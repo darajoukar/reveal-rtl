@@ -66,13 +66,14 @@ Right-to-left support plugin for [reveal.js](https://revealjs.com) 6, built for 
 
 - فهرست اسلایدها با جستجو در بالای آن (کلید `M` یا دکمه‌ی ☰). جستجو «ي/ك» عربی و اعداد فارسی را هم پیدا می‌کند.
 - دکمه‌های اولین و آخرین اسلاید
-- تایمر ارائه (شروع، توقف، صفر کردن) و ساعت
+- نمای شبکه‌ای اسلایدها (همان overview خود reveal.js، کلید `Esc`)
+- تایمر ارائه (شروع، توقف، صفر کردن) و ساعت. تایمر با رفرش صفحه متوقف نمی‌شود.
 - انتخاب تم (انتخاب کاربر ذخیره می‌شود)
 - نمایش یادداشت‌ها روی صفحه (`<aside class="notes">`)
 - دکمه‌ی پنجره‌ی سخنران (اگر پلاگین `RevealNotes` بارگذاری شده باشد)
 - دکمه‌ی تمام‌صفحه
 
-نوار ابزار بعد از چند ثانیه بی‌حرکتی موس پنهان می‌شود. نوار پیشرفت همان `progress: true` خود reveal.js است.
+نوار ابزار بعد از چند ثانیه بی‌حرکتی موس کم‌رنگ و پنهان می‌شود. با دکمه‌ی ▾ یا کلید `T` کاملاً پنهان می‌شود و فقط یک دکمه‌ی کوچک ▴ برای برگرداندنش می‌ماند؛ این انتخاب ذخیره می‌شود. نوار پیشرفت همان `progress: true` خود reveal.js است.
 
 </div>
 
@@ -141,7 +142,7 @@ Plugin for right-to-left (Persian) presentations in reveal.js 6.
 - Jalali dates via `<time data-jalali>`
 - `pre`, `code` and `dir="ltr"` content stays left-to-right
 - RTL layout, Persian labels and digits in the notes plugin speaker view (`S`)
-- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, timer, clock, theme switcher, on-slide notes and fullscreen
+- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, grid view, timer that survives page refresh, clock, theme switcher, on-slide notes, fullscreen, and a hide/show toggle for the toolbar (`T`)
 
 Options (`rtlOptions` in `Reveal.initialize`):
 

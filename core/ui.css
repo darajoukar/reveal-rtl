@@ -121,9 +121,37 @@
 	transition: opacity 0.3s;
 }
 
-.reveal.rtlui-idle .rtlui-toolbar {
+.reveal.rtlui-idle .rtlui-toolbar,
+.reveal.rtlui-idle .rtlui-show {
 	opacity: 0;
 	pointer-events: none;
+}
+
+/* Hidden toolbar: only a small handle at the bottom center. */
+.reveal.rtlui-hidden .rtlui-toolbar {
+	display: none;
+}
+
+.rtlui-button.rtlui-show {
+	position: absolute;
+	inset-block-end: 12px;
+	left: 50%;
+	translate: -50% 0;
+	z-index: 40;
+	color: var(--rtlui-fg);
+	background: var(--rtlui-bg);
+	border: 1px solid var(--rtlui-border);
+	opacity: 0.6;
+	transition: opacity 0.3s;
+}
+
+.rtlui-button.rtlui-show:hover,
+.rtlui-button.rtlui-show:focus-visible {
+	opacity: 1;
+}
+
+.reveal:not(.rtlui-hidden) .rtlui-show {
+	display: none;
 }
 
 .rtlui-group {
@@ -198,13 +226,15 @@
 
 @media print {
 	.rtlui-panel,
-	.rtlui-toolbar {
+	.rtlui-toolbar,
+	.rtlui-show {
 		display: none !important;
 	}
 }
 
 html.print-pdf .rtlui-panel,
-html.print-pdf .rtlui-toolbar {
+html.print-pdf .rtlui-toolbar,
+html.print-pdf .rtlui-show {
 	display: none !important;
 }
 

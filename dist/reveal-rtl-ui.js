@@ -40,7 +40,10 @@ var RevealRTLUI = (() => {
 
   // plugin/ui.js
   var THEME_STORAGE_KEY = "reveal-rtl-ui:theme";
+  var TIMER_STORAGE_KEY = "reveal-rtl-ui:timer";
+  var TOOLBAR_STORAGE_KEY = "reveal-rtl-ui:toolbar-hidden";
   var KEY_M = 77;
+  var KEY_T = 84;
   var svg = (path) => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="${path}"/></svg>`;
   var ICONS = {
     menu: svg("M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"),
@@ -51,6 +54,9 @@ var RevealRTLUI = (() => {
     reset: svg("M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"),
     notes: svg("M4 4h16v12H8l-4 4zm3 4v2h10V8zm0 3v2h7v-2z"),
     speaker: svg("M3 4h18v12H3zm2 2v8h14V6zm3 12h8v2H8z"),
+    grid: svg("M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"),
+    hide: svg("M7 10l5 5 5-5z"),
+    show: svg("M7 14l5-5 5 5z"),
     fullscreen: svg("M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z")
   };
   var ui_default = () => ({
@@ -155,32 +161,52 @@ var RevealRTLUI = (() => {
         const lastButton = button(ICONS.last, "\u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F", () => deck.slide(Number.MAX_VALUE));
         firstButton.classList.add("rtlui-mirror");
         lastButton.classList.add("rtlui-mirror");
-        let elapsed = 0;
-        let running = false;
-        const timerValue = el("span", "rtlui-timer", digits(formatDuration(0)));
+        const gridButton = button(ICONS.grid, "\u0646\u0645\u0627\u06CC \u0634\u0628\u06A9\u0647\u200C\u0627\u06CC (Esc)", () => deck.toggleOverview());
+        const syncGrid = () => gridButton.setAttribute("aria-pressed", String(deck.isOverview()));
+        syncGrid();
+        deck.on("overviewshown", syncGrid);
+        deck.on("overviewhidden", syncGrid);
+        const timer = readTimer();
+        const isRunning = () => timer.startedAt !== null;
+        const elapsedSeconds = () => timer.base + (isRunning() ? (Date.now() - timer.startedAt) / 1e3 : 0);
+        const timerValue = el("span", "rtlui-timer");
         timerValue.setAttribute("role", "timer");
         timerValue.setAttribute("aria-label", "\u0632\u0645\u0627\u0646 \u0633\u067E\u0631\u06CC\u200C\u0634\u062F\u0647");
+        const renderTimer = () => {
+          timerValue.textContent = digits(formatDuration(Math.floor(elapsedSeconds())));
+        };
         const playButton = button(ICONS.play, "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631", () => {
-          running = !running;
-          playButton.innerHTML = running ? ICONS.pause : ICONS.play;
-          playButton.setAttribute("aria-label", running ? "\u062A\u0648\u0642\u0641 \u062A\u0627\u06CC\u0645\u0631" : "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631");
-          playButton.title = playButton.getAttribute("aria-label");
+          if (isRunning()) {
+            timer.base = elapsedSeconds();
+            timer.startedAt = null;
+          } else {
+            timer.startedAt = Date.now();
+          }
+          saveTimer(timer);
+          renderPlayButton();
         });
+        const renderPlayButton = () => {
+          playButton.innerHTML = isRunning() ? ICONS.pause : ICONS.play;
+          setLabel(playButton, isRunning() ? "\u062A\u0648\u0642\u0641 \u062A\u0627\u06CC\u0645\u0631" : "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631");
+        };
+        renderPlayButton();
         const resetButton = button(ICONS.reset, "\u0635\u0641\u0631 \u06A9\u0631\u062F\u0646 \u062A\u0627\u06CC\u0645\u0631", () => {
-          elapsed = 0;
-          timerValue.textContent = digits(formatDuration(0));
+          timer.base = 0;
+          if (isRunning()) timer.startedAt = Date.now();
+          saveTimer(timer);
+          renderTimer();
         });
         const clock = el("time", "rtlui-clock");
         const clockFormat = new Intl.DateTimeFormat(options.digits ? "fa-IR" : void 0, { hour: "2-digit", minute: "2-digit" });
         const tick = () => {
           clock.textContent = clockFormat.format(/* @__PURE__ */ new Date());
-          if (running) timerValue.textContent = digits(formatDuration(++elapsed));
+          renderTimer();
         };
         tick();
         setInterval(tick, 1e3);
         const groups = [
           group(menuButton),
-          group(firstButton, lastButton),
+          group(firstButton, lastButton, gridButton),
           group(playButton, timerValue, resetButton),
           group(clock)
         ];
@@ -200,7 +226,29 @@ var RevealRTLUI = (() => {
           noteControls.push(button(ICONS.speaker, "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646 (S)", () => deck.getPlugin("notes").open()));
         }
         groups.push(group(...noteControls, fullscreenButton));
+        const hideButton = button(ICONS.hide, "\u067E\u0646\u0647\u0627\u0646 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631 (T)", () => setHidden(true));
+        groups.push(group(hideButton));
         element.append(...groups);
+        const showButton = button(ICONS.show, "\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631 (T)", () => setHidden(false));
+        showButton.classList.add("rtlui-show");
+        root.append(showButton);
+        const setHidden = (hidden) => {
+          const focusWasInside = element.contains(document.activeElement) || showButton === document.activeElement;
+          root.classList.toggle("rtlui-hidden", hidden);
+          element.inert = hidden;
+          try {
+            localStorage.setItem(TOOLBAR_STORAGE_KEY, hidden ? "1" : "");
+          } catch (e) {
+          }
+          if (focusWasInside) (hidden ? showButton : hideButton).focus();
+        };
+        let storedHidden = false;
+        try {
+          storedHidden = localStorage.getItem(TOOLBAR_STORAGE_KEY) === "1";
+        } catch (e) {
+        }
+        setHidden(storedHidden);
+        deck.addKeyBinding({ keyCode: KEY_T, key: "T", description: "\u067E\u0646\u0647\u0627\u0646/\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631" }, () => setHidden(!root.classList.contains("rtlui-hidden")));
         element.addEventListener("keydown", (event) => event.stopPropagation());
         setupIdleHide(element);
         return {
@@ -243,6 +291,22 @@ var RevealRTLUI = (() => {
       }
     }
   });
+  var timerStorageKey = () => `${TIMER_STORAGE_KEY}:${location.pathname}`;
+  function readTimer() {
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(timerStorageKey()));
+      const validStart = stored?.startedAt === null || Number.isFinite(stored?.startedAt) && stored.startedAt <= Date.now();
+      if (Number.isFinite(stored?.base) && stored.base >= 0 && validStart) return stored;
+    } catch (e) {
+    }
+    return { base: 0, startedAt: null };
+  }
+  function saveTimer(timer) {
+    try {
+      sessionStorage.setItem(timerStorageKey(), JSON.stringify(timer));
+    } catch (e) {
+    }
+  }
   function applyStoredTheme(themeLink, themes) {
     if (!themeLink) return;
     let stored = null;
@@ -262,10 +326,13 @@ var RevealRTLUI = (() => {
     const node = el("button", "rtlui-button");
     node.innerHTML = icon;
     node.type = "button";
-    node.title = label;
-    node.setAttribute("aria-label", label);
+    setLabel(node, label);
     node.addEventListener("click", onClick);
     return node;
+  }
+  function setLabel(node, label) {
+    node.title = label;
+    node.setAttribute("aria-label", label);
   }
   function group(...children) {
     const node = el("div", "rtlui-group");

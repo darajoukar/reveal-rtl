@@ -12,7 +12,10 @@ import { toPersianDigits, normalizeForSearch, formatDuration } from '../core/rtl
  */
 
 const THEME_STORAGE_KEY = 'reveal-rtl-ui:theme';
+const TIMER_STORAGE_KEY = 'reveal-rtl-ui:timer';
+const TOOLBAR_STORAGE_KEY = 'reveal-rtl-ui:toolbar-hidden';
 const KEY_M = 77;
+const KEY_T = 84;
 
 // Inline SVG: font glyphs for these symbols are missing on some systems.
 const svg = path => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="${ path }"/></svg>`;
@@ -25,6 +28,9 @@ const ICONS = {
 	reset: svg( 'M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z' ),
 	notes: svg( 'M4 4h16v12H8l-4 4zm3 4v2h10V8zm0 3v2h7v-2z' ),
 	speaker: svg( 'M3 4h18v12H3zm2 2v8h14V6zm3 12h8v2H8z' ),
+	grid: svg( 'M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z' ),
+	hide: svg( 'M7 10l5 5 5-5z' ),
+	show: svg( 'M7 14l5-5 5 5z' ),
 	fullscreen: svg( 'M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z' )
 };
 
@@ -159,21 +165,48 @@ export default () => ( {
 			firstButton.classList.add( 'rtlui-mirror' );
 			lastButton.classList.add( 'rtlui-mirror' );
 
-			// Timer
-			let elapsed = 0;
-			let running = false;
-			const timerValue = el( 'span', 'rtlui-timer', digits( formatDuration( 0 ) ) );
+			// Grid view = reveal.js overview mode (also Esc / O).
+			const gridButton = button( ICONS.grid, 'نمای شبکه‌ای (Esc)', () => deck.toggleOverview() );
+			const syncGrid = () => gridButton.setAttribute( 'aria-pressed', String( deck.isOverview() ) );
+			syncGrid();
+			deck.on( 'overviewshown', syncGrid );
+			deck.on( 'overviewhidden', syncGrid );
+
+			// Timer: base seconds plus the running stretch since startedAt, kept in sessionStorage
+			// so a page refresh keeps counting.
+			const timer = readTimer();
+			const isRunning = () => timer.startedAt !== null;
+			const elapsedSeconds = () => timer.base + ( isRunning() ? ( Date.now() - timer.startedAt ) / 1000 : 0 );
+
+			const timerValue = el( 'span', 'rtlui-timer' );
 			timerValue.setAttribute( 'role', 'timer' );
 			timerValue.setAttribute( 'aria-label', 'زمان سپری‌شده' );
+			const renderTimer = () => {
+				timerValue.textContent = digits( formatDuration( Math.floor( elapsedSeconds() ) ) );
+			};
+
 			const playButton = button( ICONS.play, 'شروع تایمر', () => {
-				running = !running;
-				playButton.innerHTML = running ? ICONS.pause : ICONS.play;
-				playButton.setAttribute( 'aria-label', running ? 'توقف تایمر' : 'شروع تایمر' );
-				playButton.title = playButton.getAttribute( 'aria-label' );
+				if( isRunning() ) {
+					timer.base = elapsedSeconds();
+					timer.startedAt = null;
+				}
+				else {
+					timer.startedAt = Date.now();
+				}
+				saveTimer( timer );
+				renderPlayButton();
 			} );
+			const renderPlayButton = () => {
+				playButton.innerHTML = isRunning() ? ICONS.pause : ICONS.play;
+				setLabel( playButton, isRunning() ? 'توقف تایمر' : 'شروع تایمر' );
+			};
+			renderPlayButton();
+
 			const resetButton = button( ICONS.reset, 'صفر کردن تایمر', () => {
-				elapsed = 0;
-				timerValue.textContent = digits( formatDuration( 0 ) );
+				timer.base = 0;
+				if( isRunning() ) timer.startedAt = Date.now();
+				saveTimer( timer );
+				renderTimer();
 			} );
 
 			// Clock
@@ -182,14 +215,14 @@ export default () => ( {
 
 			const tick = () => {
 				clock.textContent = clockFormat.format( new Date() );
-				if( running ) timerValue.textContent = digits( formatDuration( ++elapsed ) );
+				renderTimer();
 			};
 			tick();
 			setInterval( tick, 1000 );
 
 			const groups = [
 				group( menuButton ),
-				group( firstButton, lastButton ),
+				group( firstButton, lastButton, gridButton ),
 				group( playButton, timerValue, resetButton ),
 				group( clock )
 			];
@@ -215,7 +248,28 @@ export default () => ( {
 			}
 
 			groups.push( group( ...noteControls, fullscreenButton ) );
+
+			// Hide/show: the toolbar collapses to a small handle; choice is remembered.
+			const hideButton = button( ICONS.hide, 'پنهان کردن نوار ابزار (T)', () => setHidden( true ) );
+			groups.push( group( hideButton ) );
 			element.append( ...groups );
+
+			const showButton = button( ICONS.show, 'نمایش نوار ابزار (T)', () => setHidden( false ) );
+			showButton.classList.add( 'rtlui-show' );
+			root.append( showButton );
+
+			const setHidden = hidden => {
+				const focusWasInside = element.contains( document.activeElement ) || showButton === document.activeElement;
+				root.classList.toggle( 'rtlui-hidden', hidden );
+				element.inert = hidden;
+				try { localStorage.setItem( TOOLBAR_STORAGE_KEY, hidden ? '1' : '' ); } catch( e ) { /* storage blocked */ }
+				if( focusWasInside ) ( hidden ? showButton : hideButton ).focus();
+			};
+			let storedHidden = false;
+			try { storedHidden = localStorage.getItem( TOOLBAR_STORAGE_KEY ) === '1'; } catch( e ) { /* storage blocked */ }
+			setHidden( storedHidden );
+
+			deck.addKeyBinding( { keyCode: KEY_T, key: 'T', description: 'پنهان/نمایش نوار ابزار' }, () => setHidden( !root.classList.contains( 'rtlui-hidden' ) ) );
 
 			// Keys pressed inside toolbar controls (e.g. arrows in the theme menu) must not move slides.
 			element.addEventListener( 'keydown', event => event.stopPropagation() );
@@ -262,6 +316,22 @@ export default () => ( {
 	}
 } );
 
+// One timer per deck URL, per browser tab.
+const timerStorageKey = () => `${ TIMER_STORAGE_KEY }:${ location.pathname }`;
+
+function readTimer() {
+	try {
+		const stored = JSON.parse( sessionStorage.getItem( timerStorageKey() ) );
+		const validStart = stored?.startedAt === null || ( Number.isFinite( stored?.startedAt ) && stored.startedAt <= Date.now() );
+		if( Number.isFinite( stored?.base ) && stored.base >= 0 && validStart ) return stored;
+	} catch( e ) { /* storage blocked or bad JSON */ }
+	return { base: 0, startedAt: null };
+}
+
+function saveTimer( timer ) {
+	try { sessionStorage.setItem( timerStorageKey(), JSON.stringify( timer ) ); } catch( e ) { /* storage blocked */ }
+}
+
 function applyStoredTheme( themeLink, themes ) {
 	if( !themeLink ) return;
 	let stored = null;
@@ -281,10 +351,14 @@ function button( icon, label, onClick ) {
 	const node = el( 'button', 'rtlui-button' );
 	node.innerHTML = icon; // static ICONS constant, never user input
 	node.type = 'button';
-	node.title = label;
-	node.setAttribute( 'aria-label', label );
+	setLabel( node, label );
 	node.addEventListener( 'click', onClick );
 	return node;
+}
+
+function setLabel( node, label ) {
+	node.title = label;
+	node.setAttribute( 'aria-label', label );
 }
 
 function group( ...children ) {
