@@ -1,4 +1,5 @@
 import { toPersianDigits, persianizeDigits, fillJalaliDates } from '../core/rtl.js';
+import { watchSpeakerView } from '../core/speaker.js';
 
 /**
  * reveal.js plugin for right-to-left (Persian) presentations.
@@ -24,6 +25,9 @@ export default () => ( {
 				toPersianDigits( `${ deck.getSlidePastCount( slide ) + 1 } / ${ deck.getTotalSlides() }` )
 			];
 		}
+
+		// Speaker view (notes plugin, S key): RTL layout and Persian labels.
+		if( !deck.isSpeakerNotes() ) watchSpeakerView( { digits: options.digits } );
 
 		// 'ready' fires after all plugins, so content from markdown etc. is already in the DOM.
 		deck.on( 'ready', () => {

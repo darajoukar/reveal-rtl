@@ -13,6 +13,7 @@
   },
   "files": [
     "core/rtl.js",
+    "core/speaker.js",
     "core/rtl.css",
     "core/ui.css",
     "plugin",

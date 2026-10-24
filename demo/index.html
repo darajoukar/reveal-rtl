@@ -79,6 +79,7 @@
 
 	<!-- Classic scripts, not ES modules: browsers block module imports from file://, so this opens with a double-click. -->
 	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js" integrity="sha384-UilXW7W77EPIY5TmQGBrjhBPcfX40NqGwuIC8DGs6OeGTCxKy36B+DiOXtfqgk9S" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js" integrity="sha384-XUVoTb/UbE06yoCUaqswCPKSUvPq3q4heijGsemnUSS/JEgW1lNnK0rKlNwjuz7O" crossorigin="anonymous"></script>
 	<script src="../dist/reveal-rtl.js"></script>
 	<script src="../dist/reveal-rtl-ui.js"></script>
 	<script>
@@ -101,7 +102,7 @@
 					{ name: 'دراکولا', href: themeUrl( 'dracula' ) }
 				]
 			},
-			plugins: [ RevealRTL(), RevealRTLUI() ]
+			plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ]
 		} );
 	</script>
 </body>

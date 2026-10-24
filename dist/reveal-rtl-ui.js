@@ -50,6 +50,7 @@ var RevealRTLUI = (() => {
     pause: svg("M6 5h4v14H6zm8 0h4v14h-4z"),
     reset: svg("M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"),
     notes: svg("M4 4h16v12H8l-4 4zm3 4v2h10V8zm0 3v2h7v-2z"),
+    speaker: svg("M3 4h18v12H3zm2 2v8h14V6zm3 12h8v2H8z"),
     fullscreen: svg("M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z")
   };
   var ui_default = () => ({
@@ -194,7 +195,11 @@ var RevealRTLUI = (() => {
           if (document.fullscreenElement) document.exitFullscreen();
           else document.documentElement.requestFullscreen?.();
         });
-        groups.push(group(notesButton, fullscreenButton));
+        const noteControls = [notesButton];
+        if (deck.hasPlugin("notes")) {
+          noteControls.push(button(ICONS.speaker, "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646 (S)", () => deck.getPlugin("notes").open()));
+        }
+        groups.push(group(...noteControls, fullscreenButton));
         element.append(...groups);
         element.addEventListener("keydown", (event) => event.stopPropagation());
         setupIdleHide(element);
