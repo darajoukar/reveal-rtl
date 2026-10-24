@@ -62,3 +62,14 @@
 .reveal.rtl .slide-number {
 	font-family: var(--rtl-font);
 }
+
+/* Notes shown on the slide (showNotes: true). */
+.reveal.rtl .speaker-notes {
+	direction: rtl;
+	text-align: start;
+	font-family: var(--rtl-font);
+}
+
+.reveal.rtl .speaker-notes::before {
+	content: 'یادداشت‌ها';
+}

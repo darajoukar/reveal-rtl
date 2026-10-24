@@ -60,6 +60,50 @@ Right-to-left support plugin for [reveal.js](https://revealjs.com) 6, built for 
 
 <div dir="rtl">
 
+### نوار ابزار و فهرست اسلایدها (اختیاری)
+
+پلاگین جداگانه‌ی `RevealRTLUI` این امکانات را اضافه می‌کند:
+
+- فهرست اسلایدها با جستجو در بالای آن (کلید `M` یا دکمه‌ی ☰). جستجو «ي/ك» عربی و اعداد فارسی را هم پیدا می‌کند.
+- دکمه‌های اولین و آخرین اسلاید
+- تایمر ارائه (شروع، توقف، صفر کردن) و ساعت
+- انتخاب تم (انتخاب کاربر ذخیره می‌شود)
+- نمایش یادداشت‌ها روی صفحه (`<aside class="notes">`)
+- دکمه‌ی تمام‌صفحه
+
+نوار ابزار بعد از چند ثانیه بی‌حرکتی موس پنهان می‌شود. نوار پیشرفت همان `progress: true` خود reveal.js است.
+
+</div>
+
+```html
+<link rel="stylesheet" id="theme" href="reveal.js/dist/theme/white.css">
+<link rel="stylesheet" href="reveal-rtl/core/ui.css">
+<script src="reveal-rtl/dist/reveal-rtl-ui.js"></script>
+<script>
+  Reveal.initialize({
+    progress: true,
+    uiOptions: {
+      themes: [
+        { name: 'سفید', href: 'reveal.js/dist/theme/white.css' },
+        { name: 'مشکی', href: 'reveal.js/dist/theme/black.css' }
+      ]
+    },
+    plugins: [ RevealRTL(), RevealRTLUI() ]
+  });
+</script>
+```
+
+<div dir="rtl">
+
+| گزینه‌ی `uiOptions` | پیش‌فرض | توضیح |
+|---|---|---|
+| `themes` | `[]` | تم‌های منوی انتخاب تم: `{ name, href }` |
+| `themeLink` | `'#theme'` | انتخابگر تگ `<link>` تم |
+| `digits` | مثل `rtl` | اعداد فارسی در تایمر و ساعت |
+| `idle` | `3000` | میلی‌ثانیه تا پنهان شدن نوار ابزار |
+
+عنوان هر اسلاید در فهرست از اولین `h1` تا `h3` خوانده می‌شود، یا از `data-menu-title`.
+
 برای اینکه عددی لاتین بماند، کلاس `no-fa-digits` یا `dir="ltr"` بدهید.
 
 دمو: [demo/index.html](demo/index.html) را مستقیم در مرورگر باز کنید. بعد از تغییر کد پلاگین، `npm run build` را اجرا کنید.
@@ -78,6 +122,7 @@ Plugin for right-to-left (Persian) presentations in reveal.js 6.
 - Persian digits in slide text and slide number (code is left alone)
 - Jalali dates via `<time data-jalali>`
 - `pre`, `code` and `dir="ltr"` content stays left-to-right
+- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, timer, clock, theme switcher, on-slide notes and fullscreen
 
 Options (`rtlOptions` in `Reveal.initialize`):
 

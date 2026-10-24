@@ -5,9 +5,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>reveal-rtl — دمو</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/white.css">
+	<link rel="stylesheet" id="theme" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/white.css">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap">
 	<link rel="stylesheet" href="../core/rtl.css">
+	<link rel="stylesheet" href="../core/ui.css">
 </head>
 <body>
 	<div class="reveal">
@@ -16,6 +17,18 @@
 				<h1>ارائه‌ی راست‌به‌چپ</h1>
 				<p>پلاگین RTL برای reveal.js</p>
 				<p><time data-jalali></time></p>
+				<aside class="notes">این یادداشت سخنران است. با دکمه‌ی یادداشت در نوار ابزار یا کلید S دیده می‌شود.</aside>
+			</section>
+
+			<section data-menu-title="ابزارها">
+				<h2>نوار ابزار و فهرست</h2>
+				<ul>
+					<li>کلید M یا دکمه‌ی ☰: فهرست اسلایدها و جستجو</li>
+					<li>دکمه‌های اولین و آخرین اسلاید</li>
+					<li>تایمر ارائه و ساعت</li>
+					<li>انتخاب تم، یادداشت‌ها و تمام‌صفحه</li>
+				</ul>
+				<aside class="notes">نوار ابزار بعد از چند ثانیه بی‌حرکتی موس پنهان می‌شود.</aside>
 			</section>
 
 			<section>
@@ -67,11 +80,28 @@
 	<!-- Classic scripts, not ES modules: browsers block module imports from file://, so this opens with a double-click. -->
 	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js" integrity="sha384-UilXW7W77EPIY5TmQGBrjhBPcfX40NqGwuIC8DGs6OeGTCxKy36B+DiOXtfqgk9S" crossorigin="anonymous"></script>
 	<script src="../dist/reveal-rtl.js"></script>
+	<script src="../dist/reveal-rtl-ui.js"></script>
 	<script>
+		const themeUrl = name => `https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/${ name }.css`;
+
 		Reveal.initialize( {
 			hash: true,
 			slideNumber: true,
-			plugins: [ RevealRTL() ]
+			progress: true,
+			uiOptions: {
+				themes: [
+					{ name: 'سفید', href: themeUrl( 'white' ) },
+					{ name: 'مشکی', href: themeUrl( 'black' ) },
+					{ name: 'ساده', href: themeUrl( 'simple' ) },
+					{ name: 'آسمانی', href: themeUrl( 'sky' ) },
+					{ name: 'بژ', href: themeUrl( 'beige' ) },
+					{ name: 'شب', href: themeUrl( 'night' ) },
+					{ name: 'ماه', href: themeUrl( 'moon' ) },
+					{ name: 'سولارایز', href: themeUrl( 'solarized' ) },
+					{ name: 'دراکولا', href: themeUrl( 'dracula' ) }
+				]
+			},
+			plugins: [ RevealRTL(), RevealRTLUI() ]
 		} );
 	</script>
 </body>

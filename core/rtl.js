@@ -22,6 +22,25 @@ export function persianizeDigits( root ) {
 	}
 }
 
+// Lowercases and unifies Arabic/Persian letter and digit variants so "كتاب ۱" matches "کتاب 1".
+export function normalizeForSearch( text ) {
+	return String( text )
+		.replace( /ي|ى/g, 'ی' )
+		.replace( /ك/g, 'ک' )
+		.replace( /[۰-۹]/g, d => d.charCodeAt( 0 ) - 0x06F0 )
+		.replace( /[٠-٩]/g, d => d.charCodeAt( 0 ) - 0x0660 )
+		.replace( /‌/g, ' ' )
+		.toLowerCase();
+}
+
+// Seconds to "m:ss", or "h:mm:ss" from one hour.
+export function formatDuration( totalSeconds ) {
+	const h = Math.floor( totalSeconds / 3600 );
+	const m = Math.floor( totalSeconds % 3600 / 60 );
+	const s = String( totalSeconds % 60 ).padStart( 2, '0' );
+	return h ? `${ h }:${ String( m ).padStart( 2, '0' ) }:${ s }` : `${ m }:${ s }`;
+}
+
 export function formatJalali( date = new Date(), options = { dateStyle: 'long' } ) {
 	return new Intl.DateTimeFormat( 'fa-IR-u-ca-persian', options ).format( date );
 }

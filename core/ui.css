@@ -1,0 +1,216 @@
+/* Toolbar and slide list for plugin/ui.js. Colors follow the active reveal.js theme. */
+
+.reveal {
+	--rtlui-bg: color-mix(in srgb, var(--r-background-color, #fff) 92%, var(--r-main-color, #222));
+	--rtlui-fg: var(--r-main-color, #222);
+	--rtlui-accent: var(--r-link-color, #2a76dd);
+	--rtlui-border: color-mix(in srgb, var(--r-main-color, #222) 20%, transparent);
+	--rtlui-font: var(--rtl-font, var(--r-main-font, sans-serif));
+}
+
+.reveal.rtl .rtlui-panel,
+.reveal.rtl .rtlui-toolbar {
+	direction: rtl;
+}
+
+.rtlui-panel,
+.rtlui-toolbar {
+	font-family: var(--rtlui-font);
+	font-size: 15px;
+	color: var(--rtlui-fg);
+	background: var(--rtlui-bg);
+	border: 1px solid var(--rtlui-border);
+	box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+	z-index: 40;
+}
+
+/* Slide list panel */
+
+.rtlui-panel {
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: min(320px, 85vw);
+	display: flex;
+	flex-direction: column;
+	border-block: 0;
+	border-inline-start: 0;
+}
+
+.rtlui-panel[hidden] {
+	display: none;
+}
+
+.rtlui-search {
+	margin: 12px;
+	padding: 8px 12px;
+	font: inherit;
+	color: inherit;
+	background: var(--r-background-color, #fff);
+	border: 1px solid var(--rtlui-border);
+	border-radius: 6px;
+}
+
+.rtlui-search:focus-visible {
+	outline: 2px solid var(--rtlui-accent);
+	outline-offset: 1px;
+}
+
+/* Extra specificity: theme and rtl.css list rules (`.reveal.rtl ol`) must not apply here. */
+.reveal .rtlui-panel .rtlui-list {
+	flex: 1;
+	overflow-y: auto;
+	margin: 0;
+	padding: 0 8px 12px;
+	list-style: none;
+}
+
+.rtlui-item {
+	display: flex;
+	gap: 10px;
+	width: 100%;
+	padding: 8px 10px;
+	font: inherit;
+	color: inherit;
+	text-align: start;
+	background: none;
+	border: 0;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.rtlui-item:hover {
+	background: var(--rtlui-border);
+}
+
+.rtlui-item:focus-visible {
+	outline: 2px solid var(--rtlui-accent);
+}
+
+.rtlui-item-current {
+	color: var(--rtlui-accent);
+	font-weight: bold;
+}
+
+.rtlui-item-vertical {
+	padding-inline-start: 28px;
+}
+
+.rtlui-item-number {
+	min-width: 2ch;
+	opacity: 0.6;
+}
+
+.rtlui-empty {
+	margin: 0 12px;
+	opacity: 0.7;
+}
+
+/* Toolbar */
+
+.rtlui-toolbar {
+	position: absolute;
+	inset-block-end: 12px;
+	left: 50%;
+	translate: -50% 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	border-radius: 999px;
+	transition: opacity 0.3s;
+}
+
+.reveal.rtlui-idle .rtlui-toolbar {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.rtlui-group {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding-inline: 4px;
+}
+
+.rtlui-group + .rtlui-group {
+	border-inline-start: 1px solid var(--rtlui-border);
+}
+
+.rtlui-button {
+	display: inline-grid;
+	place-items: center;
+	min-width: 32px;
+	height: 32px;
+	padding: 0;
+	font: inherit;
+	font-size: 16px;
+	line-height: 1;
+	color: inherit;
+	background: none;
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.rtlui-button:hover,
+.rtlui-button[aria-pressed="true"],
+.rtlui-button[aria-expanded="true"] {
+	background: var(--rtlui-border);
+}
+
+.rtlui-button:focus-visible,
+.rtlui-theme:focus-visible {
+	outline: 2px solid var(--rtlui-accent);
+}
+
+/* First/last arrows point the reading direction. */
+.reveal.rtl .rtlui-mirror {
+	transform: scaleX(-1);
+}
+
+.rtlui-timer,
+.rtlui-clock {
+	min-width: 4ch;
+	padding-inline: 4px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+.rtlui-theme {
+	font: inherit;
+	color: inherit;
+	background: transparent;
+	border: 1px solid var(--rtlui-border);
+	border-radius: 6px;
+	padding: 2px 6px;
+}
+
+.rtlui-theme option {
+	color: initial;
+	background: initial;
+}
+
+/* Leave room so the toolbar does not cover reveal's own controls and slide number. */
+.reveal .controls {
+	bottom: 60px;
+}
+
+@media print {
+	.rtlui-panel,
+	.rtlui-toolbar {
+		display: none !important;
+	}
+}
+
+html.print-pdf .rtlui-panel,
+html.print-pdf .rtlui-toolbar {
+	display: none !important;
+}
+
+@media (max-width: 640px) {
+	.rtlui-clock,
+	.rtlui-theme {
+		display: none;
+	}
+}

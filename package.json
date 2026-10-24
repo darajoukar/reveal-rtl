@@ -6,17 +6,20 @@
   "main": "plugin/rtl.js",
   "exports": {
     ".": "./plugin/rtl.js",
+    "./ui": "./plugin/ui.js",
     "./core": "./core/rtl.js",
-    "./rtl.css": "./core/rtl.css"
+    "./rtl.css": "./core/rtl.css",
+    "./ui.css": "./core/ui.css"
   },
   "files": [
     "core/rtl.js",
     "core/rtl.css",
+    "core/ui.css",
     "plugin",
     "dist"
   ],
   "scripts": {
-    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js",
+    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js",
     "test": "node --test \"core/*.test.js\"",
     "demo": "npx --yes serve ."
   },
