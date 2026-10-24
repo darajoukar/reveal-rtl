@@ -1,0 +1,27 @@
+{
+  "name": "reveal-rtl",
+  "version": "0.1.0",
+  "description": "Right-to-left (Persian) support plugin for reveal.js",
+  "type": "module",
+  "main": "plugin/rtl.js",
+  "exports": {
+    ".": "./plugin/rtl.js",
+    "./core": "./core/rtl.js",
+    "./rtl.css": "./core/rtl.css"
+  },
+  "files": [
+    "core/rtl.js",
+    "core/rtl.css",
+    "plugin"
+  ],
+  "scripts": {
+    "test": "node --test \"core/*.test.js\"",
+    "demo": "npx --yes serve ."
+  },
+  "keywords": ["reveal.js", "reveal-js", "revealjs-plugin", "rtl", "persian", "farsi", "presentation"],
+  "author": "Dara Joukar",
+  "license": "MIT",
+  "peerDependencies": {
+    "reveal.js": ">=6"
+  }
+}

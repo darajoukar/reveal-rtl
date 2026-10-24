@@ -1,0 +1,64 @@
+/* RTL fixes on top of reveal.js's built-in `rtl: true` support.
+   reveal.js 6 flips direction and navigation, but its themes still hard-code left-side
+   margins and alignment, and it forces `font-family: sans-serif` on RTL slides. */
+
+.reveal.rtl {
+	--rtl-font: 'Vazirmatn', 'Sahel', Tahoma, sans-serif;
+}
+
+.reveal.rtl .slides,
+.reveal.rtl .slides h1,
+.reveal.rtl .slides h2,
+.reveal.rtl .slides h3,
+.reveal.rtl .slides h4,
+.reveal.rtl .slides h5,
+.reveal.rtl .slides h6 {
+	font-family: var(--rtl-font);
+	letter-spacing: normal; /* letter-spacing breaks Persian/Arabic joining */
+}
+
+/* Lists: themes use `margin: 0 0 0 1em` and nested `margin-left: 40px`. */
+.reveal.rtl ol,
+.reveal.rtl dl,
+.reveal.rtl ul {
+	text-align: start;
+	margin: 0;
+	margin-inline-start: 1em;
+}
+
+.reveal.rtl ul ul,
+.reveal.rtl ul ol,
+.reveal.rtl ol ol,
+.reveal.rtl ol ul,
+.reveal.rtl dd {
+	margin: 0;
+	margin-inline-start: 40px;
+}
+
+.reveal.rtl ol {
+	list-style-type: persian;
+}
+
+.reveal.rtl table th,
+.reveal.rtl table td {
+	text-align: start;
+}
+
+/* Code, math and anything marked LTR stay left-to-right. */
+.reveal.rtl pre,
+.reveal.rtl pre code,
+.reveal.rtl [dir="ltr"] {
+	direction: ltr;
+	text-align: left;
+	font-family: revert;
+}
+
+/* Inline code inside Persian text: isolate so surrounding punctuation stays in place. */
+.reveal.rtl :not(pre) > code {
+	direction: ltr;
+	unicode-bidi: isolate;
+}
+
+.reveal.rtl .slide-number {
+	font-family: var(--rtl-font);
+}
