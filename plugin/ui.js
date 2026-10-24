@@ -1,4 +1,5 @@
 import { toPersianDigits, normalizeForSearch, formatDuration } from '../core/rtl.js';
+import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, standaloneHTML, safeFileName, download } from '../core/export.js';
 
 /**
  * reveal.js plugin: toolbar (first/last, timer, clock, theme, notes, fullscreen)
@@ -16,6 +17,10 @@ const TIMER_STORAGE_KEY = 'reveal-rtl-ui:timer';
 const TOOLBAR_STORAGE_KEY = 'reveal-rtl-ui:toolbar-hidden';
 const KEY_M = 77;
 const KEY_T = 84;
+const ZOOM_STEP = 0.1;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 3;
+const PRINT_PARAM = 'rtlui-print';
 
 // Inline SVG: font glyphs for these symbols are missing on some systems.
 const svg = path => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="${ path }"/></svg>`;
@@ -29,6 +34,9 @@ const ICONS = {
 	notes: svg( 'M4 4h16v12H8l-4 4zm3 4v2h10V8zm0 3v2h7v-2z' ),
 	speaker: svg( 'M3 4h18v12H3zm2 2v8h14V6zm3 12h8v2H8z' ),
 	grid: svg( 'M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z' ),
+	zoomIn: svg( 'M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM9 7h2v2h2v2h-2v2H9v-2H7V9h2z' ),
+	zoomOut: svg( 'M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM7 9h6v2H7z' ),
+	export: svg( 'M11 3h2v9.2l3.3-3.3 1.4 1.4-5.7 5.7-5.7-5.7 1.4-1.4 3.3 3.3zM4 18h16v2H4z' ),
 	hide: svg( 'M7 10l5 5 5-5z' ),
 	show: svg( 'M7 14l5-5 5 5z' ),
 	fullscreen: svg( 'M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z' )
@@ -53,6 +61,17 @@ export default () => ( {
 
 		const root = deck.getRevealElement();
 		const themeLink = document.querySelector( options.themeLink );
+
+		// HTML export: snapshot the page before reveal.js and this plugin change the DOM.
+		const pageSnapshot = document.documentElement.cloneNode( true );
+
+		// No toolbar in the print view. PDF export opens it with ?print-pdf&rtlui-print; print once rendered.
+		if( deck.isPrintView() ) {
+			if( new URLSearchParams( location.search ).has( PRINT_PARAM ) ) {
+				deck.on( 'pdf-ready', () => document.fonts.ready.then( () => setTimeout( () => window.print(), 500 ) ) );
+			}
+			return;
+		}
 
 		applyStoredTheme( themeLink, options.themes );
 
@@ -107,9 +126,7 @@ export default () => ( {
 				list.replaceChildren();
 				items = deck.getSlides().map( ( slide, i ) => {
 					const { h, v } = deck.getIndices( slide );
-					const title = slide.dataset.menuTitle
-						|| slide.querySelector( 'h1, h2, h3' )?.textContent.trim()
-						|| `اسلاید ${ i + 1 }`;
+					const title = getSlideTitle( slide, i );
 
 					const li = el( 'li' );
 					const button = el( 'button', 'rtlui-item' );
@@ -227,7 +244,27 @@ export default () => ( {
 				group( clock )
 			];
 
+			// Zoom: scales the slides around the center, on top of reveal.js's own fit-to-window scale.
+			let zoom = 1;
+			const zoomReset = el( 'button', 'rtlui-button rtlui-zoom-value' );
+			zoomReset.type = 'button';
+			setLabel( zoomReset, 'بازنشانی بزرگ‌نمایی' );
+			const setZoom = value => {
+				zoom = Math.min( ZOOM_MAX, Math.max( ZOOM_MIN, Math.round( value * 10 ) / 10 ) );
+				root.style.setProperty( '--rtlui-zoom', zoom );
+				zoomReset.textContent = digits( `${ Math.round( zoom * 100 ) }%` );
+			};
+			zoomReset.addEventListener( 'click', () => setZoom( 1 ) );
+			setZoom( 1 );
+			groups.push( group(
+				button( ICONS.zoomIn, 'بزرگ‌نمایی', () => setZoom( zoom + ZOOM_STEP ) ),
+				zoomReset,
+				button( ICONS.zoomOut, 'کوچک‌نمایی', () => setZoom( zoom - ZOOM_STEP ) )
+			) );
+
 			if( options.themes.length && themeLink ) groups.push( group( themeSelect() ) );
+
+			groups.push( group( exportMenu() ) );
 
 			const notesButton = button( ICONS.notes, 'نمایش یادداشت‌ها', () => {
 				const show = !deck.getConfig().showNotes;
@@ -280,6 +317,73 @@ export default () => ( {
 				element,
 				setMenuOpen: open => menuButton.setAttribute( 'aria-expanded', String( open ) )
 			};
+		}
+
+		function exportMenu() {
+			const wrapper = el( 'div', 'rtlui-menu-wrapper' );
+			const trigger = button( ICONS.export, 'خروجی گرفتن', () => setOpen( menu.hidden ) );
+			trigger.setAttribute( 'aria-haspopup', 'menu' );
+			trigger.setAttribute( 'aria-expanded', 'false' );
+
+			const menu = el( 'div', 'rtlui-menu' );
+			menu.setAttribute( 'role', 'menu' );
+			menu.setAttribute( 'aria-label', 'خروجی گرفتن' );
+			menu.hidden = true;
+
+			const title = document.title || 'presentation';
+			const fileName = ext => `${ safeFileName( title ) }.${ ext }`;
+			const slides = () => deck.getSlides().map( element => ( { element, ...deck.getIndices( element ) } ) );
+
+			const items = [
+				[ 'PDF (چاپ)', exportPDF ],
+				[ 'JSON', () => download( fileName( 'json' ), slidesToJSON( slides(), title ), 'application/json' ) ],
+				[ 'متن Markdown', () => download( fileName( 'md' ), slidesToMarkdown( slides() ), 'text/markdown' ) ],
+				[ 'HTML', () => download( fileName( 'html' ), standaloneHTML( pageSnapshot.cloneNode( true ), document.baseURI ), 'text/html' ) ],
+				[ 'یادداشت‌های سخنران', () => download( `${ safeFileName( title ) }-notes.txt`, slidesToNotesText( slides(), title ), 'text/plain' ) ]
+			].map( ( [ label, action ] ) => {
+				const item = el( 'button', 'rtlui-menu-item', label );
+				item.type = 'button';
+				item.setAttribute( 'role', 'menuitem' );
+				item.tabIndex = -1;
+				item.addEventListener( 'click', () => {
+					setOpen( false );
+					trigger.focus();
+					action();
+				} );
+				menu.append( item );
+				return item;
+			} );
+
+			function setOpen( open ) {
+				menu.hidden = !open;
+				trigger.setAttribute( 'aria-expanded', String( open ) );
+				if( open ) items[0].focus();
+			}
+
+			menu.addEventListener( 'keydown', event => {
+				const i = items.indexOf( document.activeElement );
+				if( event.key === 'ArrowDown' ) items[ ( i + 1 ) % items.length ].focus();
+				else if( event.key === 'ArrowUp' ) items[ ( i - 1 + items.length ) % items.length ].focus();
+				else if( event.key === 'Escape' ) { setOpen( false ); trigger.focus(); }
+				else return;
+				event.preventDefault();
+			} );
+
+			document.addEventListener( 'click', event => {
+				if( !menu.hidden && !wrapper.contains( event.target ) ) setOpen( false );
+			} );
+
+			wrapper.append( trigger, menu );
+			return wrapper;
+		}
+
+		function exportPDF() {
+			const url = new URL( location.href );
+			url.searchParams.set( 'print-pdf', '' );
+			url.searchParams.set( PRINT_PARAM, '' );
+			url.hash = '';
+			// Popup blocked: open the print view in this tab instead.
+			if( !window.open( url.href, '_blank' ) ) location.href = url.href;
 		}
 
 		function themeSelect() {

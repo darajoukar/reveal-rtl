@@ -205,6 +205,65 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/* Zoom from plugin/ui.js. Applied to each slide (not .slides, whose transform-origin reveal.js
+   controls) so it scales around the slide center; `scale` composes with transition transforms. */
+.reveal .slides section:not(.stack) {
+	scale: var(--rtlui-zoom, 1);
+}
+
+.reveal.overview .slides section,
+html.print-pdf .reveal .slides section {
+	scale: none;
+}
+
+.rtlui-button.rtlui-zoom-value {
+	min-width: 4.5ch;
+	border-radius: 6px;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Export menu */
+.rtlui-menu-wrapper {
+	position: relative;
+}
+
+.rtlui-menu {
+	position: absolute;
+	inset-block-end: calc(100% + 10px);
+	inset-inline-start: 0;
+	min-width: 180px;
+	display: flex;
+	flex-direction: column;
+	padding: 6px;
+	background: var(--rtlui-bg);
+	border: 1px solid var(--rtlui-border);
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+}
+
+.rtlui-menu[hidden] {
+	display: none;
+}
+
+.rtlui-menu-item {
+	padding: 8px 12px;
+	font: inherit;
+	color: inherit;
+	text-align: start;
+	white-space: nowrap;
+	background: none;
+	border: 0;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.rtlui-menu-item:hover,
+.rtlui-menu-item:focus-visible {
+	background: var(--rtlui-border);
+	outline: none;
+}
+
 .rtlui-theme {
 	font: inherit;
 	color: inherit;

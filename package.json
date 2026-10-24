@@ -14,6 +14,7 @@
   "files": [
     "core/rtl.js",
     "core/speaker.js",
+    "core/export.js",
     "core/rtl.css",
     "core/ui.css",
     "plugin",

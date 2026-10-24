@@ -68,7 +68,14 @@ Right-to-left support plugin for [reveal.js](https://revealjs.com) 6, built for 
 - دکمه‌های اولین و آخرین اسلاید
 - نمای شبکه‌ای اسلایدها (همان overview خود reveal.js، کلید `Esc`)
 - تایمر ارائه (شروع، توقف، صفر کردن) و ساعت. تایمر با رفرش صفحه متوقف نمی‌شود.
+- بزرگ‌نمایی، کوچک‌نمایی و بازنشانی (۵۰٪ تا ۳۰۰٪)
 - انتخاب تم (انتخاب کاربر ذخیره می‌شود)
+- منوی خروجی:
+  - **PDF**: نمای چاپ reveal.js را در تب جدید باز می‌کند و پنجره‌ی چاپ را نشان می‌دهد؛ «Save as PDF» را انتخاب کنید.
+  - **JSON**: عنوان، متن، یادداشت و Markdown هر اسلاید
+  - **Markdown**: اسلایدها با جداکننده‌ی `---` و یادداشت‌ها با `Note:` (قابل استفاده با پلاگین markdown خود reveal.js)
+  - **HTML**: نسخه‌ی کامل ارائه با آدرس‌های مطلق برای CSS و اسکریپت‌ها
+  - **یادداشت‌های سخنران**: فایل متنی، به ترتیب اسلایدها
 - نمایش یادداشت‌ها روی صفحه (`<aside class="notes">`)
 - دکمه‌ی پنجره‌ی سخنران (اگر پلاگین `RevealNotes` بارگذاری شده باشد)
 - دکمه‌ی تمام‌صفحه
@@ -142,7 +149,7 @@ Plugin for right-to-left (Persian) presentations in reveal.js 6.
 - Jalali dates via `<time data-jalali>`
 - `pre`, `code` and `dir="ltr"` content stays left-to-right
 - RTL layout, Persian labels and digits in the notes plugin speaker view (`S`)
-- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, grid view, timer that survives page refresh, clock, theme switcher, on-slide notes, fullscreen, and a hide/show toggle for the toolbar (`T`)
+- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, grid view, timer that survives page refresh, clock, zoom in/out/reset, theme switcher, export menu (PDF via print view, JSON, Markdown, standalone HTML, speaker notes), on-slide notes, fullscreen, and a hide/show toggle for the toolbar (`T`)
 
 Options (`rtlOptions` in `Reveal.initialize`):
 
