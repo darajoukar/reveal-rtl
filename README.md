@@ -46,15 +46,25 @@ Right-to-left support plugin for [reveal.js](https://revealjs.com) 6, built for 
 
 <div dir="rtl">
 
-برای اینکه عددی لاتین بماند، کلاس `no-fa-digits` یا `dir="ltr"` بدهید.
-
-دمو: [demo/index.html](demo/index.html). چون از ES module استفاده می‌کند، باید با یک سرور محلی اجرا شود:
+بدون ES module (مثلاً باز کردن مستقیم فایل HTML از روی دیسک) از نسخه‌ی `dist` استفاده کنید:
 
 </div>
 
-```bash
-npm run demo
+```html
+<script src="reveal.js/dist/reveal.js"></script>
+<script src="reveal-rtl/dist/reveal-rtl.js"></script>
+<script>
+  Reveal.initialize({ plugins: [ RevealRTL() ] });
+</script>
 ```
+
+<div dir="rtl">
+
+برای اینکه عددی لاتین بماند، کلاس `no-fa-digits` یا `dir="ltr"` بدهید.
+
+دمو: [demo/index.html](demo/index.html) را مستقیم در مرورگر باز کنید. بعد از تغییر کد پلاگین، `npm run build` را اجرا کنید.
+
+</div>
 
 ---
 

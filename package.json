@@ -12,16 +12,29 @@
   "files": [
     "core/rtl.js",
     "core/rtl.css",
-    "plugin"
+    "plugin",
+    "dist"
   ],
   "scripts": {
+    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js",
     "test": "node --test \"core/*.test.js\"",
     "demo": "npx --yes serve ."
   },
-  "keywords": ["reveal.js", "reveal-js", "revealjs-plugin", "rtl", "persian", "farsi", "presentation"],
+  "keywords": [
+    "reveal.js",
+    "reveal-js",
+    "revealjs-plugin",
+    "rtl",
+    "persian",
+    "farsi",
+    "presentation"
+  ],
   "author": "Dara Joukar",
   "license": "MIT",
   "peerDependencies": {
     "reveal.js": ">=6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }
