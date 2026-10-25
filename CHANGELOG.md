@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.5 — 2026-10-25
+
+- README: Persian and Arabic paragraphs that start with a Persian/Arabic word no longer need an RTL span.
+
 ## 0.5.4 — 2026-10-25
 
 - README: right-to-left blocks in the Arabic section rearranged.

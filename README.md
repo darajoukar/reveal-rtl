@@ -42,9 +42,9 @@ Or straight from a CDN — no build step, works from `file://`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/themes/parsi-light.css" id="theme">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/core/rtl.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/core/ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.5/themes/parsi-light.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.5/core/rtl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.5/core/ui.css">
 
 <div class="reveal"><div class="slides">
   <section><h1>سلام دنیا</h1></section>
@@ -52,8 +52,8 @@ Or straight from a CDN — no build step, works from `file://`:
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/dist/reveal-rtl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/dist/reveal-rtl-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.5/dist/reveal-rtl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.5/dist/reveal-rtl-ui.js"></script>
 <script>
   Reveal.initialize({
     slideNumber: 'c/t',
@@ -271,7 +271,7 @@ npm install reveal.js reveal-rtl
 
 ### تنظیمات
 
-<span  dir="rtl">گزینه `rtlOptions.lang` زبان برچسب‌ها را تعیین می‌کند (`'fa'` پیش‌فرض، `'ar'`، `'en'`) و `rtlOptions.digits` نوع رقم را (`'persian'`، `'arabic'`، `'latin'`). جدول کامل تنظیمات و کلیدها در [بخش انگلیسی](#english) است.</span>
+گزینه `rtlOptions.lang` زبان برچسب‌ها را تعیین می‌کند (`'fa'` پیش‌فرض، `'ar'`، `'en'`) و `rtlOptions.digits` نوع رقم را (`'persian'`، `'arabic'`، `'latin'`). جدول کامل تنظیمات و کلیدها در [بخش انگلیسی](#english) است.
 
 ### تم‌ها
 
@@ -343,7 +343,7 @@ npx reveal-rtl-lint slides/
 
 
 
-<span  dir="rtl">مشروع **reveal-rtl** يضمّ إضافتين لإنشاء عروض تقديمية من اليمين إلى اليسار باستخدام reveal.js 6، مع دعم كامل للعربية والفارسية.</span>
+مشروع **reveal-rtl** يضمّ إضافتين لإنشاء عروض تقديمية من اليمين إلى اليسار باستخدام reveal.js 6، مع دعم كامل للعربية والفارسية.
 
 ### التثبيت
 
@@ -393,7 +393,7 @@ Reveal.initialize({
 
 ### الخيارات
 
-<span  dir="rtl">الخيار `rtlOptions.lang` يحدد لغة الواجهة (`'fa'` أو `'ar'` أو `'en'`) و`rtlOptions.digits` نوع الأرقام (`'persian'` أو `'arabic'` أو `'latin'`). الجداول الكاملة للخيارات والمفاتيح في [القسم الإنجليزي](#english).</span>
+الخيار `rtlOptions.lang` يحدد لغة الواجهة (`'fa'` أو `'ar'` أو `'en'`) و`rtlOptions.digits` نوع الأرقام (`'persian'` أو `'arabic'` أو `'latin'`). الجداول الكاملة للخيارات والمفاتيح في [القسم الإنجليزي](#english).
 
 <div dir="rtl">
 

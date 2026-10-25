@@ -51,4 +51,4 @@ PDF (print view, then "Save as PDF") · PNG of the current slide with pen drawin
 
 ## Persian text checker
 
-`npx --yes -p reveal-rtl@0.5.4 reveal-rtl-lint <files or folders>` — reports Arabic ي/ك, missing ZWNJ (after «می», before «ها/تر/ترین»), numbers mixing digit sets, Arabic-Indic digits. Elements with `lang="ar"` and code are skipped. Exit code 1 when something is found.
+`npx --yes -p reveal-rtl@0.5.5 reveal-rtl-lint <files or folders>` — reports Arabic ي/ك, missing ZWNJ (after «می», before «ها/تر/ترین»), numbers mixing digit sets, Arabic-Indic digits. Elements with `lang="ar"` and code are skipped. Exit code 1 when something is found.
