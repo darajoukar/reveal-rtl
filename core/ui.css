@@ -337,6 +337,11 @@ html.print-pdf .rtlui-laser {
 	display: none;
 }
 
+/* While taking a slide image: only the slide and the pen drawing. */
+.reveal.rtlui-capturing :is(.rtlui-toolbar, .rtlui-show, .rtlui-panel, .rtlui-laser, .controls, .progress) {
+	visibility: hidden !important;
+}
+
 /* Export menu */
 .rtlui-menu-wrapper {
 	position: relative;

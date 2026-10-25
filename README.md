@@ -111,7 +111,7 @@ Reveal.initialize({ plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ] });
 - **Laser pointer** (`Z`), **pen** (`D`) and **erase** (`E`); drawings are kept per slide, saved across reloads and included in the PDF export
 - Zoom in / out / reset, **theme switcher** (remembered), clock
 - Notes on the slide, speaker view button, fullscreen
-- **Export**: PDF (print view), JSON, Markdown (reveal.js format, `Note:` for notes), HTML, **offline single-file HTML** (CSS, scripts, fonts and images inlined) and speaker notes as text
+- **Export**: PDF (print view), **PNG image of the current slide with your pen drawing**, JSON, Markdown (reveal.js format, `Note:` for notes), HTML, **offline single-file HTML** (CSS, scripts, fonts, images and slide backgrounds inlined) and speaker notes as text
 - Hide / show the toolbar (`T`); compact one-row layout on phones
 
 ### Options
@@ -149,6 +149,29 @@ Reveal.initialize({ plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ] });
 ### Themes
 
 Two themes built from the reveal.js theme template, tuned for Persian/Arabic: `themes/parsi-light.css` and `themes/parsi-dark.css`. Use them in place of a reveal.js theme. All 14 reveal.js themes work too.
+
+### Images, backgrounds and icons
+
+Use reveal.js's own features; see [`demo/media.html`](https://darajoukar.github.io/reveal-rtl/demo/media.html):
+
+```html
+<section data-background-image="images/photo.jpg" data-background-opacity="0.4">…</section>
+<section data-background-gradient="linear-gradient(to left, #c2410c, #1d3557)">…</section>
+
+<div class="r-hstack">              <!-- in RTL the first child sits on the right -->
+  <ul><li>متن</li></ul>
+  <img src="images/chart.svg" alt="…">
+</div>
+<img class="r-stretch" data-src="images/big.jpg" alt="…">   <!-- fill the slide, lazy-loaded -->
+
+<svg class="rtl-mirror" viewBox="0 0 24 24" fill="currentColor">…</svg>   <!-- arrow points the reading direction -->
+```
+
+- `data-background-opacity` keeps text readable on photos. In Markdown: `<!-- .slide: data-background-image="images/photo.jpg" -->`.
+- **`rtl-mirror`** (from `core/rtl.css`) flips directional icons/images — arrows, "next", "back" — in RTL decks only. Don't use it on clocks, logos or text.
+- Inline SVG with `fill="currentColor"` follows the theme color.
+- The **offline HTML** export embeds `<img>` (including `data-src`) and slide background images; background videos and iframes stay as links.
+- **Image of this slide (PNG)** in the export menu saves the slide exactly as shown — theme, background and pen drawing — using the browser's screen capture (desktop browsers; choose this tab when asked).
 
 ### Writing slides in Markdown
 
@@ -239,6 +262,16 @@ npm install reveal.js reveal-rtl
 ### تم‌ها
 
 دو تم مخصوص فارسی و عربی: **پارسی روشن** (`themes/parsi-light.css`) و **پارسی تیره** (`themes/parsi-dark.css`). همه‌ی ۱۴ تم reveal.js هم کار می‌کنند.
+
+### عکس، پس‌زمینه و آیکن
+
+از امکانات خود reveal.js استفاده کنید (نمونه در [`demo/media.html`](https://darajoukar.github.io/reveal-rtl/demo/media.html)):
+
+- **پس‌زمینه‌ی اسلاید:** `data-background-image`، `data-background-color` و `data-background-gradient`؛ با `data-background-opacity` عکس کم‌رنگ می‌شود تا متن خوانا بماند.
+- **عکس و متن کنار هم:** کلاس `r-hstack`؛ در راست‌به‌چپ اولین بخش سمت راست قرار می‌گیرد. `r-stretch` عکس را به اندازه‌ی اسلاید بزرگ می‌کند.
+- **آیکن:** SVG با `fill="currentColor"` رنگ تم را می‌گیرد. به آیکن‌های جهت‌دار (فلش، بعدی، برگشت) کلاس **`rtl-mirror`** بدهید تا در ارائه‌ی راست‌به‌چپ قرینه شوند؛ ساعت و لوگو را قرینه نکنید.
+- خروجی **HTML آفلاین** عکس‌ها و پس‌زمینه‌های اسلاید را هم داخل فایل قرار می‌دهد.
+- **تصویر این اسلاید (PNG)** در منوی خروجی، اسلاید را دقیقاً همان‌طور که می‌بینید ذخیره می‌کند، همراه با نوشته‌های قلم (در مرورگر دسکتاپ؛ وقتی پرسید، همین تب را انتخاب کنید).
 
 ### نوشتن با Markdown
 
@@ -334,6 +367,13 @@ Reveal.initialize({
 ### الخيارات
 
 `rtlOptions.lang` يحدد لغة الواجهة (`'fa'` أو `'ar'` أو `'en'`) و`rtlOptions.digits` نوع الأرقام (`'persian'` أو `'arabic'` أو `'latin'`). الجداول الكاملة للخيارات والمفاتيح في [القسم الإنجليزي](#english).
+
+### الصور والخلفيات والأيقونات
+
+- **خلفية الشريحة:** `data-background-image` و`data-background-gradient`، مع `data-background-opacity` لإبقاء النص مقروءًا.
+- **صورة ونص جنبًا إلى جنب:** الصنف `r-hstack`؛ في الاتجاه من اليمين إلى اليسار يكون العنصر الأول على اليمين.
+- **الأيقونات:** أضف الصنف **`rtl-mirror`** إلى الأيقونات الاتجاهية (الأسهم، التالي، الرجوع) لتنعكس تلقائيًا.
+- **صورة هذه الشريحة (PNG)** في قائمة التصدير تحفظ الشريحة كما تظهر مع كتابة القلم.
 
 ### الهاتف
 

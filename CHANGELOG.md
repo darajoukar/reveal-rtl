@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Slide image (PNG)** in the export menu: the current slide as shown — theme, background, pen drawing — via the browser's tab capture; the toolbar is hidden while capturing. Desktop browsers only.
+- Offline HTML export now embeds slide background images (`data-background-image`, image `data-background`) and lazy images (`data-src`); the plain HTML export makes those paths absolute.
+- `rtl-mirror` class: flips directional icons/images in RTL decks.
+- Media demo (`demo/media.html`): backgrounds, side-by-side image and text, stretched image, SVG icons.
+
 ## 0.4.0 — 2026-10-25
 
 - **Saved drawings**: pen strokes are stored per slide (localStorage, per deck URL), survive reloads and are drawn onto the PDF export. Strokes now use slide-box coordinates, so they stay on the slide at any window size.

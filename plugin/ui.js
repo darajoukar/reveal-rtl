@@ -450,6 +450,8 @@ export default () => ( {
 
 			const items = [
 				[ t( 'exportPDF' ), exportPDF ],
+				// Screen capture exists on desktop browsers only.
+				...( navigator.mediaDevices?.getDisplayMedia ? [ [ t( 'exportImage' ), exportSlideImage ] ] : [] ),
 				[ t( 'exportJSON' ), () => download( fileName( 'json' ), slidesToJSON( slides(), title, t ), 'application/json' ) ],
 				[ t( 'exportMarkdown' ), () => download( fileName( 'md' ), slidesToMarkdown( slides() ), 'text/markdown' ) ],
 				[ t( 'exportHTML' ), () => download( fileName( 'html' ), standaloneHTML( pageSnapshot.cloneNode( true ), document.baseURI ), 'text/html' ) ],
@@ -490,6 +492,40 @@ export default () => ( {
 
 			wrapper.append( trigger, menu );
 			return wrapper;
+		}
+
+		// PNG of the current slide as shown — theme, background and pen drawing included — via the
+		// browser's screen capture of this tab (it asks for permission). The toolbar is hidden meanwhile.
+		async function exportSlideImage() {
+			let stream;
+			try {
+				stream = await navigator.mediaDevices.getDisplayMedia( { video: { displaySurface: 'browser' }, audio: false, preferCurrentTab: true, selfBrowserSurface: 'include' } );
+			} catch( e ) {
+				// The user cancelled the picker: nothing to do. Anything else: say why.
+				if( e.name !== 'NotAllowedError' && e.name !== 'AbortError' ) window.alert( `${ t( 'imageUnsupported' ) }\n${ t( 'imageHint' ) }` );
+				return;
+			}
+			root.classList.add( 'rtlui-capturing' );
+			try {
+				const video = document.createElement( 'video' );
+				video.muted = true;
+				video.srcObject = stream;
+				await video.play();
+				// Two frames for the toolbar to disappear, then a moment for the capture to catch up.
+				await new Promise( resolve => requestAnimationFrame( () => requestAnimationFrame( resolve ) ) );
+				await new Promise( resolve => setTimeout( resolve, 300 ) );
+				const canvas = document.createElement( 'canvas' );
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				canvas.getContext( '2d' ).drawImage( video, 0, 0 );
+				const blob = await new Promise( resolve => canvas.toBlob( resolve, 'image/png' ) );
+				const { h, v } = deck.getIndices();
+				download( `${ safeFileName( document.title ) }-slide-${ h + 1 }${ v ? `.${ v + 1 }` : '' }.png`, blob, 'image/png' );
+			}
+			finally {
+				stream.getTracks().forEach( track => track.stop() );
+				root.classList.remove( 'rtlui-capturing' );
+			}
 		}
 
 		async function exportOfflineHTML() {

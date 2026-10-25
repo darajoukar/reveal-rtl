@@ -167,13 +167,21 @@ export function slidesToNotesText( slides, title, t ) {
 // --- HTML ---
 
 // Makes src/href attributes absolute so a saved copy still loads its CSS, scripts and images.
+// Attributes holding URLs (link[href] only: <a href> may be in-deck "#/3" links and stays as is).
+const URL_ATTRS = [ 'src', 'data-src', 'data-background-image', 'data-background-video', 'data-background-iframe' ];
+
 export function standaloneHTML( docClone, baseURI ) {
-	docClone.querySelectorAll( '[src], link[href]' ).forEach( el => {
-		const attr = el.hasAttribute( 'src' ) ? 'src' : 'href';
+	const absolutize = ( el, attr ) => {
 		const value = el.getAttribute( attr );
 		if( value && !/^(data:|blob:|#)/.test( value ) ) {
 			try { el.setAttribute( attr, new URL( value, baseURI ).href ); } catch( e ) { /* leave invalid URLs as is */ }
 		}
+	};
+	docClone.querySelectorAll( 'link[href]' ).forEach( el => absolutize( el, 'href' ) );
+	URL_ATTRS.forEach( attr => docClone.querySelectorAll( `[${ attr }]` ).forEach( el => absolutize( el, attr ) ) );
+	// data-background is a shorthand: only image paths are URLs (not colors or gradients).
+	docClone.querySelectorAll( '[data-background]' ).forEach( el => {
+		if( /\.(png|jpe?g|gif|svg|webp|avif|bmp)([?#]|$)/i.test( el.getAttribute( 'data-background' ) ) ) absolutize( el, 'data-background' );
 	} );
 	return '<!doctype html>\n' + docClone.outerHTML;
 }
@@ -253,9 +261,21 @@ export async function offlineHTML( docClone, baseURI, fetchFn = fetch ) {
 		catch( e ) { failed.push( url ); }
 	}
 
-	for( const img of docClone.querySelectorAll( 'img[src]:not([src^="data:"])' ) ) {
-		const url = new URL( img.getAttribute( 'src' ), baseURI ).href;
-		try { img.setAttribute( 'src', await toDataURL( await ( await fetchOk( url, fetchFn ) ).blob() ) ); }
+	// Images: <img src>, lazy-loaded <img data-src>, and slide backgrounds (data-background-image, or the
+	// data-background shorthand when it holds an image path rather than a color or gradient).
+	// shortcut: background videos and iframes stay as links (too large to inline); revisit if asked.
+	const IMAGE_PATH = /\.(png|jpe?g|gif|svg|webp|avif|bmp)([?#]|$)/i;
+	const targets = [
+		...[ ...docClone.querySelectorAll( 'img[src]' ) ].map( el => [ el, 'src' ] ),
+		...[ ...docClone.querySelectorAll( 'img[data-src]' ) ].map( el => [ el, 'data-src' ] ),
+		...[ ...docClone.querySelectorAll( '[data-background-image]' ) ].map( el => [ el, 'data-background-image' ] ),
+		...[ ...docClone.querySelectorAll( '[data-background]' ) ].filter( el => IMAGE_PATH.test( el.getAttribute( 'data-background' ) ) ).map( el => [ el, 'data-background' ] )
+	];
+	for( const [ el, attr ] of targets ) {
+		const value = el.getAttribute( attr );
+		if( !value || value.startsWith( 'data:' ) ) continue;
+		const url = new URL( value, baseURI ).href;
+		try { el.setAttribute( attr, await toDataURL( await ( await fetchOk( url, fetchFn ) ).blob() ) ); }
 		catch( e ) { failed.push( url ); }
 	}
 

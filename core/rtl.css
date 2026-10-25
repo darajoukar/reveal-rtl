@@ -117,6 +117,12 @@
 	unicode-bidi: isolate;
 }
 
+/* Directional icons and images (arrows, "next", "back"): add class="rtl-mirror" and they point the
+   reading direction in RTL decks. `scale` composes with fragment and transition transforms. */
+.reveal.rtl .rtl-mirror {
+	scale: -1 1;
+}
+
 /* Jump to slide (G key). */
 .reveal.rtl .jump-to-slide-input {
 	font-family: var(--rtl-font);

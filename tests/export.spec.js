@@ -18,7 +18,7 @@ async function downloadText( page, label ) {
 test( 'export menu has five items and works with the keyboard', async ( { page } ) => {
 	await openDemo( page );
 	await exportItem( page, 'JSON' );
-	await expect( page.locator( '.rtlui-menu-item' ) ).toHaveText( [ 'PDF (چاپ)', 'JSON', 'متن Markdown', 'HTML', 'HTML آفلاین (یک فایل)', 'یادداشت‌های سخنران' ] );
+	await expect( page.locator( '.rtlui-menu-item' ) ).toHaveText( [ 'PDF (چاپ)', 'تصویر این اسلاید (PNG)', 'JSON', 'متن Markdown', 'HTML', 'HTML آفلاین (یک فایل)', 'یادداشت‌های سخنران' ] );
 	await expect( page.locator( '.rtlui-menu-item' ).first() ).toBeFocused();
 	await page.keyboard.press( 'ArrowDown' );
 	await expect( page.locator( '.rtlui-menu-item' ).nth( 1 ) ).toBeFocused();
@@ -104,4 +104,63 @@ test( 'PDF export opens the print view and prints it', async ( { page, context }
 	await expect( popup.locator( '.pdf-page' ) ).toHaveCount( 8 );
 	await expect( popup.locator( '.slide-number-pdf' ).first() ).toHaveText( '۱' );
 	await expect( popup.locator( '.rtlui-toolbar' ) ).toHaveCount( 0 );
+} );
+
+test( 'slide image export: PNG of the slide with the pen drawing, without the toolbar', async ( { page } ) => {
+	await openDemo( page );
+	await page.keyboard.press( 'd' );
+	await page.mouse.move( 300, 120 );
+	await page.mouse.down();
+	await page.mouse.move( 700, 130, { steps: 8 } );
+	await page.mouse.up();
+	await page.keyboard.press( 'd' );
+
+	const item = await exportItem( page, 'تصویر این اسلاید (PNG)' );
+	const [ download ] = await Promise.all( [ page.waitForEvent( 'download' ), item.click() ] );
+	expect( download.suggestedFilename() ).toMatch( /-slide-1\.png$/ );
+	const png = ( await fs.readFile( await download.path() ) ).toString( 'base64' );
+
+	// Decode in the page and sample pixels: red ink on the stroke, no toolbar at the bottom center.
+	const viewport = page.viewportSize();
+	const sample = await page.evaluate( async ( { png, viewport } ) => {
+		const bitmap = await createImageBitmap( await ( await fetch( `data:image/png;base64,${ png }` ) ).blob() );
+		const canvas = new OffscreenCanvas( bitmap.width, bitmap.height );
+		const ctx = canvas.getContext( '2d' );
+		ctx.drawImage( bitmap, 0, 0 );
+		const sx = bitmap.width / viewport.width, sy = bitmap.height / viewport.height;
+		const at = ( x, y ) => [ ...ctx.getImageData( Math.round( x * sx ), Math.round( y * sy ), 1, 1 ).data ];
+		const toolbar = document.querySelector( '.rtlui-toolbar' ).getBoundingClientRect();
+		return { width: bitmap.width, height: bitmap.height, ink: at( 500, 125 ), toolbarSpot: at( toolbar.left + 20, toolbar.top + toolbar.height / 2 ), background: at( 10, viewport.height / 2 ) };
+	}, { png, viewport } );
+
+	expect( sample.width / sample.height ).toBeCloseTo( viewport.width / viewport.height, 1 );
+	const [ r, g, b ] = sample.ink;
+	expect( r > 180 && g < 120 && b < 120 ).toBe( true ); // pen red
+	expect( sample.toolbarSpot.slice( 0, 3 ) ).toEqual( sample.background.slice( 0, 3 ) ); // toolbar hidden
+	await expect( page.locator( '.reveal' ) ).not.toHaveClass( /rtlui-capturing/ );
+} );
+
+test( 'offline HTML inlines slide background images and lazy images', async ( { page } ) => {
+	await page.goto( '/demo/media.html' );
+	await page.locator( '.reveal.ready' ).waitFor();
+	await page.addStyleTag( { content: '.reveal.rtlui-idle .rtlui-toolbar { opacity: 1 !important; pointer-events: auto !important; }' } );
+	page.on( 'dialog', dialog => { throw new Error( `unexpected alert: ${ dialog.message() }` ); } );
+	const item = await exportItem( page, 'HTML آفلاین (یک فایل)' );
+	const [ download ] = await Promise.all( [ page.waitForEvent( 'download' ), item.click() ] );
+	const html = await fs.readFile( await download.path(), 'utf8' );
+	expect( html ).toMatch( /data-background-image="data:image\/svg\+xml;base64,/ );
+	expect( html ).toMatch( /data-src="data:image\/svg\+xml;base64,/ );
+	expect( html ).not.toContain( 'images/pattern.svg' );
+	expect( html ).not.toContain( 'images/illustration.svg' );
+} );
+
+test( 'plain HTML export makes background paths absolute', async ( { page } ) => {
+	await page.goto( '/demo/media.html' );
+	await page.locator( '.reveal.ready' ).waitFor();
+	await page.addStyleTag( { content: '.reveal.rtlui-idle .rtlui-toolbar { opacity: 1 !important; pointer-events: auto !important; }' } );
+	const item = await exportItem( page, 'HTML' );
+	const [ download ] = await Promise.all( [ page.waitForEvent( 'download' ), item.click() ] );
+	const html = await fs.readFile( await download.path(), 'utf8' );
+	expect( html ).toMatch( /data-background-image="http:\/\/localhost:\d+\/demo\/images\/pattern\.svg"/ );
+	expect( html ).toMatch( /data-src="http:\/\/localhost:\d+\/demo\/images\/illustration\.svg"/ );
 } );

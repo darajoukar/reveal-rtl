@@ -12,7 +12,9 @@ export default defineConfig( {
 		locale: 'fa-IR',
 		// Local runs use an installed browser (set PW_CHANNEL=msedge or chrome) when Playwright's
 		// own Chromium download is unavailable; CI uses the bundled Chromium.
-		channel: process.env.PW_CHANNEL || undefined
+		channel: process.env.PW_CHANNEL || undefined,
+		// Lets the slide-image export (getDisplayMedia) capture the tab without a picker dialog.
+		launchOptions: { args: [ '--auto-accept-this-tab-capture' ] }
 	},
 	projects: [
 		{ name: 'desktop', use: { ...devices['Desktop Chrome'], channel: process.env.PW_CHANNEL || undefined }, testIgnore: /mobile/ },

@@ -130,3 +130,16 @@ test( 'Hijri date in each language', async ( { page } ) => {
 	await openDemo( page, '?lang=en' );
 	await expect( page.locator( 'time[data-hijri]' ) ).toHaveText( /\d{4} AH/ );
 } );
+
+test( 'media demo: background, side-by-side image and rtl-mirror icons', async ( { page } ) => {
+	await page.goto( '/demo/media.html' );
+	await page.locator( '.reveal.ready' ).waitFor();
+	await expect( page.locator( '.slide-background.present .slide-background-content' ) ).toHaveCSS( 'background-image', /pattern\.svg/ );
+	await page.evaluate( () => Reveal.slide( 2 ) );
+	const textBox = await page.locator( '.slides > section.present .r-hstack ul' ).boundingBox();
+	const imageBox = await page.locator( '.slides > section.present .r-hstack img' ).boundingBox();
+	expect( textBox.x ).toBeGreaterThan( imageBox.x ); // RTL: text on the right
+	await page.evaluate( () => Reveal.slide( 4 ) );
+	await expect( page.locator( '.slides > section.present svg.rtl-mirror' ) ).toHaveCSS( 'scale', '-1 1' );
+	await expect( page.locator( '.slides > section.present svg:not(.rtl-mirror)' ).first() ).toHaveCSS( 'scale', 'none' );
+} );

@@ -77,6 +77,9 @@ var RevealRTLUI = (() => {
     exportHTML: "HTML",
     exportOffline: "HTML \u0622\u0641\u0644\u0627\u06CC\u0646 (\u06CC\u06A9 \u0641\u0627\u06CC\u0644)",
     exportNotes: "\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646",
+    exportImage: "\u062A\u0635\u0648\u06CC\u0631 \u0627\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F (PNG)",
+    imageUnsupported: "\u0627\u06CC\u0646 \u0645\u0631\u0648\u0631\u06AF\u0631 \u06AF\u0631\u0641\u062A\u0646 \u062A\u0635\u0648\u06CC\u0631 \u0627\u0632 \u0635\u0641\u062D\u0647 \u0631\u0627 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u06CC \u0646\u0645\u06CC\u200C\u06A9\u0646\u062F.",
+    imageHint: "\u062F\u0631 \u067E\u0646\u062C\u0631\u0647\u200C\u0627\u06CC \u06A9\u0647 \u0628\u0627\u0632 \u0645\u06CC\u200C\u0634\u0648\u062F\u060C \u0647\u0645\u06CC\u0646 \u062A\u0628 \u0631\u0627 \u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F.",
     notesFileTitle: "\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646",
     offlineFailed: "{n} \u0641\u0627\u06CC\u0644 \u062F\u0627\u062E\u0644 \u062E\u0631\u0648\u062C\u06CC \u0642\u0631\u0627\u0631 \u0646\u06AF\u0631\u0641\u062A \u0648 \u0647\u0646\u0648\u0632 \u0628\u0647 \u0627\u06CC\u0646\u062A\u0631\u0646\u062A \u06CC\u0627 \u0645\u0633\u06CC\u0631 \u0627\u0635\u0644\u06CC \u0646\u06CC\u0627\u0632 \u062F\u0627\u0631\u062F:",
     offlineFileHint: "\u0628\u0631\u0627\u06CC \u062E\u0631\u0648\u062C\u06CC \u0622\u0641\u0644\u0627\u06CC\u0646 \u06A9\u0627\u0645\u0644\u060C \u0627\u0631\u0627\u0626\u0647 \u0631\u0627 \u0627\u0632 \u06CC\u06A9 \u0633\u0631\u0648\u0631 (\u0645\u062B\u0644\u0627\u064B npm run demo) \u06CC\u0627 \u0646\u0633\u062E\u0647\u200C\u06CC \u0622\u0646\u0644\u0627\u06CC\u0646 \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
@@ -147,6 +150,9 @@ var RevealRTLUI = (() => {
     exportHTML: "HTML",
     exportOffline: "HTML \u062F\u0648\u0646 \u0627\u062A\u0635\u0627\u0644 (\u0645\u0644\u0641 \u0648\u0627\u062D\u062F)",
     exportNotes: "\u0645\u0644\u0627\u062D\u0638\u0627\u062A \u0627\u0644\u0645\u062A\u062D\u062F\u062B",
+    exportImage: "\u0635\u0648\u0631\u0629 \u0647\u0630\u0647 \u0627\u0644\u0634\u0631\u064A\u062D\u0629 (PNG)",
+    imageUnsupported: "\u0647\u0630\u0627 \u0627\u0644\u0645\u062A\u0635\u0641\u062D \u0644\u0627 \u064A\u062F\u0639\u0645 \u0627\u0644\u062A\u0642\u0627\u0637 \u0635\u0648\u0631\u0629 \u0644\u0644\u0634\u0627\u0634\u0629.",
+    imageHint: "\u0641\u064A \u0627\u0644\u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u062A\u064A \u0633\u062A\u0638\u0647\u0631\u060C \u0627\u062E\u062A\u0631 \u0639\u0644\u0627\u0645\u0629 \u0627\u0644\u062A\u0628\u0648\u064A\u0628 \u0647\u0630\u0647.",
     notesFileTitle: "\u0645\u0644\u0627\u062D\u0638\u0627\u062A \u0627\u0644\u0645\u062A\u062D\u062F\u062B",
     offlineFailed: "\u0644\u0645 \u064A\u064F\u0636\u0645\u064E\u0651\u0646 {n} \u0645\u0644\u0641 \u0641\u064A \u0627\u0644\u062A\u0635\u062F\u064A\u0631 \u0648\u0645\u0627 \u0632\u0627\u0644 \u064A\u062D\u062A\u0627\u062C \u0625\u0644\u0649 \u0627\u0644\u0625\u0646\u062A\u0631\u0646\u062A \u0623\u0648 \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0623\u0635\u0644\u064A:",
     offlineFileHint: "\u0644\u0644\u062D\u0635\u0648\u0644 \u0639\u0644\u0649 \u062A\u0635\u062F\u064A\u0631 \u0643\u0627\u0645\u0644 \u062F\u0648\u0646 \u0627\u062A\u0635\u0627\u0644\u060C \u0627\u0641\u062A\u062D \u0627\u0644\u0639\u0631\u0636 \u0645\u0646 \u062E\u0627\u062F\u0645 (\u0645\u062B\u0644 npm run demo) \u0623\u0648 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0645\u0646\u0634\u0648\u0631\u0629.",
@@ -216,6 +222,9 @@ var RevealRTLUI = (() => {
     exportHTML: "HTML",
     exportOffline: "Offline HTML (single file)",
     exportNotes: "Speaker notes",
+    exportImage: "Image of this slide (PNG)",
+    imageUnsupported: "This browser cannot capture the screen.",
+    imageHint: "In the dialog that opens, choose this tab.",
     notesFileTitle: "Speaker notes",
     offlineFailed: "{n} file(s) could not be embedded and still need the internet or the original location:",
     offlineFileHint: "For a complete offline export, open the deck from a server (e.g. npm run demo) or the published site.",
@@ -563,9 +572,9 @@ ${notes || "\u2014"}`;
 ${parts.join("\n\n")}
 `;
   }
+  var URL_ATTRS = ["src", "data-src", "data-background-image", "data-background-video", "data-background-iframe"];
   function standaloneHTML(docClone, baseURI) {
-    docClone.querySelectorAll("[src], link[href]").forEach((el2) => {
-      const attr = el2.hasAttribute("src") ? "src" : "href";
+    const absolutize = (el2, attr) => {
       const value = el2.getAttribute(attr);
       if (value && !/^(data:|blob:|#)/.test(value)) {
         try {
@@ -573,6 +582,11 @@ ${parts.join("\n\n")}
         } catch (e) {
         }
       }
+    };
+    docClone.querySelectorAll("link[href]").forEach((el2) => absolutize(el2, "href"));
+    URL_ATTRS.forEach((attr) => docClone.querySelectorAll(`[${attr}]`).forEach((el2) => absolutize(el2, attr)));
+    docClone.querySelectorAll("[data-background]").forEach((el2) => {
+      if (/\.(png|jpe?g|gif|svg|webp|avif|bmp)([?#]|$)/i.test(el2.getAttribute("data-background"))) absolutize(el2, "data-background");
     });
     return "<!doctype html>\n" + docClone.outerHTML;
   }
@@ -642,10 +656,19 @@ ${parts.join("\n\n")}
         failed.push(url);
       }
     }
-    for (const img of docClone.querySelectorAll('img[src]:not([src^="data:"])')) {
-      const url = new URL(img.getAttribute("src"), baseURI).href;
+    const IMAGE_PATH = /\.(png|jpe?g|gif|svg|webp|avif|bmp)([?#]|$)/i;
+    const targets = [
+      ...[...docClone.querySelectorAll("img[src]")].map((el2) => [el2, "src"]),
+      ...[...docClone.querySelectorAll("img[data-src]")].map((el2) => [el2, "data-src"]),
+      ...[...docClone.querySelectorAll("[data-background-image]")].map((el2) => [el2, "data-background-image"]),
+      ...[...docClone.querySelectorAll("[data-background]")].filter((el2) => IMAGE_PATH.test(el2.getAttribute("data-background"))).map((el2) => [el2, "data-background"])
+    ];
+    for (const [el2, attr] of targets) {
+      const value = el2.getAttribute(attr);
+      if (!value || value.startsWith("data:")) continue;
+      const url = new URL(value, baseURI).href;
       try {
-        img.setAttribute("src", await toDataURL(await (await fetchOk(url, fetchFn)).blob()));
+        el2.setAttribute(attr, await toDataURL(await (await fetchOk(url, fetchFn)).blob()));
       } catch (e) {
         failed.push(url);
       }
@@ -1024,6 +1047,8 @@ ${parts.join("\n\n")}
         const slides = () => deck.getSlides().map((element) => ({ element, ...deck.getIndices(element) }));
         const items = [
           [t("exportPDF"), exportPDF],
+          // Screen capture exists on desktop browsers only.
+          ...navigator.mediaDevices?.getDisplayMedia ? [[t("exportImage"), exportSlideImage]] : [],
           [t("exportJSON"), () => download(fileName("json"), slidesToJSON(slides(), title, t), "application/json")],
           [t("exportMarkdown"), () => download(fileName("md"), slidesToMarkdown(slides()), "text/markdown")],
           [t("exportHTML"), () => download(fileName("html"), standaloneHTML(pageSnapshot.cloneNode(true), document.baseURI), "text/html")],
@@ -1062,6 +1087,35 @@ ${parts.join("\n\n")}
         });
         wrapper.append(trigger, menu);
         return wrapper;
+      }
+      async function exportSlideImage() {
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: "browser" }, audio: false, preferCurrentTab: true, selfBrowserSurface: "include" });
+        } catch (e) {
+          if (e.name !== "NotAllowedError" && e.name !== "AbortError") window.alert(`${t("imageUnsupported")}
+${t("imageHint")}`);
+          return;
+        }
+        root.classList.add("rtlui-capturing");
+        try {
+          const video = document.createElement("video");
+          video.muted = true;
+          video.srcObject = stream;
+          await video.play();
+          await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext("2d").drawImage(video, 0, 0);
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+          const { h, v } = deck.getIndices();
+          download(`${safeFileName(document.title)}-slide-${h + 1}${v ? `.${v + 1}` : ""}.png`, blob, "image/png");
+        } finally {
+          stream.getTracks().forEach((track) => track.stop());
+          root.classList.remove("rtlui-capturing");
+        }
       }
       async function exportOfflineHTML() {
         const title = document.title || "presentation";

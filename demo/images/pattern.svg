@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+	<!-- Eight-point star tile (girih-style), made for the reveal-rtl demo. CC0. -->
+	<rect width="160" height="160" fill="#1d3557"/>
+	<g fill="none" stroke="#f2c14e" stroke-width="2" opacity="0.55">
+		<path d="M80 20 L95 65 L140 80 L95 95 L80 140 L65 95 L20 80 L65 65 Z"/>
+		<path d="M37.6 37.6 L80 55 L122.4 37.6 L105 80 L122.4 122.4 L80 105 L37.6 122.4 L55 80 Z"/>
+		<circle cx="80" cy="80" r="14"/>
+		<path d="M0 0 L20 20 M160 0 L140 20 M0 160 L20 140 M160 160 L140 140"/>
+	</g>
+</svg>
