@@ -21,6 +21,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Persian text check
+        run: npm run lint:text
+
       # dist/ and themes/ are committed (the demo and script-tag users load them); they must match the sources.
       - name: Check build output is up to date
         run: |

@@ -61,10 +61,16 @@ var RevealRTL = (() => {
   function formatJalali(date = /* @__PURE__ */ new Date(), options = { dateStyle: "long" }, digits = "persian") {
     return new Intl.DateTimeFormat(`fa-IR-u-ca-persian-nu-${NUMBERING[digits] || "arabext"}`, options).format(date);
   }
-  function fillJalaliDates(root, digits = "persian") {
-    root.querySelectorAll("time[data-jalali]").forEach((el) => {
+  var HIJRI_LOCALES = { fa: "fa-IR", ar: "ar-SA", en: "en-US" };
+  function formatHijri(date = /* @__PURE__ */ new Date(), lang = "ar", digits = "arabic", options = { dateStyle: "long" }) {
+    const locale = HIJRI_LOCALES[lang] || HIJRI_LOCALES.ar;
+    return new Intl.DateTimeFormat(`${locale}-u-ca-islamic-umalqura-nu-${NUMBERING[digits] || "arab"}`, options).format(date);
+  }
+  function fillJalaliDates(root, digits = "persian", lang = "fa") {
+    root.querySelectorAll("time[data-jalali], time[data-hijri]").forEach((el) => {
       const date = el.dateTime ? new Date(el.dateTime) : /* @__PURE__ */ new Date();
-      if (!isNaN(date)) el.textContent = formatJalali(date, void 0, digits);
+      if (isNaN(date)) return;
+      el.textContent = el.hasAttribute("data-hijri") ? formatHijri(date, lang, digits) : formatJalali(date, void 0, digits);
     });
   }
 
@@ -437,7 +443,7 @@ body[data-speaker-layout="tall"] #speaker-controls { left: auto; right: 45%; }
       if (!deck.isSpeakerNotes()) watchSpeakerView(locale);
       deck.on("ready", () => {
         const slides = deck.getSlidesElement();
-        fillJalaliDates(slides, digits);
+        fillJalaliDates(slides, digits, locale.lang);
         localizeDigitsIn(slides, digits);
       });
     }

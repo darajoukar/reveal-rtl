@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 — 2026-10-25
+
+- **Saved drawings**: pen strokes are stored per slide (localStorage, per deck URL), survive reloads and are drawn onto the PDF export. Strokes now use slide-box coordinates, so they stay on the slide at any window size.
+- **Hijri dates**: `<time data-hijri></time>` (Umm al-Qura) in the UI language and digit style.
+- **Persian text checker**: `npx reveal-rtl-lint [files…]` reports Arabic ي/ك, missing ZWNJ, mixed digit sets and Arabic-Indic digits; never edits. Runs in CI on the demos and docs.
+- **Starter**: `npm create reveal-rtl my-talk` (new `create-reveal-rtl` package) writes a ready-to-open presentation in Persian, Arabic or English.
+
 ## 0.3.0 — 2026-10-25
 
 - **Languages**: `rtlOptions.lang` = `'fa'` (default), `'ar'` or `'en'` for every built-in label — toolbar, slide list, exports, timer, keyboard help, speaker view, notes, jump-to-slide. `rtlOptions.labels` overrides single strings (`core/i18n.js`).

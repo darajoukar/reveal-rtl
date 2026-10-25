@@ -121,3 +121,12 @@ test( 'Markdown demo: slides, notes and RTL from Markdown', async ( { page } ) =
 	await expect( page.locator( 'pre code' ) ).toContainText( '42' );
 	await expect( page.locator( 'aside.notes' ).first() ).toContainText( 'یادداشت سخنران' );
 } );
+
+test( 'Hijri date in each language', async ( { page } ) => {
+	await openDemo( page );
+	await expect( page.locator( 'time[data-hijri]' ) ).toHaveText( /[۰-۹]{4}/ );
+	await openDemo( page, '?lang=ar' );
+	await expect( page.locator( 'time[data-hijri]' ) ).toHaveText( /[٠-٩]{4} هـ/ );
+	await openDemo( page, '?lang=en' );
+	await expect( page.locator( 'time[data-hijri]' ) ).toHaveText( /\d{4} AH/ );
+} );

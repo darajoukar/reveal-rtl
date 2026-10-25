@@ -290,7 +290,7 @@
 			<a class="brand" href="./">reveal-rtl</a>
 			<div class="langs" role="group" aria-label="Language">
 				<button type="button" data-lang="fa">فارسی</button>
-				<button type="button" data-lang="ar">العربية</button>
+				<button type="button" data-lang="ar" lang="ar">العربية</button>
 				<button type="button" data-lang="en">English</button>
 			</div>
 		</header>
@@ -314,12 +314,14 @@
 		<section class="block">
 			<h2 data-i18n="installTitle">نصب</h2>
 			<div class="install">
-				<button class="copy" type="button" data-copy="npm install reveal.js reveal-rtl" data-i18n="copy">کپی</button>
-				<pre>npm install reveal.js reveal-rtl</pre>
+				<button class="copy" type="button" data-copy="npm create reveal-rtl my-talk" data-i18n="copy">کپی</button>
+				<pre>npm create reveal-rtl my-talk        # new presentation (--lang ar | en)
+npm install reveal.js reveal-rtl     # existing project
+npx reveal-rtl-lint slides/          # Persian text check</pre>
 			</div>
 			<div class="install">
-				<pre>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/core/rtl.css"&gt;
-&lt;script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/dist/reveal-rtl.js"&gt;&lt;/script&gt;
+				<pre>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/core/rtl.css"&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/dist/reveal-rtl.js"&gt;&lt;/script&gt;
 
 Reveal.initialize({
   rtlOptions: { lang: 'fa' },   // 'fa' | 'ar' | 'en'

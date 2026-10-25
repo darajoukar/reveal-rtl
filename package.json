@@ -1,9 +1,12 @@
 {
   "name": "reveal-rtl",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Right-to-left (Persian) support plugin for reveal.js",
   "type": "module",
   "main": "plugin/rtl.js",
+  "bin": {
+    "reveal-rtl-lint": "bin/lint.js"
+  },
   "exports": {
     ".": "./plugin/rtl.js",
     "./ui": "./plugin/ui.js",
@@ -19,6 +22,8 @@
     "core/help.js",
     "core/draw.js",
     "core/i18n.js",
+    "core/lint.js",
+    "bin",
     "core/rtl.css",
     "core/ui.css",
     "plugin",
@@ -29,8 +34,9 @@
   ],
   "scripts": {
     "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js && node scripts/build-themes.js",
-    "test": "node --test \"core/*.test.js\"",
+    "test": "node --test \"core/*.test.js\" \"create-reveal-rtl/*.test.js\"",
     "test:e2e": "playwright test",
+    "lint:text": "node bin/lint.js demo index.html README.md create-reveal-rtl/template",
     "prepublishOnly": "npm run build && npm test",
     "demo": "serve ."
   },

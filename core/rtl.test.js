@@ -9,6 +9,14 @@ test( 'localizeDigits supports Persian, Arabic and Latin', async () => {
 	assert.equal( localizeDigits( 'v2.10', 'latin' ), 'v2.10' );
 } );
 
+test( 'formatHijri gives the Umm al-Qura date in each language', async () => {
+	const { formatHijri } = await import( './rtl.js' );
+	const day = new Date( 2025, 2, 21 ); // 21 Ramadan 1446
+	assert.match( formatHijri( day, 'ar', 'arabic' ), /رمضان ١٤٤٦/ );
+	assert.match( formatHijri( day, 'fa', 'persian' ), /رمضان ۱۴۴۶/ );
+	assert.match( formatHijri( day, 'en', 'latin' ), /Ramadan 21, 1446/ );
+} );
+
 test( 'toLatinDigits converts Persian and Arabic digits', () => {
 	assert.equal( toLatinDigits( '۱۲ و ٣٤' ), '12 و 34' );
 } );

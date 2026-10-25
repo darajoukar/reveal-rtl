@@ -79,7 +79,7 @@ export default () => ( {
 		// 'ready' fires after all plugins, so content from markdown etc. is already in the DOM.
 		deck.on( 'ready', () => {
 			const slides = deck.getSlidesElement();
-			fillJalaliDates( slides, digits );
+			fillJalaliDates( slides, digits, locale.lang );
 			localizeDigitsIn( slides, digits );
 		} );
 	}

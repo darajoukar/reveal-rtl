@@ -92,10 +92,20 @@ export function formatJalali( date = new Date(), options = { dateStyle: 'long' }
 	return new Intl.DateTimeFormat( `fa-IR-u-ca-persian-nu-${ NUMBERING[ digits ] || 'arabext' }`, options ).format( date );
 }
 
-// Fills <time data-jalali> elements. Uses the datetime attribute when present, otherwise today.
-export function fillJalaliDates( root, digits = 'persian' ) {
-	root.querySelectorAll( 'time[data-jalali]' ).forEach( el => {
+// Hijri (lunar, Umm al-Qura) date, in the given UI language.
+const HIJRI_LOCALES = { fa: 'fa-IR', ar: 'ar-SA', en: 'en-US' };
+
+export function formatHijri( date = new Date(), lang = 'ar', digits = 'arabic', options = { dateStyle: 'long' } ) {
+	const locale = HIJRI_LOCALES[ lang ] || HIJRI_LOCALES.ar;
+	return new Intl.DateTimeFormat( `${ locale }-u-ca-islamic-umalqura-nu-${ NUMBERING[ digits ] || 'arab' }`, options ).format( date );
+}
+
+// Fills <time data-jalali> and <time data-hijri> elements. Uses the datetime attribute when
+// present, otherwise today.
+export function fillJalaliDates( root, digits = 'persian', lang = 'fa' ) {
+	root.querySelectorAll( 'time[data-jalali], time[data-hijri]' ).forEach( el => {
 		const date = el.dateTime ? new Date( el.dateTime ) : new Date();
-		if( !isNaN( date ) ) el.textContent = formatJalali( date, undefined, digits );
+		if( isNaN( date ) ) return;
+		el.textContent = el.hasAttribute( 'data-hijri' ) ? formatHijri( date, lang, digits ) : formatJalali( date, undefined, digits );
 	} );
 }

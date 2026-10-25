@@ -188,3 +188,43 @@ test( 'hovering a slide in the list shows its preview', async ( { page } ) => {
 	await page.keyboard.press( 'Escape' );
 	await expect( preview ).toBeHidden();
 } );
+
+test( 'pen drawings survive a reload and appear on the PDF print pages', async ( { page } ) => {
+	await openDemo( page );
+	await page.keyboard.press( 'd' );
+	await page.mouse.move( 300, 200 );
+	await page.mouse.down();
+	await page.mouse.move( 600, 260, { steps: 6 } );
+	await page.mouse.up();
+	await page.keyboard.press( 'd' );
+
+	const saved = await page.evaluate( () => JSON.parse( localStorage.getItem( 'reveal-rtl-ui:drawings:/demo/' ) ) );
+	expect( Object.keys( saved ) ).toEqual( [ '0/0' ] );
+	// Strokes are stored relative to the slide box (0..1).
+	expect( saved['0/0'][0].flat().every( n => n >= 0 && n <= 1 ) ).toBe( true );
+
+	const inked = () => page.evaluate( () => {
+		const canvas = document.querySelector( '.rtlui-canvas' );
+		const data = canvas.getContext( '2d' ).getImageData( 0, 0, canvas.width, canvas.height ).data;
+		for( let i = 3; i < data.length; i += 4 ) if( data[i] ) return true;
+		return false;
+	} );
+	await reloadDemo( page );
+	await expect.poll( inked ).toBe( true );
+
+	await page.goto( '/demo/?print-pdf' );
+	await page.locator( '.pdf-page' ).first().waitFor();
+	const printCanvas = page.locator( '.pdf-page' ).first().locator( '.rtlui-print-canvas' );
+	await expect( printCanvas ).toHaveCount( 1 );
+	await expect( page.locator( '.rtlui-print-canvas' ) ).toHaveCount( 1 ); // only the drawn slide
+	expect( await printCanvas.evaluate( canvas => {
+		const data = canvas.getContext( '2d' ).getImageData( 0, 0, canvas.width, canvas.height ).data;
+		for( let i = 3; i < data.length; i += 4 ) if( data[i] ) return true;
+		return false;
+	} ) ).toBe( true );
+
+	// E clears this slide's drawing and its saved copy.
+	await openDemo( page );
+	await page.keyboard.press( 'e' );
+	expect( await page.evaluate( () => localStorage.getItem( 'reveal-rtl-ui:drawings:/demo/' ) ) ).toBeNull();
+} );

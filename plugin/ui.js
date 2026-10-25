@@ -1,6 +1,6 @@
 import { localizeDigits, toLatinDigits, normalizeForSearch, timerDisplay } from '../core/rtl.js';
 import { resolveLocale, DIGIT_LOCALES } from '../core/i18n.js';
-import { createDrawingLayer } from '../core/draw.js';
+import { createDrawingLayer, drawStrokesOnPrintPages } from '../core/draw.js';
 import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, standaloneHTML, offlineHTML, safeFileName, download } from '../core/export.js';
 
 /**
@@ -20,6 +20,7 @@ import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, stand
 const THEME_STORAGE_KEY = 'reveal-rtl-ui:theme';
 const TIMER_STORAGE_KEY = 'reveal-rtl-ui:timer';
 const TOOLBAR_STORAGE_KEY = 'reveal-rtl-ui:toolbar-hidden';
+const DRAWINGS_STORAGE_KEY = 'reveal-rtl-ui:drawings';
 const KEY_M = 77;
 const KEY_T = 84;
 const KEY_D = 68;
@@ -81,18 +82,36 @@ export default () => ( {
 		const pageSnapshot = document.documentElement.cloneNode( true );
 
 		// No toolbar in the print view. PDF export opens it with ?print-pdf&rtlui-print; print once rendered.
+		// Pen drawings are saved per deck URL.
+		const drawingsKey = `${ DRAWINGS_STORAGE_KEY }:${ location.pathname }`;
+
 		if( deck.isPrintView() ) {
-			if( new URLSearchParams( location.search ).has( PRINT_PARAM ) ) {
-				deck.on( 'pdf-ready', () => document.fonts.ready.then( () => setTimeout( () => window.print(), 500 ) ) );
-			}
+			// The print view moves slides into pages, so tag each with its "h/v" first, then draw the
+			// saved pen strokes onto its page.
+			[ ...root.querySelectorAll( '.slides > section' ) ].forEach( ( section, h ) => {
+				const children = section.querySelectorAll( ':scope > section' );
+				if( children.length ) children.forEach( ( child, v ) => { child.dataset.rtluiKey = `${ h }/${ v }`; } );
+				else section.dataset.rtluiKey = `${ h }/0`;
+			} );
+			deck.on( 'pdf-ready', () => {
+				const size = deck.getComputedSlideSize();
+				drawStrokesOnPrintPages( drawingsKey, { slideWidth: size.width, slideHeight: size.height, margin: config.margin } );
+				if( new URLSearchParams( location.search ).has( PRINT_PARAM ) ) {
+					document.fonts.ready.then( () => setTimeout( () => window.print(), 500 ) );
+				}
+			} );
 			return;
 		}
 
 		applyStoredTheme( themeLink, options.themes );
 
-		const drawing = createDrawingLayer( root, () => {
-			const { h, v } = deck.getIndices();
-			return `${ h }/${ v }`;
+		const drawing = createDrawingLayer( root, {
+			getSlideKey: () => {
+				const { h, v } = deck.getIndices();
+				return `${ h }/${ v }`;
+			},
+			getSlideBox: () => deck.getSlidesElement().getBoundingClientRect(),
+			storageKey: drawingsKey
 		} );
 		deck.on( 'slidechanged', () => drawing.redraw() );
 

@@ -259,7 +259,42 @@ var RevealRTLUI = (() => {
   // core/draw.js
   var PEN_COLOR = "#e53935";
   var PEN_WIDTH = 4;
-  function createDrawingLayer(root, getSlideKey) {
+  function drawStrokes(ctx, strokes, box, scale = 1) {
+    ctx.strokeStyle = PEN_COLOR;
+    ctx.lineWidth = PEN_WIDTH * scale;
+    ctx.lineCap = ctx.lineJoin = "round";
+    strokes.forEach((points) => {
+      if (!points.length) return;
+      ctx.beginPath();
+      points.forEach(([x, y], i) => {
+        const px = box.x + x * box.width, py = box.y + y * box.height;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      });
+      if (points.length === 1) ctx.lineTo(box.x + points[0][0] * box.width + 0.1, box.y + points[0][1] * box.height);
+      ctx.stroke();
+    });
+  }
+  function loadStrokes(storageKey) {
+    const strokes = /* @__PURE__ */ new Map();
+    try {
+      const data = JSON.parse(localStorage.getItem(storageKey));
+      for (const [key, list2] of Object.entries(data || {})) {
+        if (!/^\d+\/\d+$/.test(key) || !Array.isArray(list2)) continue;
+        const valid = list2.filter((points) => Array.isArray(points) && points.every((p) => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite)));
+        if (valid.length) strokes.set(key, valid);
+      }
+    } catch (e) {
+    }
+    return strokes;
+  }
+  function saveStrokes(storageKey, strokes) {
+    try {
+      if (strokes.size) localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(strokes)));
+      else localStorage.removeItem(storageKey);
+    } catch (e) {
+    }
+  }
+  function createDrawingLayer(root, { getSlideKey, getSlideBox, storageKey }) {
     const canvas = document.createElement("canvas");
     canvas.className = "rtlui-canvas";
     canvas.setAttribute("aria-hidden", "true");
@@ -268,36 +303,28 @@ var RevealRTLUI = (() => {
     laser.hidden = true;
     root.append(canvas, laser);
     const ctx = canvas.getContext("2d");
-    const strokes = /* @__PURE__ */ new Map();
+    const strokes = loadStrokes(storageKey);
     let tool = null;
     let current = null;
+    function box() {
+      const ratio = window.devicePixelRatio || 1;
+      const c = canvas.getBoundingClientRect(), s = getSlideBox();
+      return { x: (s.left - c.left) * ratio, y: (s.top - c.top) * ratio, width: s.width * ratio, height: s.height * ratio };
+    }
     const point = (event) => {
-      const r = canvas.getBoundingClientRect();
-      return [(event.clientX - r.left) / r.width, (event.clientY - r.top) / r.height];
+      const s = getSlideBox();
+      return [(event.clientX - s.left) / s.width, (event.clientY - s.top) / s.height];
     };
+    const lineScale = () => (window.devicePixelRatio || 1) * getSlideBox().width / root.querySelector(".slides").offsetWidth;
     function resize() {
       const ratio = window.devicePixelRatio || 1;
       canvas.width = Math.round(canvas.clientWidth * ratio);
       canvas.height = Math.round(canvas.clientHeight * ratio);
       redraw();
     }
-    function drawStroke(points) {
-      if (!points.length) return;
-      const ratio = window.devicePixelRatio || 1;
-      ctx.strokeStyle = PEN_COLOR;
-      ctx.lineWidth = PEN_WIDTH * ratio;
-      ctx.lineCap = ctx.lineJoin = "round";
-      ctx.beginPath();
-      points.forEach(([x, y], i) => {
-        const px = x * canvas.width, py = y * canvas.height;
-        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-      });
-      if (points.length === 1) ctx.lineTo(points[0][0] * canvas.width + 0.1, points[0][1] * canvas.height);
-      ctx.stroke();
-    }
     function redraw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      (strokes.get(getSlideKey()) || []).forEach(drawStroke);
+      drawStrokes(ctx, strokes.get(getSlideKey()) || [], box(), lineScale());
     }
     canvas.addEventListener("pointerdown", (event) => {
       if (tool !== "pen") return;
@@ -306,22 +333,25 @@ var RevealRTLUI = (() => {
       const key = getSlideKey();
       if (!strokes.has(key)) strokes.set(key, []);
       strokes.get(key).push(current);
-      drawStroke(current);
+      drawStrokes(ctx, [current], box(), lineScale());
       event.preventDefault();
     });
     canvas.addEventListener("pointermove", (event) => {
       if (!current) return;
       current.push(point(event));
-      drawStroke(current.slice(-2));
+      drawStrokes(ctx, [current.slice(-2)], box(), lineScale());
     });
     const endStroke = () => {
+      if (!current) return;
       current = null;
+      saveStrokes(storageKey, strokes);
     };
     canvas.addEventListener("pointerup", endStroke);
     canvas.addEventListener("pointercancel", endStroke);
     root.addEventListener("pointermove", (event) => {
       if (tool !== "laser") return;
-      laser.style.translate = `${event.clientX - root.getBoundingClientRect().left}px ${event.clientY - root.getBoundingClientRect().top}px`;
+      const r = root.getBoundingClientRect();
+      laser.style.translate = `${event.clientX - r.left}px ${event.clientY - r.top}px`;
       laser.hidden = false;
     });
     root.addEventListener("pointerleave", () => {
@@ -342,11 +372,29 @@ var RevealRTLUI = (() => {
       },
       clear() {
         strokes.delete(getSlideKey());
+        saveStrokes(storageKey, strokes);
         redraw();
       },
-      hasStrokes: () => (strokes.get(getSlideKey()) || []).length > 0,
       redraw
     };
+  }
+  function drawStrokesOnPrintPages(storageKey, { slideWidth, slideHeight, margin }) {
+    const strokes = loadStrokes(storageKey);
+    if (!strokes.size) return;
+    const pageWidth = Math.floor(slideWidth * (1 + margin));
+    const pageHeight = Math.floor(slideHeight * (1 + margin));
+    document.querySelectorAll(".pdf-page").forEach((page) => {
+      const key = page.querySelector("section[data-rtlui-key]")?.dataset.rtluiKey;
+      if (!strokes.has(key)) return;
+      const canvas = document.createElement("canvas");
+      canvas.className = "rtlui-print-canvas";
+      canvas.width = pageWidth * 2;
+      canvas.height = pageHeight * 2;
+      Object.assign(canvas.style, { position: "absolute", left: 0, top: 0, width: `${pageWidth}px`, height: `${pageHeight}px`, zIndex: 10, pointerEvents: "none" });
+      const box = { x: pageWidth - slideWidth, y: pageHeight - slideHeight, width: slideWidth * 2, height: slideHeight * 2 };
+      drawStrokes(canvas.getContext("2d"), strokes.get(key), box, 2);
+      page.append(canvas);
+    });
   }
 
   // core/export.js
@@ -622,6 +670,7 @@ ${parts.join("\n\n")}
   var THEME_STORAGE_KEY = "reveal-rtl-ui:theme";
   var TIMER_STORAGE_KEY = "reveal-rtl-ui:timer";
   var TOOLBAR_STORAGE_KEY = "reveal-rtl-ui:toolbar-hidden";
+  var DRAWINGS_STORAGE_KEY = "reveal-rtl-ui:drawings";
   var KEY_M = 77;
   var KEY_T = 84;
   var KEY_D = 68;
@@ -671,16 +720,32 @@ ${parts.join("\n\n")}
       const root = deck.getRevealElement();
       const themeLink = document.querySelector(options.themeLink);
       const pageSnapshot = document.documentElement.cloneNode(true);
+      const drawingsKey = `${DRAWINGS_STORAGE_KEY}:${location.pathname}`;
       if (deck.isPrintView()) {
-        if (new URLSearchParams(location.search).has(PRINT_PARAM)) {
-          deck.on("pdf-ready", () => document.fonts.ready.then(() => setTimeout(() => window.print(), 500)));
-        }
+        [...root.querySelectorAll(".slides > section")].forEach((section, h) => {
+          const children2 = section.querySelectorAll(":scope > section");
+          if (children2.length) children2.forEach((child, v) => {
+            child.dataset.rtluiKey = `${h}/${v}`;
+          });
+          else section.dataset.rtluiKey = `${h}/0`;
+        });
+        deck.on("pdf-ready", () => {
+          const size = deck.getComputedSlideSize();
+          drawStrokesOnPrintPages(drawingsKey, { slideWidth: size.width, slideHeight: size.height, margin: config.margin });
+          if (new URLSearchParams(location.search).has(PRINT_PARAM)) {
+            document.fonts.ready.then(() => setTimeout(() => window.print(), 500));
+          }
+        });
         return;
       }
       applyStoredTheme(themeLink, options.themes);
-      const drawing = createDrawingLayer(root, () => {
-        const { h, v } = deck.getIndices();
-        return `${h}/${v}`;
+      const drawing = createDrawingLayer(root, {
+        getSlideKey: () => {
+          const { h, v } = deck.getIndices();
+          return `${h}/${v}`;
+        },
+        getSlideBox: () => deck.getSlidesElement().getBoundingClientRect(),
+        storageKey: drawingsKey
       });
       deck.on("slidechanged", () => drawing.redraw());
       const panel = createPanel();
