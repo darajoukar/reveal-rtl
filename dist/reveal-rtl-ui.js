@@ -413,7 +413,7 @@ ${parts.join("\n\n")}
           group(menuButton),
           group(firstButton, lastButton, gridButton),
           group(playButton, timerValue, resetButton),
-          group(clock)
+          wideOnly(group(clock))
         ];
         let zoom = 1;
         const zoomReset = el("button", "rtlui-button rtlui-zoom-value");
@@ -426,12 +426,12 @@ ${parts.join("\n\n")}
         };
         zoomReset.addEventListener("click", () => setZoom(1));
         setZoom(1);
-        groups.push(group(
+        groups.push(wideOnly(group(
           button(ICONS.zoomIn, "\u0628\u0632\u0631\u06AF\u200C\u0646\u0645\u0627\u06CC\u06CC", () => setZoom(zoom + ZOOM_STEP)),
           zoomReset,
           button(ICONS.zoomOut, "\u06A9\u0648\u0686\u06A9\u200C\u0646\u0645\u0627\u06CC\u06CC", () => setZoom(zoom - ZOOM_STEP))
-        ));
-        if (options.themes.length && themeLink) groups.push(group(themeSelect()));
+        )));
+        if (options.themes.length && themeLink) groups.push(wideOnly(group(themeSelect())));
         groups.push(group(exportMenu()));
         const notesButton = button(ICONS.notes, "\u0646\u0645\u0627\u06CC\u0634 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627", () => {
           const show = !deck.getConfig().showNotes;
@@ -445,9 +445,9 @@ ${parts.join("\n\n")}
         });
         const noteControls = [notesButton];
         if (deck.hasPlugin("notes")) {
-          noteControls.push(button(ICONS.speaker, "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646 (S)", () => deck.getPlugin("notes").open()));
+          noteControls.push(wideOnly(button(ICONS.speaker, "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646 (S)", () => deck.getPlugin("notes").open())));
         }
-        groups.push(group(...noteControls, fullscreenButton));
+        groups.push(group(...noteControls, wideOnly(fullscreenButton)));
         const hideButton = button(ICONS.hide, "\u067E\u0646\u0647\u0627\u0646 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631 (T)", () => setHidden(true));
         groups.push(group(hideButton));
         element.append(...groups);
@@ -609,6 +609,10 @@ ${parts.join("\n\n")}
     node.type = "button";
     setLabel(node, label);
     node.addEventListener("click", onClick);
+    return node;
+  }
+  function wideOnly(node) {
+    node.classList.add("rtlui-wide-only");
     return node;
   }
   function setLabel(node, label) {

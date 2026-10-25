@@ -231,7 +231,8 @@ html.print-pdf .reveal .slides section {
 .rtlui-menu {
 	position: absolute;
 	inset-block-end: calc(100% + 10px);
-	inset-inline-start: 0;
+	/* The export button sits on the toolbar's end side, so open toward the start (center). */
+	inset-inline-end: 0;
 	min-width: 180px;
 	display: flex;
 	flex-direction: column;
@@ -297,9 +298,45 @@ html.print-pdf .rtlui-show {
 	display: none !important;
 }
 
+/* Small screens: drop the controls a phone already has or cannot use, and wrap if still too wide. */
 @media (max-width: 640px) {
-	.rtlui-clock,
-	.rtlui-theme {
-		display: none;
+	.rtlui-wide-only {
+		display: none !important;
+	}
+
+	.rtlui-toolbar {
+		box-sizing: border-box;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0;
+		/* Absolute + left: 50% would shrink-to-fit into half the width; size to content instead. */
+		width: max-content;
+		max-width: calc(100% - 16px);
+		padding: 2px 4px;
+		border-radius: 18px;
+	}
+
+	.rtlui-group {
+		gap: 0;
+		padding-inline: 0;
+	}
+
+	.rtlui-group + .rtlui-group {
+		border-inline-start: 0;
+	}
+
+	.rtlui-button {
+		min-width: 32px;
+		height: 36px;
+	}
+
+	.rtlui-timer {
+		min-width: 0;
+		padding-inline: 2px;
+	}
+
+	/* The full-width toolbar would cover the slide number in the corner. */
+	.reveal .slide-number {
+		bottom: 60px;
 	}
 }

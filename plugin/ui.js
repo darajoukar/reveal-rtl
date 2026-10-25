@@ -241,7 +241,7 @@ export default () => ( {
 				group( menuButton ),
 				group( firstButton, lastButton, gridButton ),
 				group( playButton, timerValue, resetButton ),
-				group( clock )
+				wideOnly( group( clock ) )
 			];
 
 			// Zoom: scales the slides around the center, on top of reveal.js's own fit-to-window scale.
@@ -256,13 +256,13 @@ export default () => ( {
 			};
 			zoomReset.addEventListener( 'click', () => setZoom( 1 ) );
 			setZoom( 1 );
-			groups.push( group(
+			groups.push( wideOnly( group(
 				button( ICONS.zoomIn, 'بزرگ‌نمایی', () => setZoom( zoom + ZOOM_STEP ) ),
 				zoomReset,
 				button( ICONS.zoomOut, 'کوچک‌نمایی', () => setZoom( zoom - ZOOM_STEP ) )
-			) );
+			) ) );
 
-			if( options.themes.length && themeLink ) groups.push( group( themeSelect() ) );
+			if( options.themes.length && themeLink ) groups.push( wideOnly( group( themeSelect() ) ) );
 
 			groups.push( group( exportMenu() ) );
 
@@ -281,10 +281,10 @@ export default () => ( {
 			const noteControls = [ notesButton ];
 			// Speaker view needs the notes plugin (RevealNotes).
 			if( deck.hasPlugin( 'notes' ) ) {
-				noteControls.push( button( ICONS.speaker, 'پنجره‌ی سخنران (S)', () => deck.getPlugin( 'notes' ).open() ) );
+				noteControls.push( wideOnly( button( ICONS.speaker, 'پنجره‌ی سخنران (S)', () => deck.getPlugin( 'notes' ).open() ) ) );
 			}
 
-			groups.push( group( ...noteControls, fullscreenButton ) );
+			groups.push( group( ...noteControls, wideOnly( fullscreenButton ) ) );
 
 			// Hide/show: the toolbar collapses to a small handle; choice is remembered.
 			const hideButton = button( ICONS.hide, 'پنهان کردن نوار ابزار (T)', () => setHidden( true ) );
@@ -457,6 +457,12 @@ function button( icon, label, onClick ) {
 	node.type = 'button';
 	setLabel( node, label );
 	node.addEventListener( 'click', onClick );
+	return node;
+}
+
+// Hidden on small screens (see core/ui.css): clock, zoom, theme, speaker view, fullscreen.
+function wideOnly( node ) {
+	node.classList.add( 'rtlui-wide-only' );
 	return node;
 }
 
