@@ -1,0 +1,15 @@
+{
+  "name": "reveal-rtl",
+  "description": "Right-to-left (Persian, Arabic) presentations with reveal.js",
+  "owner": {
+    "name": "Dara Joukar",
+    "url": "https://github.com/darajoukar"
+  },
+  "plugins": [
+    {
+      "name": "reveal-rtl",
+      "source": "./plugins/reveal-rtl",
+      "description": "Skill for creating right-to-left Persian/Arabic reveal.js presentations with reveal-rtl"
+    }
+  ]
+}

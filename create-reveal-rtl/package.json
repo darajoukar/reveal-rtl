@@ -1,6 +1,6 @@
 {
   "name": "create-reveal-rtl",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Start a right-to-left reveal.js presentation (Persian, Arabic, English): npm create reveal-rtl",
   "type": "module",
   "bin": {

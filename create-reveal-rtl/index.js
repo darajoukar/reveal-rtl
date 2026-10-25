@@ -11,7 +11,7 @@ export const REVEAL_RTL_VERSION = '0.5';
 const CONTENT = {
 	fa: {
 		title: 'ارائه‌ی من',
-		slides: `# ارائه‌ی من
+		slides: `# {{title}}
 
 <time data-jalali></time>
 
@@ -44,7 +44,7 @@ Note: یادداشت سخنران؛ با کلید S پنجره‌ی سخنران
 	},
 	ar: {
 		title: 'عرضي التقديمي',
-		slides: `# عرضي التقديمي
+		slides: `# {{title}}
 
 <time data-hijri></time>
 
@@ -76,7 +76,7 @@ Note: ملاحظات المتحدث؛ اضغط S لفتح نافذة المتح�
 	},
 	en: {
 		title: 'My presentation',
-		slides: `# My presentation
+		slides: `# {{title}}
 
 Right-to-left slides with reveal-rtl
 
@@ -109,7 +109,9 @@ export function createPresentation( target, { lang = 'fa', title } = {} ) {
 		throw new Error( `Folder "${ target }" already exists and is not empty` );
 	}
 	const content = CONTENT[ lang ];
-	const values = { lang, version: REVEAL_RTL_VERSION, title: escapeHTML( title || content.title ), slides: content.slides };
+	const safeTitle = escapeHTML( title || content.title );
+	// The first slide's heading is the title too (slides are filled first: fill() does not recurse).
+	const values = { lang, version: REVEAL_RTL_VERSION, title: safeTitle, slides: fill( content.slides, { title: safeTitle } ) };
 	const template = fs.readFileSync( path.join( path.dirname( fileURLToPath( import.meta.url ) ), 'template', 'index.html' ), 'utf8' );
 
 	fs.mkdirSync( target, { recursive: true } );

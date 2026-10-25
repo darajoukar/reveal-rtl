@@ -19,6 +19,15 @@ test( 'creates a Persian presentation with filled placeholders', () => {
 	assert.ok( fs.existsSync( path.join( target, 'README.md' ) ) );
 } );
 
+test( 'the given title is used on the first slide too', () => {
+	const target = path.join( tmp(), 'titled' );
+	createPresentation( target, { title: 'انرژی خورشیدی' } );
+	const html = fs.readFileSync( path.join( target, 'index.html' ), 'utf8' );
+	assert.match( html, /<title>انرژی خورشیدی<\/title>/ );
+	assert.match( html, /^# انرژی خورشیدی$/m );
+	assert.ok( !html.includes( 'ارائه‌ی من' ) );
+} );
+
 test( 'Arabic and English variants, title is escaped', () => {
 	const ar = path.join( tmp(), 'ar' );
 	createPresentation( ar, { lang: 'ar' } );

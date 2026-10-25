@@ -36,7 +36,7 @@ jobs:
       - name: Check build output is up to date
         run: |
           npm run build
-          git diff --exit-code dist/ themes/ || (echo "::error::dist/ or themes/ is stale. Run 'npm run build' and commit." && exit 1)
+          git diff --exit-code dist/ themes/ plugins/ || (echo "::error::dist/, themes/ or the skill template is stale. Run 'npm run build' and commit." && exit 1)
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium

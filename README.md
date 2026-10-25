@@ -4,7 +4,7 @@
 
 **Right-to-left presentations with [reveal.js](https://revealjs.com) 6 — Persian, Arabic and more**
 
-**ارائه‌های راست‌به‌چپ با reveal.js** · <b lang="ar">عروض تقديمية من اليمين إلى اليسار مع reveal.js</b>
+<span style="direction:rtl;">**ارائه‌های راست‌به‌چپ با reveal.js** · <b lang="ar">عروض تقديمية من اليمين إلى اليسار مع reveal.js</b></span>
 
 [![npm](https://img.shields.io/npm/v/reveal-rtl?color=c2410c)](https://www.npmjs.com/package/reveal-rtl)
 [![CI](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml/badge.svg)](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml)
@@ -191,6 +191,18 @@ Note: یادداشت سخنران
 
 Below 435px reveal.js 6 switches to a vertical scroll view; set `scrollActivationWidth: null` to keep swiping slide by slide.
 
+### Use with Claude (Agent Skill)
+
+The repo ships an Agent Skill, **`rtl-slides`**, that teaches Claude to build reveal-rtl presentations — correct Persian typography, speaker notes, the text check — from a request like «یک ارائه‌ی فارسی درباره‌ی … بساز».
+
+- **Claude Code** (2.1.275+):
+  ```
+  /plugin install reveal-rtl --marketplace darajoukar/reveal-rtl
+  ```
+  or in two steps: `/plugin marketplace add darajoukar/reveal-rtl`, then `/plugin install reveal-rtl@reveal-rtl`.
+- **claude.ai** (web/desktop): download [`rtl-slides-skill.zip`](https://github.com/darajoukar/reveal-rtl/releases/latest/download/rtl-slides-skill.zip) and upload it under Settings → Capabilities → Skills.
+- **By hand**: copy [`plugins/reveal-rtl/skills/rtl-slides`](plugins/reveal-rtl/skills/rtl-slides) into `~/.claude/skills/`.
+
 ### Persian text checker
 
 ```bash
@@ -293,6 +305,13 @@ npm create reveal-rtl my-talk
 
 <div dir="rtl">
 
+### استفاده با Claude
+
+این ریپو یک Skill به اسم **`rtl-slides`** دارد که به Claude یاد می‌دهد ارائه را با reveal-rtl بسازد؛ با نیم‌فاصله و نگارش درست فارسی، یادداشت سخنران و بررسی متن. بعد از نصب کافی است بنویسید: «یک ارائه‌ی فارسی درباره‌ی … بساز».
+
+- **Claude Code:** دستور `/plugin install reveal-rtl --marketplace darajoukar/reveal-rtl`
+- **claude.ai:** فایل [`rtl-slides-skill.zip`](https://github.com/darajoukar/reveal-rtl/releases/latest/download/rtl-slides-skill.zip) را دانلود کنید و در Settings → Capabilities → Skills آپلود کنید.
+
 ### بررسی متن فارسی
 
 </div>
@@ -367,6 +386,10 @@ Reveal.initialize({
 ### الخيارات
 
 `rtlOptions.lang` يحدد لغة الواجهة (`'fa'` أو `'ar'` أو `'en'`) و`rtlOptions.digits` نوع الأرقام (`'persian'` أو `'arabic'` أو `'latin'`). الجداول الكاملة للخيارات والمفاتيح في [القسم الإنجليزي](#english).
+
+### الاستخدام مع Claude
+
+مهارة **`rtl-slides`** تعلّم Claude إنشاء عروض reveal-rtl. في Claude Code: `/plugin install reveal-rtl --marketplace darajoukar/reveal-rtl`؛ وفي claude.ai ارفع الملف [`rtl-slides-skill.zip`](https://github.com/darajoukar/reveal-rtl/releases/latest/download/rtl-slides-skill.zip) من Settings → Capabilities → Skills.
 
 ### الصور والخلفيات والأيقونات
 
