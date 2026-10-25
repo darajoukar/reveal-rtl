@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — 2026-10-25
 
 - **Languages**: `rtlOptions.lang` = `'fa'` (default), `'ar'` or `'en'` for every built-in label — toolbar, slide list, exports, timer, keyboard help, speaker view, notes, jump-to-slide. `rtlOptions.labels` overrides single strings (`core/i18n.js`).
 - **Digit styles**: `rtlOptions.digits` = `'persian'`, `'arabic'` or `'latin'` (default by language) — slide text, slide number, PDF pages, ordered lists, Jalali dates, clock and timer.
