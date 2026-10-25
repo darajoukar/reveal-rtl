@@ -1,5 +1,5 @@
 import { toPersianDigits, normalizeForSearch, formatDuration } from '../core/rtl.js';
-import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, standaloneHTML, safeFileName, download } from '../core/export.js';
+import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, standaloneHTML, offlineHTML, safeFileName, download } from '../core/export.js';
 
 /**
  * reveal.js plugin: toolbar (first/last, timer, clock, theme, notes, fullscreen)
@@ -345,6 +345,7 @@ export default () => ( {
 				[ 'JSON', () => download( fileName( 'json' ), slidesToJSON( slides(), title ), 'application/json' ) ],
 				[ 'متن Markdown', () => download( fileName( 'md' ), slidesToMarkdown( slides() ), 'text/markdown' ) ],
 				[ 'HTML', () => download( fileName( 'html' ), standaloneHTML( pageSnapshot.cloneNode( true ), document.baseURI ), 'text/html' ) ],
+				[ 'HTML آفلاین (یک فایل)', exportOfflineHTML ],
 				[ 'یادداشت‌های سخنران', () => download( `${ safeFileName( title ) }-notes.txt`, slidesToNotesText( slides(), title ), 'text/plain' ) ]
 			].map( ( [ label, action ] ) => {
 				const item = el( 'button', 'rtlui-menu-item', label );
@@ -381,6 +382,23 @@ export default () => ( {
 
 			wrapper.append( trigger, menu );
 			return wrapper;
+		}
+
+		async function exportOfflineHTML() {
+			const title = document.title || 'presentation';
+			root.classList.add( 'rtlui-busy' );
+			try {
+				const { html, failed } = await offlineHTML( pageSnapshot.cloneNode( true ), document.baseURI );
+				download( `${ safeFileName( title ) }-offline.html`, html, 'text/html' );
+				if( failed.length ) {
+					// Browsers block fetch() for file:// pages, so nothing local can be inlined there.
+					const hint = location.protocol === 'file:' ? '\nبرای خروجی آفلاین کامل، ارائه را از یک سرور (مثلاً npm run demo) یا نسخه‌ی آنلاین باز کنید.' : '';
+					window.alert( `${ toPersianDigits( failed.length ) } فایل داخل خروجی قرار نگرفت و هنوز به اینترنت یا مسیر اصلی نیاز دارد:\n${ failed.join( '\n' ) }${ hint }` );
+				}
+			}
+			finally {
+				root.classList.remove( 'rtlui-busy' );
+			}
 		}
 
 		function exportPDF() {

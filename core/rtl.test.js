@@ -1,6 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toPersianDigits, formatJalali, normalizeForSearch, formatDuration } from './rtl.js';
+import { toPersianDigits, formatJalali, normalizeForSearch, formatDuration, formatSlideNumber } from './rtl.js';
+
+test( 'formatSlideNumber supports every reveal.js format', () => {
+	const vertical = { h: 6, v: 1, vertical: true, pastCount: 7, total: 8, uncounted: false, horizontalCount: 7 };
+	const flat = { ...vertical, h: 2, v: 0, vertical: false, pastCount: 2 };
+	assert.equal( formatSlideNumber( true, vertical ), '7.2' );
+	assert.equal( formatSlideNumber( 'h.v', flat ), '3' );
+	assert.equal( formatSlideNumber( 'h/v', vertical ), '7/2' );
+	assert.equal( formatSlideNumber( 'c', vertical ), '8' );
+	assert.equal( formatSlideNumber( 'c/t', flat ), '3 / 8' );
+	assert.equal( formatSlideNumber( 'h.v', { ...flat, horizontalCount: 1 } ), '3' );
+	assert.equal( formatSlideNumber( 'c', { ...flat, uncounted: true } ), '2' );
+} );
 
 test( 'normalizeForSearch unifies Arabic letters, digits and ZWNJ', () => {
 	assert.equal( normalizeForSearch( 'كتابي ۱۲' ), normalizeForSearch( 'کتابی 12' ) );

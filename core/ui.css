@@ -243,6 +243,11 @@ html.print-pdf .reveal .slides section {
 	box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
 }
 
+.reveal.rtlui-busy,
+.reveal.rtlui-busy .rtlui-toolbar * {
+	cursor: progress;
+}
+
 .rtlui-menu[hidden] {
 	display: none;
 }

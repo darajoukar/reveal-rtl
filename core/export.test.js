@@ -1,6 +1,30 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { htmlToMarkdown, getSlideTitle, getSlideNotes, slidesToMarkdown, slidesToJSON, safeFileName } from './export.js';
+import { htmlToMarkdown, getSlideTitle, getSlideNotes, slidesToMarkdown, slidesToJSON, safeFileName, inlineCss, toDataURL } from './export.js';
+
+test( 'inlineCss inlines nested @import and url() relative to each stylesheet, and reports failures', async () => {
+	const files = {
+		'https://x.test/theme/main.css': '@import url(./fonts/f.css);\nh1 { background: url("../img/bg.png"); }',
+		'https://x.test/theme/fonts/f.css': '@font-face { src: url(a.woff2) format("woff2"), url(missing.woff); }',
+		'https://x.test/theme/fonts/a.woff2': new Blob( [ new Uint8Array( [ 1, 2, 3 ] ) ], { type: 'font/woff2' } ),
+		'https://x.test/img/bg.png': new Blob( [ 'png' ], { type: 'image/png' } )
+	};
+	const fakeFetch = async url => url in files ? new Response( files[url] ) : new Response( '', { status: 404 } );
+	const failed = [];
+	const css = await inlineCss( files['https://x.test/theme/main.css'], 'https://x.test/theme/main.css', fakeFetch, failed );
+
+	assert.ok( !css.includes( '@import' ) );
+	assert.ok( css.includes( 'url("data:font/woff2;base64,AQID")' ) );
+	assert.ok( css.includes( 'url("data:image/png;base64,cG5n")' ) );
+	assert.ok( css.includes( 'url("https://x.test/theme/fonts/missing.woff")' ) );
+	assert.deepEqual( failed, [ 'https://x.test/theme/fonts/missing.woff' ] );
+} );
+
+test( 'toDataURL encodes large binaries', async () => {
+	const big = new Uint8Array( 100_000 ).fill( 65 );
+	const url = await toDataURL( new Blob( [ big ], { type: 'text/plain' } ) );
+	assert.equal( Buffer.from( url.split( ',' )[1], 'base64' ).length, 100_000 );
+} );
 
 // Minimal DOM-like nodes: enough for the converters.
 const t = value => ( { nodeType: 3, nodeName: '#text', nodeValue: value, childNodes: [] } );

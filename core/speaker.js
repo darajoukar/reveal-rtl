@@ -53,8 +53,14 @@ export function applySpeakerRTL( doc, { digits = true } = {} ) {
 	doc.head.append( style );
 	doc.documentElement.lang = 'fa';
 
-	// Reuse the deck's Persian font stylesheet if the opener loaded one.
-	document.querySelectorAll( 'link[rel="stylesheet"][href*="Vazirmatn"]' ).forEach( link => doc.head.append( link.cloneNode() ) );
+	// Load the Persian font: rtl.css carries the bundled @font-face; also any Vazirmatn stylesheet
+	// the deck links itself. Absolute href, since the popup document is about:blank.
+	document.querySelectorAll( 'link[rel="stylesheet"][href*="rtl.css"], link[rel="stylesheet"][href*="Vazirmatn"]' ).forEach( link => {
+		const copy = doc.createElement( 'link' );
+		copy.rel = 'stylesheet';
+		copy.href = link.href;
+		doc.head.append( copy );
+	} );
 
 	LABELS.forEach( ( [ selector, text ] ) => {
 		const el = doc.querySelector( selector );

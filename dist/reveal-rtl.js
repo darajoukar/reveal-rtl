@@ -37,6 +37,21 @@ var RevealRTL = (() => {
       if (/[0-9]/.test(node.nodeValue)) node.nodeValue = toPersianDigits(node.nodeValue);
     }
   }
+  function formatSlideNumber(format, s) {
+    if (typeof format !== "string") format = "h.v";
+    if (!/c/.test(format) && s.horizontalCount === 1) format = "c";
+    const offset = s.uncounted ? 0 : 1;
+    switch (format) {
+      case "c":
+        return String(s.pastCount + offset);
+      case "c/t":
+        return `${s.pastCount + offset} / ${s.total}`;
+      default: {
+        const sep = format === "h/v" ? "/" : ".";
+        return s.vertical ? `${s.h + offset}${sep}${s.v + 1}` : String(s.h + offset);
+      }
+    }
+  }
   function formatJalali(date = /* @__PURE__ */ new Date(), options = { dateStyle: "long" }) {
     return new Intl.DateTimeFormat("fa-IR-u-ca-persian", options).format(date);
   }
@@ -89,7 +104,12 @@ body[data-speaker-layout="tall"] #speaker-controls { left: auto; right: 45%; }
     style.textContent = SPEAKER_CSS;
     doc.head.append(style);
     doc.documentElement.lang = "fa";
-    document.querySelectorAll('link[rel="stylesheet"][href*="Vazirmatn"]').forEach((link) => doc.head.append(link.cloneNode()));
+    document.querySelectorAll('link[rel="stylesheet"][href*="rtl.css"], link[rel="stylesheet"][href*="Vazirmatn"]').forEach((link) => {
+      const copy = doc.createElement("link");
+      copy.rel = "stylesheet";
+      copy.href = link.href;
+      doc.head.append(copy);
+    });
     LABELS.forEach(([selector, text]) => {
       const el = doc.querySelector(selector);
       if (el) el.textContent = text;
@@ -136,6 +156,42 @@ body[data-speaker-layout="tall"] #speaker-controls { left: auto; right: 45%; }
     });
   }
 
+  // core/help.js
+  var TEXT = {
+    "Keyboard Shortcuts": "\u0645\u06CC\u0627\u0646\u200C\u0628\u0631\u0647\u0627\u06CC \u0635\u0641\u062D\u0647\u200C\u06A9\u0644\u06CC\u062F",
+    "KEY": "\u06A9\u0644\u06CC\u062F",
+    "ACTION": "\u06A9\u0627\u0631",
+    "Next slide": "\u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0639\u062F\u06CC",
+    "Previous slide": "\u0627\u0633\u0644\u0627\u06CC\u062F \u0642\u0628\u0644\u06CC",
+    // In RTL mode reveal.js maps left to "next" and right to "previous".
+    "Navigate left": "\u0686\u067E: \u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0639\u062F\u06CC",
+    "Navigate right": "\u0631\u0627\u0633\u062A: \u0627\u0633\u0644\u0627\u06CC\u062F \u0642\u0628\u0644\u06CC",
+    "Navigate up": "\u0628\u0627\u0644\u0627",
+    "Navigate down": "\u067E\u0627\u06CC\u06CC\u0646",
+    "Navigate without fragments": "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u062F\u0648\u0646 \u0645\u0631\u0627\u062D\u0644 (fragment)",
+    "Jump to first/last slide": "\u0631\u0641\u062A\u0646 \u0628\u0647 \u0627\u0648\u0644\u06CC\u0646/\u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F",
+    "Pause": "\u0645\u06A9\u062B (\u0635\u0641\u062D\u0647\u200C\u06CC \u0633\u06CC\u0627\u0647)",
+    "Fullscreen": "\u062A\u0645\u0627\u0645\u200C\u0635\u0641\u062D\u0647",
+    "Jump to slide": "\u0631\u0641\u062A\u0646 \u0628\u0647 \u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0627 \u0634\u0645\u0627\u0631\u0647",
+    "Slide overview": "\u0646\u0645\u0627\u06CC \u06A9\u0644\u06CC \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627",
+    "Speaker notes view": "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646"
+  };
+  function translateHelp(text) {
+    return TEXT[text.trim()] ?? text;
+  }
+  function localizeHelp(overlay) {
+    const content = overlay?.querySelector(".r-overlay-help-content");
+    if (!content) return;
+    content.dir = "rtl";
+    content.lang = "fa";
+    content.querySelectorAll(".title, th, td:nth-child(2)").forEach((el) => {
+      el.textContent = translateHelp(el.textContent);
+    });
+    content.querySelectorAll("td:first-child").forEach((el) => {
+      el.dir = "ltr";
+    });
+  }
+
   // plugin/rtl.js
   var rtl_default = () => ({
     id: "rtl",
@@ -144,10 +200,24 @@ body[data-speaker-layout="tall"] #speaker-controls { left: auto; right: 45%; }
       const options = { digits: true, ...config.rtlOptions };
       config.rtl = true;
       if (options.digits && config.slideNumber && typeof config.slideNumber !== "function") {
-        config.slideNumber = (slide) => [
-          toPersianDigits(`${deck.getSlidePastCount(slide) + 1} / ${deck.getTotalSlides()}`)
-        ];
+        const format = config.slideNumber;
+        config.slideNumber = (slide) => {
+          const { h, v } = deck.getIndices(slide);
+          return [toPersianDigits(formatSlideNumber(format, {
+            h,
+            v,
+            vertical: deck.isVerticalSlide(slide),
+            pastCount: deck.getSlidePastCount(slide),
+            total: deck.getTotalSlides(),
+            uncounted: slide?.dataset.visibility === "uncounted",
+            horizontalCount: deck.getHorizontalSlides().length
+          }))];
+        };
       }
+      if (options.digits) {
+        deck.on("pdf-ready", () => document.querySelectorAll(".slide-number-pdf").forEach(persianizeDigits));
+      }
+      deck.on("showhelp", () => localizeHelp(deck.getRevealElement().querySelector(".r-overlay-help")));
       if (!deck.isSpeakerNotes()) watchSpeakerView({ digits: options.digits });
       deck.on("ready", () => {
         const slides = deck.getSlidesElement();

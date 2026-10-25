@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Slide number keeps every reveal.js format (`h.v`, `h/v`, `c`, `c/t`) with Persian digits; PDF page numbers are Persian too.
+- Vazirmatn is bundled (`fonts/`, OFL) — no Google Fonts or internet needed.
+- New export: "HTML آفلاین" — one file with CSS, scripts, fonts and images inlined; runs with no network.
+- Keyboard help overlay (`?`) is Persian and RTL.
+- Verified on all 14 reveal.js themes (automated test).
+- Fix: toolbar no longer swallows Esc/arrow keys after a button click.
+
 ## 0.1.0 — 2026-10-25
 
 First release, for reveal.js 6.

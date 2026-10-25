@@ -215,6 +215,82 @@ ${parts.join("\n\n")}
     });
     return "<!doctype html>\n" + docClone.outerHTML;
   }
+  var CSS_IMPORT = /@import\s+(?:url\(\s*)?(['"]?)([^'")\s;]+)\1\s*\)?[^;]*;/g;
+  var CSS_URL = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
+  async function toDataURL(blob) {
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 32768) binary += String.fromCharCode(...bytes.subarray(i, i + 32768));
+    return `data:${blob.type || "application/octet-stream"};base64,${btoa(binary)}`;
+  }
+  async function fetchOk(url, fetchFn) {
+    const response = await fetchFn(url);
+    if (!response.ok) throw new Error(`${response.status} ${url}`);
+    return response;
+  }
+  async function inlineCss(css, cssURL, fetchFn = fetch, failed = [], depth = 0) {
+    if (depth > 5) return css;
+    const imports = [...css.matchAll(CSS_IMPORT)];
+    for (const [rule, , href] of imports) {
+      const url = new URL(href, cssURL).href;
+      try {
+        const imported = await (await fetchOk(url, fetchFn)).text();
+        css = css.replace(rule, await inlineCss(imported, url, fetchFn, failed, depth + 1));
+      } catch (e) {
+        failed.push(url);
+      }
+    }
+    const cache = /* @__PURE__ */ new Map();
+    for (const [, , href] of css.matchAll(CSS_URL)) {
+      if (/^(data:|#)/.test(href) || cache.has(href)) continue;
+      const url = new URL(href, cssURL).href;
+      if (failed.includes(url)) continue;
+      try {
+        cache.set(href, await toDataURL(await (await fetchOk(url, fetchFn)).blob()));
+      } catch (e) {
+        failed.push(url);
+      }
+    }
+    return css.replace(CSS_URL, (match, quote, href) => {
+      if (cache.has(href)) return `url("${cache.get(href)}")`;
+      return /^(data:|#)/.test(href) ? match : `url("${new URL(href, cssURL).href}")`;
+    });
+  }
+  async function offlineHTML(docClone, baseURI, fetchFn = fetch) {
+    const failed = [];
+    const doc = docClone.ownerDocument;
+    for (const link of docClone.querySelectorAll('link[rel="stylesheet"][href]')) {
+      const url = new URL(link.getAttribute("href"), baseURI).href;
+      try {
+        const style = doc.createElement("style");
+        if (link.media) style.media = link.media;
+        style.textContent = await inlineCss(await (await fetchOk(url, fetchFn)).text(), url, fetchFn, failed);
+        link.replaceWith(style);
+      } catch (e) {
+        failed.push(url);
+      }
+    }
+    for (const script of docClone.querySelectorAll("script[src]")) {
+      const url = new URL(script.getAttribute("src"), baseURI).href;
+      try {
+        const code = await (await fetchOk(url, fetchFn)).text();
+        const inline2 = doc.createElement("script");
+        inline2.textContent = code.replace(/<\/script/gi, "<\\/script");
+        script.replaceWith(inline2);
+      } catch (e) {
+        failed.push(url);
+      }
+    }
+    for (const img of docClone.querySelectorAll('img[src]:not([src^="data:"])')) {
+      const url = new URL(img.getAttribute("src"), baseURI).href;
+      try {
+        img.setAttribute("src", await toDataURL(await (await fetchOk(url, fetchFn)).blob()));
+      } catch (e) {
+        failed.push(url);
+      }
+    }
+    return { html: standaloneHTML(docClone, baseURI), failed: [...new Set(failed)] };
+  }
   function safeFileName(title) {
     return (title || "").replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, "-").slice(0, 80) || "presentation";
   }
@@ -500,6 +576,7 @@ ${parts.join("\n\n")}
           ["JSON", () => download(fileName("json"), slidesToJSON(slides(), title), "application/json")],
           ["\u0645\u062A\u0646 Markdown", () => download(fileName("md"), slidesToMarkdown(slides()), "text/markdown")],
           ["HTML", () => download(fileName("html"), standaloneHTML(pageSnapshot.cloneNode(true), document.baseURI), "text/html")],
+          ["HTML \u0622\u0641\u0644\u0627\u06CC\u0646 (\u06CC\u06A9 \u0641\u0627\u06CC\u0644)", exportOfflineHTML],
           ["\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646", () => download(`${safeFileName(title)}-notes.txt`, slidesToNotesText(slides(), title), "text/plain")]
         ].map(([label, action]) => {
           const item = el("button", "rtlui-menu-item", label);
@@ -534,6 +611,21 @@ ${parts.join("\n\n")}
         });
         wrapper.append(trigger, menu);
         return wrapper;
+      }
+      async function exportOfflineHTML() {
+        const title = document.title || "presentation";
+        root.classList.add("rtlui-busy");
+        try {
+          const { html, failed } = await offlineHTML(pageSnapshot.cloneNode(true), document.baseURI);
+          download(`${safeFileName(title)}-offline.html`, html, "text/html");
+          if (failed.length) {
+            const hint = location.protocol === "file:" ? "\n\u0628\u0631\u0627\u06CC \u062E\u0631\u0648\u062C\u06CC \u0622\u0641\u0644\u0627\u06CC\u0646 \u06A9\u0627\u0645\u0644\u060C \u0627\u0631\u0627\u0626\u0647 \u0631\u0627 \u0627\u0632 \u06CC\u06A9 \u0633\u0631\u0648\u0631 (\u0645\u062B\u0644\u0627\u064B npm run demo) \u06CC\u0627 \u0646\u0633\u062E\u0647\u200C\u06CC \u0622\u0646\u0644\u0627\u06CC\u0646 \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F." : "";
+            window.alert(`${toPersianDigits(failed.length)} \u0641\u0627\u06CC\u0644 \u062F\u0627\u062E\u0644 \u062E\u0631\u0648\u062C\u06CC \u0642\u0631\u0627\u0631 \u0646\u06AF\u0631\u0641\u062A \u0648 \u0647\u0646\u0648\u0632 \u0628\u0647 \u0627\u06CC\u0646\u062A\u0631\u0646\u062A \u06CC\u0627 \u0645\u0633\u06CC\u0631 \u0627\u0635\u0644\u06CC \u0646\u06CC\u0627\u0632 \u062F\u0627\u0631\u062F:
+${failed.join("\n")}${hint}`);
+          }
+        } finally {
+          root.classList.remove("rtlui-busy");
+        }
       }
       function exportPDF() {
         const url = new URL(location.href);

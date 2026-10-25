@@ -41,6 +41,26 @@ export function formatDuration( totalSeconds ) {
 	return h ? `${ h }:${ String( m ).padStart( 2, '0' ) }:${ s }` : `${ m }:${ s }`;
 }
 
+/**
+ * Slide number text for reveal.js formats 'h.v' (default), 'h/v', 'c' and 'c/t', mirroring
+ * reveal.js 6's own logic (js/controllers/slidenumber.js) so Persian digits keep every format.
+ * s: { h, v, vertical, pastCount, total, uncounted, horizontalCount }
+ */
+export function formatSlideNumber( format, s ) {
+	if( typeof format !== 'string' ) format = 'h.v';
+	// reveal.js: with a single horizontal stack, a non-"c" format falls back to "c".
+	if( !/c/.test( format ) && s.horizontalCount === 1 ) format = 'c';
+	const offset = s.uncounted ? 0 : 1;
+	switch( format ) {
+		case 'c': return String( s.pastCount + offset );
+		case 'c/t': return `${ s.pastCount + offset } / ${ s.total }`;
+		default: {
+			const sep = format === 'h/v' ? '/' : '.';
+			return s.vertical ? `${ s.h + offset }${ sep }${ s.v + 1 }` : String( s.h + offset );
+		}
+	}
+}
+
 export function formatJalali( date = new Date(), options = { dateStyle: 'long' } ) {
 	return new Intl.DateTimeFormat( 'fa-IR-u-ca-persian', options ).format( date );
 }

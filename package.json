@@ -15,10 +15,12 @@
     "core/rtl.js",
     "core/speaker.js",
     "core/export.js",
+    "core/help.js",
     "core/rtl.css",
     "core/ui.css",
     "plugin",
     "dist",
+    "fonts",
     "CHANGELOG.md"
   ],
   "scripts": {

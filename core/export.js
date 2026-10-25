@@ -175,6 +175,91 @@ export function standaloneHTML( docClone, baseURI ) {
 	return '<!doctype html>\n' + docClone.outerHTML;
 }
 
+// --- Offline HTML: CSS, scripts, fonts and images inlined into one file ---
+
+const CSS_IMPORT = /@import\s+(?:url\(\s*)?(['"]?)([^'")\s;]+)\1\s*\)?[^;]*;/g;
+const CSS_URL = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
+
+export async function toDataURL( blob ) {
+	const bytes = new Uint8Array( await blob.arrayBuffer() );
+	let binary = '';
+	for( let i = 0; i < bytes.length; i += 0x8000 ) binary += String.fromCharCode( ...bytes.subarray( i, i + 0x8000 ) );
+	return `data:${ blob.type || 'application/octet-stream' };base64,${ btoa( binary ) }`;
+}
+
+async function fetchOk( url, fetchFn ) {
+	const response = await fetchFn( url );
+	if( !response.ok ) throw new Error( `${ response.status } ${ url }` );
+	return response;
+}
+
+// Inlines @import rules (recursively) and url() references of a stylesheet fetched from cssURL.
+export async function inlineCss( css, cssURL, fetchFn = fetch, failed = [], depth = 0 ) {
+	if( depth > 5 ) return css;
+
+	const imports = [ ...css.matchAll( CSS_IMPORT ) ];
+	for( const [ rule, , href ] of imports ) {
+		const url = new URL( href, cssURL ).href;
+		try {
+			const imported = await ( await fetchOk( url, fetchFn ) ).text();
+			css = css.replace( rule, await inlineCss( imported, url, fetchFn, failed, depth + 1 ) );
+		}
+		catch( e ) { failed.push( url ); }
+	}
+
+	const cache = new Map();
+	for( const [ , , href ] of css.matchAll( CSS_URL ) ) {
+		if( /^(data:|#)/.test( href ) || cache.has( href ) ) continue;
+		const url = new URL( href, cssURL ).href;
+		if( failed.includes( url ) ) continue;
+		try { cache.set( href, await toDataURL( await ( await fetchOk( url, fetchFn ) ).blob() ) ); }
+		catch( e ) { failed.push( url ); }
+	}
+	// Leftovers become absolute: once inlined into another stylesheet or the page, relative paths would break.
+	return css.replace( CSS_URL, ( match, quote, href ) => {
+		if( cache.has( href ) ) return `url("${ cache.get( href ) }")`;
+		return /^(data:|#)/.test( href ) ? match : `url("${ new URL( href, cssURL ).href }")`;
+	} );
+}
+
+// Returns { html, failed }: failed lists URLs that could not be fetched (left as absolute links).
+export async function offlineHTML( docClone, baseURI, fetchFn = fetch ) {
+	const failed = [];
+	const doc = docClone.ownerDocument;
+
+	for( const link of docClone.querySelectorAll( 'link[rel="stylesheet"][href]' ) ) {
+		const url = new URL( link.getAttribute( 'href' ), baseURI ).href;
+		try {
+			const style = doc.createElement( 'style' );
+			if( link.media ) style.media = link.media;
+			style.textContent = await inlineCss( await ( await fetchOk( url, fetchFn ) ).text(), url, fetchFn, failed );
+			link.replaceWith( style );
+		}
+		catch( e ) { failed.push( url ); }
+	}
+
+	for( const script of docClone.querySelectorAll( 'script[src]' ) ) {
+		const url = new URL( script.getAttribute( 'src' ), baseURI ).href;
+		try {
+			const code = await ( await fetchOk( url, fetchFn ) ).text();
+			const inline = doc.createElement( 'script' );
+			// "</script" inside the code would end the inline element early.
+			inline.textContent = code.replace( /<\/script/gi, '<\\/script' );
+			script.replaceWith( inline );
+		}
+		catch( e ) { failed.push( url ); }
+	}
+
+	for( const img of docClone.querySelectorAll( 'img[src]:not([src^="data:"])' ) ) {
+		const url = new URL( img.getAttribute( 'src' ), baseURI ).href;
+		try { img.setAttribute( 'src', await toDataURL( await ( await fetchOk( url, fetchFn ) ).blob() ) ); }
+		catch( e ) { failed.push( url ); }
+	}
+
+	// Anything not inlined still needs to resolve from the saved file.
+	return { html: standaloneHTML( docClone, baseURI ), failed: [ ...new Set( failed ) ] };
+}
+
 // --- Download ---
 
 export function safeFileName( title ) {

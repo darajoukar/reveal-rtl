@@ -47,11 +47,14 @@ Or from a CDN, no build step (works from `file://`) — یا مستقیم از C
 
 - فعال‌سازی خودکار حالت `rtl` در reveal.js (جهت، کلیدها، نوار پیشرفت)
 - اصلاح تورفتگی فهرست‌ها، جدول‌ها و تراز متن در تم‌های reveal.js
-- فونت وزیرمتن (قابل تغییر با متغیر `--rtl-font`)
+- فونت وزیرمتن داخل پکیج، بدون نیاز به اینترنت یا Google Fonts (قابل تغییر با متغیر `--rtl-font`؛ مجوز OFL در `fonts/OFL.txt`)
 - تبدیل اعداد به فارسی در متن اسلایدها و شماره‌ی اسلاید (به‌جز کد)
 - فهرست شماره‌دار با اعداد فارسی
 - تاریخ شمسی با `<time data-jalali>`
 - کد و متن‌های `dir="ltr"` همیشه چپ‌به‌راست می‌مانند
+- همه‌ی قالب‌های شماره‌ی اسلاید reveal.js (`h.v`، `h/v`، `c`، `c/t`) با اعداد فارسی، از جمله شماره‌ی صفحه‌های PDF
+- راهنمای کلیدها (`?`) فارسی و راست‌به‌چپ
+- با هر ۱۴ تم reveal.js تست شده
 
 ### استفاده
 
@@ -60,7 +63,6 @@ Or from a CDN, no build step (works from `file://`) — یا مستقیم از C
 ```html
 <link rel="stylesheet" href="reveal.js/dist/reveal.css">
 <link rel="stylesheet" href="reveal.js/dist/theme/white.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap">
 <link rel="stylesheet" href="reveal-rtl/core/rtl.css">
 
 <script type="module">
@@ -105,7 +107,8 @@ Or from a CDN, no build step (works from `file://`) — یا مستقیم از C
   - **PDF**: نمای چاپ reveal.js را در تب جدید باز می‌کند و پنجره‌ی چاپ را نشان می‌دهد؛ «Save as PDF» را انتخاب کنید.
   - **JSON**: عنوان، متن، یادداشت و Markdown هر اسلاید
   - **Markdown**: اسلایدها با جداکننده‌ی `---` و یادداشت‌ها با `Note:` (قابل استفاده با پلاگین markdown خود reveal.js)
-  - **HTML**: نسخه‌ی کامل ارائه با آدرس‌های مطلق برای CSS و اسکریپت‌ها
+  - **HTML**: نسخه‌ی کامل ارائه با آدرس‌های مطلق برای CSS و اسکریپت‌ها (به اینترنت/مسیر اصلی نیاز دارد)
+  - **HTML آفلاین**: یک فایل تنها که CSS، اسکریپت‌ها، فونت و تصاویر داخلش است و بدون اینترنت اجرا می‌شود. باید ارائه را از سرور یا نسخه‌ی آنلاین باز کرده باشید؛ مرورگر در حالت `file://` اجازه‌ی خواندن فایل‌ها را نمی‌دهد.
   - **یادداشت‌های سخنران**: فایل متنی، به ترتیب اسلایدها
 - نمایش یادداشت‌ها روی صفحه (`<aside class="notes">`)
 - دکمه‌ی پنجره‌ی سخنران (اگر پلاگین `RevealNotes` بارگذاری شده باشد)
@@ -189,7 +192,7 @@ Plugin for right-to-left (Persian) presentations in reveal.js 6.
 
 - Turns on reveal.js `rtl` mode (direction, keyboard, progress bar)
 - Fixes theme list indentation, table alignment and the forced `sans-serif` font
-- Vazirmatn font by default (override with `--rtl-font`)
+- Vazirmatn bundled (variable font, works offline; override with `--rtl-font`; OFL license in `fonts/OFL.txt`)
 - Persian digits in slide text and slide number (code is left alone)
 - Jalali dates via `<time data-jalali>`
 - `pre`, `code` and `dir="ltr"` content stays left-to-right

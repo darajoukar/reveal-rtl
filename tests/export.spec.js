@@ -18,7 +18,7 @@ async function downloadText( page, label ) {
 test( 'export menu has five items and works with the keyboard', async ( { page } ) => {
 	await openDemo( page );
 	await exportItem( page, 'JSON' );
-	await expect( page.locator( '.rtlui-menu-item' ) ).toHaveText( [ 'PDF (چاپ)', 'JSON', 'متن Markdown', 'HTML', 'یادداشت‌های سخنران' ] );
+	await expect( page.locator( '.rtlui-menu-item' ) ).toHaveText( [ 'PDF (چاپ)', 'JSON', 'متن Markdown', 'HTML', 'HTML آفلاین (یک فایل)', 'یادداشت‌های سخنران' ] );
 	await expect( page.locator( '.rtlui-menu-item' ).first() ).toBeFocused();
 	await page.keyboard.press( 'ArrowDown' );
 	await expect( page.locator( '.rtlui-menu-item' ).nth( 1 ) ).toBeFocused();
@@ -56,6 +56,33 @@ test( 'HTML export is the original page with absolute URLs and no toolbar', asyn
 	expect( text ).toContain( 'Reveal.initialize' );
 } );
 
+test( 'offline HTML export is one file that runs with the network blocked', async ( { page, browser } ) => {
+	await openDemo( page );
+	page.on( 'dialog', dialog => { throw new Error( `unexpected alert: ${ dialog.message() }` ); } );
+	const item = await exportItem( page, 'HTML آفلاین (یک فایل)' );
+	const [ download ] = await Promise.all( [ page.waitForEvent( 'download' ), item.click() ] );
+	expect( download.suggestedFilename() ).toMatch( /-offline\.html$/ );
+	const file = await download.path();
+	const html = await fs.readFile( file, 'utf8' );
+	expect( html ).not.toMatch( /<link[^>]+stylesheet/ );
+	expect( html ).not.toMatch( /<script[^>]+src=/ );
+	expect( html ).toContain( 'data:font/woff2;base64,' );
+
+	// Fresh context with every network request refused: everything must come from the file itself.
+	const offline = await browser.newContext();
+	await offline.route( /^https?:/, route => route.abort() );
+	const view = await offline.newPage();
+	const copy = test.info().outputPath( 'offline.html' );
+	await fs.copyFile( file, copy );
+	await view.goto( 'file:///' + copy.replace( /\\/g, '/' ) );
+	await view.locator( '.reveal.ready' ).waitFor();
+	await expect( view.locator( '.reveal' ) ).toHaveClass( /\brtl\b/ );
+	await expect( view.locator( '.rtlui-toolbar' ) ).toBeAttached();
+	await expect( view.locator( '.slide-number' ) ).toHaveText( /۱ \/ ۸/ );
+	expect( await view.evaluate( async () => { await document.fonts.ready; return document.fonts.check( '40px Vazirmatn', 'ارائه' ); } ) ).toBe( true );
+	await offline.close();
+} );
+
 test( 'speaker notes export', async ( { page } ) => {
 	await openDemo( page );
 	const { name, text } = await downloadText( page, 'یادداشت‌های سخنران' );
@@ -75,5 +102,6 @@ test( 'PDF export opens the print view and prints it', async ( { page, context }
 	expect( popup.url() ).toContain( 'print-pdf' );
 	await expect( popup.locator( 'html' ) ).toHaveClass( /print-pdf/ );
 	await expect( popup.locator( '.pdf-page' ) ).toHaveCount( 8 );
+	await expect( popup.locator( '.slide-number-pdf' ).first() ).toHaveText( '۱' );
 	await expect( popup.locator( '.rtlui-toolbar' ) ).toHaveCount( 0 );
 } );

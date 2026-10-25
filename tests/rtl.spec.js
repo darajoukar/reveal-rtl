@@ -11,12 +11,33 @@ test( 'deck is RTL with Persian digits, Jalali date and Latin digits in code', a
 	await expect( page.locator( 'li', { hasText: 'اعداد فارسی' } ) ).toContainText( '۱۴۰۴' );
 } );
 
+test( 'bundled Vazirmatn font loads without Google Fonts', async ( { page } ) => {
+	await openDemo( page );
+	await expect.poll( () => page.evaluate( async () => {
+		await document.fonts.ready;
+		return document.fonts.check( '700 40px Vazirmatn', 'ارائه' );
+	} ) ).toBe( true );
+	expect( await page.evaluate( () => [ ...document.fonts ].some( f => f.family.includes( 'Vazirmatn' ) && f.status === 'loaded' ) ) ).toBe( true );
+} );
+
 test( 'left arrow goes to the next slide in RTL', async ( { page } ) => {
 	await openDemo( page );
 	await page.keyboard.press( 'ArrowLeft' );
 	await expect.poll( () => slideIndex( page ) ).toBe( 1 );
 	await page.keyboard.press( 'ArrowRight' );
 	await expect.poll( () => slideIndex( page ) ).toBe( 0 );
+} );
+
+test( 'keyboard help overlay is Persian and RTL', async ( { page } ) => {
+	await openDemo( page );
+	await page.keyboard.press( 'Shift+Slash' );
+	const help = page.locator( '.r-overlay-help-content' );
+	await expect( help ).toBeVisible();
+	await expect( help ).toHaveAttribute( 'dir', 'rtl' );
+	await expect( help.locator( '.title' ) ).toHaveText( 'میان‌برهای صفحه‌کلید' );
+	await expect( help ).toContainText( 'اسلاید بعدی' );
+	await expect( help ).toContainText( 'فهرست اسلایدها' ); // the UI plugin's own M binding
+	await expect( help ).not.toContainText( 'Next slide' );
 } );
 
 test( 'on-slide notes are RTL with a Persian label', async ( { page } ) => {
