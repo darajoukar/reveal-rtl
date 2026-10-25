@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 — 2026-10-25
 
 - **Slide image (PNG)** in the export menu: the current slide as shown — theme, background, pen drawing — via the browser's tab capture; the toolbar is hidden while capturing. Desktop browsers only.
 - Offline HTML export now embeds slide background images (`data-background-image`, image `data-background`) and lazy images (`data-src`); the plain HTML export makes those paths absolute.
 - `rtl-mirror` class: flips directional icons/images in RTL decks.
 - Media demo (`demo/media.html`): backgrounds, side-by-side image and text, stretched image, SVG icons.
+- `create-reveal-rtl` 0.2.0: new presentations load reveal-rtl 0.5.x.
 
 ## 0.4.0 — 2026-10-25
 

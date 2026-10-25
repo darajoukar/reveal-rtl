@@ -5,8 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// reveal-rtl version range used in the CDN links (jsDelivr resolves "0.4" to the latest 0.4.x).
-export const REVEAL_RTL_VERSION = '0.4';
+// reveal-rtl version range used in the CDN links (jsDelivr resolves "0.5" to the latest 0.5.x).
+export const REVEAL_RTL_VERSION = '0.5';
 
 const CONTENT = {
 	fa: {

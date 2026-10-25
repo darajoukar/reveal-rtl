@@ -1,6 +1,6 @@
 {
   "name": "create-reveal-rtl",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Start a right-to-left reveal.js presentation (Persian, Arabic, English): npm create reveal-rtl",
   "type": "module",
   "bin": {
@@ -10,7 +10,16 @@
     "index.js",
     "template"
   ],
-  "keywords": ["reveal.js", "reveal-js", "rtl", "persian", "farsi", "arabic", "presentation", "create"],
+  "keywords": [
+    "reveal.js",
+    "reveal-js",
+    "rtl",
+    "persian",
+    "farsi",
+    "arabic",
+    "presentation",
+    "create"
+  ],
   "author": "Dara Joukar",
   "license": "MIT",
   "repository": {

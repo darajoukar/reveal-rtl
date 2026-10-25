@@ -40,9 +40,9 @@ Or straight from a CDN — no build step, works from `file://`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/themes/parsi-light.css" id="theme">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/core/rtl.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/core/ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.0/themes/parsi-light.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.0/core/rtl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.0/core/ui.css">
 
 <div class="reveal"><div class="slides">
   <section><h1>سلام دنیا</h1></section>
@@ -50,8 +50,8 @@ Or straight from a CDN — no build step, works from `file://`:
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/dist/reveal-rtl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.4.0/dist/reveal-rtl-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.0/dist/reveal-rtl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.0/dist/reveal-rtl-ui.js"></script>
 <script>
   Reveal.initialize({
     slideNumber: 'c/t',
