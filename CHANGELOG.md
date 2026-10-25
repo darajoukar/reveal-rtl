@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2 — 2026-10-25
+
+- README: right-to-left sections use `dir="rtl"` (GitHub and npm strip `style`), and the "Use with Claude" lines render as a bulleted list.
+
 ## 0.5.1 — 2026-10-25
 
 - **Agent Skill for Claude** (`plugins/reveal-rtl/skills/rtl-slides`): builds reveal-rtl presentations with correct Persian typography and the text check. Installable as a Claude Code plugin (`/plugin install reveal-rtl --marketplace darajoukar/reveal-rtl`); each GitHub release gets `rtl-slides-skill.zip` for claude.ai.

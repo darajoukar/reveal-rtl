@@ -53,7 +53,7 @@ Both give the same file. Never edit anything outside the `<textarea data-templat
 Run the Persian text checker and fix everything it reports (it only reports, never edits):
 
 ```bash
-npx --yes -p reveal-rtl@0.5.1 reveal-rtl-lint <folder>
+npx --yes -p reveal-rtl@0.5.2 reveal-rtl-lint <folder>
 ```
 
 Skip this step for Arabic or English decks (it checks Persian rules). If you can open a browser, open `<folder>/index.html` and look at a few slides.

@@ -1,7 +1,7 @@
 {
   "name": "reveal-rtl",
   "displayName": "reveal-rtl: Persian & Arabic presentations",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Create right-to-left HTML presentations (Persian, Arabic) with reveal.js: RTL layout, localized digits, Jalali/Hijri dates, Vazirmatn font, toolbar and exports.",
   "author": {
     "name": "Dara Joukar",

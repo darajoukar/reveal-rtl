@@ -4,7 +4,7 @@
 
 **Right-to-left presentations with [reveal.js](https://revealjs.com) 6 — Persian, Arabic and more**
 
-<span style="direction:rtl;">**ارائه‌های راست‌به‌چپ با reveal.js** · <b lang="ar">عروض تقديمية من اليمين إلى اليسار مع reveal.js</b></span>
+<span dir="rtl">**ارائه‌های راست‌به‌چپ با reveal.js** · <b lang="ar">عروض تقديمية من اليمين إلى اليسار مع reveal.js</b></span>
 
 [![npm](https://img.shields.io/npm/v/reveal-rtl?color=c2410c)](https://www.npmjs.com/package/reveal-rtl)
 [![CI](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml/badge.svg)](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml)
@@ -42,9 +42,9 @@ Or straight from a CDN — no build step, works from `file://`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.1/themes/parsi-light.css" id="theme">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.1/core/rtl.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.1/core/ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.2/themes/parsi-light.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.2/core/rtl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.2/core/ui.css">
 
 <div class="reveal"><div class="slides">
   <section><h1>سلام دنیا</h1></section>
@@ -52,8 +52,8 @@ Or straight from a CDN — no build step, works from `file://`:
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.1/dist/reveal-rtl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.1/dist/reveal-rtl-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.2/dist/reveal-rtl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.2/dist/reveal-rtl-ui.js"></script>
 <script>
   Reveal.initialize({
     slideNumber: 'c/t',
@@ -315,8 +315,8 @@ npm create reveal-rtl jalase-3 -- --template class
 
 این ریپو یک Skill به اسم **`rtl-slides`** دارد که به Claude یاد می‌دهد ارائه را با reveal-rtl بسازد؛ با نیم‌فاصله و نگارش درست فارسی، یادداشت سخنران و بررسی متن. بعد از نصب کافی است بنویسید: «یک ارائه‌ی فارسی درباره‌ی … بساز».
 
-<span  dir="rtl">- **Claude Code:** دستور `/plugin install reveal-rtl --marketplace darajoukar/reveal-rtl`</span>
-<span  dir="rtl">- **claude.ai:** فایل [`rtl-slides-skill.zip`](https://github.com/darajoukar/reveal-rtl/releases/latest/download/rtl-slides-skill.zip) را دانلود کنید و در Settings → Capabilities → Skills آپلود کنید.</span>
+- **Claude Code:** دستور `/plugin install reveal-rtl --marketplace darajoukar/reveal-rtl`
+- **claude.ai:** فایل [`rtl-slides-skill.zip`](https://github.com/darajoukar/reveal-rtl/releases/latest/download/rtl-slides-skill.zip) را دانلود کنید و در Settings → Capabilities → Skills آپلود کنید.
 
 ### بررسی متن فارسی
 

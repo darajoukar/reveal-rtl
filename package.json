@@ -1,6 +1,6 @@
 {
   "name": "reveal-rtl",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Right-to-left (Persian) support plugin for reveal.js",
   "type": "module",
   "main": "plugin/rtl.js",
