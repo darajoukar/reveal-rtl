@@ -171,7 +171,17 @@ Options (`rtlOptions` in `Reveal.initialize`):
 |---|---|---|
 | `digits` | `true` | Convert digits to Persian in slides and slide number |
 
-Tests: `npm test`
+Tests:
+
+```bash
+npm test                 # unit tests (node:test)
+npx playwright install chromium
+npm run test:e2e         # browser tests (Playwright), desktop + mobile
+```
+
+Browser tests serve reveal.js from `node_modules` and stub Google Fonts, so they run offline. If the Playwright Chromium download is unavailable, use an installed browser: `PW_CHANNEL=msedge npm run test:e2e` (or `chrome`).
+
+CI (GitHub Actions) runs both suites and fails if `dist/` is out of date with the sources — run `npm run build` before committing.
 
 ## License
 

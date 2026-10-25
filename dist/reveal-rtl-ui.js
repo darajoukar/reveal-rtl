@@ -471,7 +471,12 @@ ${parts.join("\n\n")}
         }
         setHidden(storedHidden);
         deck.addKeyBinding({ keyCode: KEY_T, key: "T", description: "\u067E\u0646\u0647\u0627\u0646/\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631" }, () => setHidden(!root.classList.contains("rtlui-hidden")));
-        element.addEventListener("keydown", (event) => event.stopPropagation());
+        element.addEventListener("keydown", (event) => {
+          const target = event.target;
+          if (target.matches("select") || target.closest(".rtlui-menu") || target.matches("button") && (event.key === "Enter" || event.key === " ")) {
+            event.stopPropagation();
+          }
+        });
         setupIdleHide(element);
         return {
           element,

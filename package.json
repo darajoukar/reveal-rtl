@@ -18,13 +18,22 @@
     "core/rtl.css",
     "core/ui.css",
     "plugin",
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js",
     "test": "node --test \"core/*.test.js\"",
-    "demo": "npx --yes serve ."
+    "test:e2e": "playwright test",
+    "prepublishOnly": "npm run build && npm test",
+    "demo": "serve ."
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darajoukar/reveal-rtl.git"
+  },
+  "homepage": "https://darajoukar.github.io/reveal-rtl/demo/",
+  "bugs": "https://github.com/darajoukar/reveal-rtl/issues",
   "keywords": [
     "reveal.js",
     "reveal-js",
@@ -40,6 +49,9 @@
     "reveal.js": ">=6"
   },
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "@playwright/test": "^1.64.1",
+    "esbuild": "^0.28.2",
+    "reveal.js": "6.0.2",
+    "serve": "^14.2.6"
   }
 }

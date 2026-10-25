@@ -308,8 +308,14 @@ export default () => ( {
 
 			deck.addKeyBinding( { keyCode: KEY_T, key: 'T', description: 'پنهان/نمایش نوار ابزار' }, () => setHidden( !root.classList.contains( 'rtlui-hidden' ) ) );
 
-			// Keys pressed inside toolbar controls (e.g. arrows in the theme menu) must not move slides.
-			element.addEventListener( 'keydown', event => event.stopPropagation() );
+			// Keep reveal.js shortcuts (arrows, Esc) working after a toolbar click, except where the key
+			// belongs to the control: arrows in the theme select and export menu, Enter/Space on buttons.
+			element.addEventListener( 'keydown', event => {
+				const target = event.target;
+				if( target.matches( 'select' ) || target.closest( '.rtlui-menu' ) || ( target.matches( 'button' ) && ( event.key === 'Enter' || event.key === ' ' ) ) ) {
+					event.stopPropagation();
+				}
+			} );
 
 			setupIdleHide( element );
 
