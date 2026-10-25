@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.1 — 2026-10-25
 
 - **Agent Skill for Claude** (`plugins/reveal-rtl/skills/rtl-slides`): builds reveal-rtl presentations with correct Persian typography and the text check. Installable as a Claude Code plugin (`/plugin install reveal-rtl --marketplace darajoukar/reveal-rtl`); each GitHub release gets `rtl-slides-skill.zip` for claude.ai.
 - `create-reveal-rtl` 0.3.0: `--template thesis` (thesis defense) and `--template class` (lecture) in Persian, Arabic and English; the `--title` is also used on the first slide.
