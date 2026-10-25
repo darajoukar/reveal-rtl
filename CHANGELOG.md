@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.3 — 2026-10-25
+
+- README: Persian and Arabic paragraphs start with a Persian/Arabic word instead of code or a Latin name, so they keep right-to-left direction; clearer Arabic intro sentence.
+
 ## 0.5.2 — 2026-10-25
 
 - README: right-to-left sections use `dir="rtl"` (GitHub and npm strip `style`), and the "Use with Claude" lines render as a bulleted list.
