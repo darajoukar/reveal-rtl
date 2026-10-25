@@ -9,6 +9,10 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
 
+env:
+  # Full Chromium (new headless) instead of the headless shell: the slide-image test needs tab capture.
+  PW_CHANNEL: chromium
+
 jobs:
   test:
     runs-on: ubuntu-latest

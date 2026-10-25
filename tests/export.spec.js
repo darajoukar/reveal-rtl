@@ -108,6 +108,15 @@ test( 'PDF export opens the print view and prints it', async ( { page, context }
 
 test( 'slide image export: PNG of the slide with the pen drawing, without the toolbar', async ( { page } ) => {
 	await openDemo( page );
+	// Needs a browser that can auto-accept tab capture (full Chromium/Edge with --auto-accept-this-tab-capture).
+	const canCapture = await page.evaluate( async () => {
+		try {
+			const stream = await navigator.mediaDevices.getDisplayMedia( { video: true, preferCurrentTab: true } );
+			stream.getTracks().forEach( track => track.stop() );
+			return true;
+		} catch( e ) { return false; }
+	} );
+	test.skip( !canCapture, 'Tab capture is not available in this browser build (e.g. the headless shell)' );
 	await page.keyboard.press( 'd' );
 	await page.mouse.move( 300, 120 );
 	await page.mouse.down();
