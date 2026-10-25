@@ -101,6 +101,10 @@ Or from a CDN, no build step (works from `file://`) — یا مستقیم از C
 - دکمه‌های اولین و آخرین اسلاید
 - نمای شبکه‌ای اسلایدها (همان overview خود reveal.js، کلید `Esc`)
 - تایمر ارائه (شروع، توقف، صفر کردن) و ساعت. تایمر با رفرش صفحه متوقف نمی‌شود.
+- شمارش معکوس: با کلیک روی عدد تایمر مدت ارائه را به دقیقه وارد کنید (یا `uiOptions.duration`). در دقایق آخر زرد و بعد از پایان وقت قرمز و منفی می‌شود.
+- نشانگر لیزری (`Z`)، قلم برای نوشتن روی اسلاید (`D`) و پاک کردن نوشته‌های اسلاید (`E`). نوشته‌ها برای هر اسلاید جدا نگه داشته می‌شوند.
+- پیش‌نمایش اسلاید با بردن موس روی فهرست
+- رفتن به اسلاید با شماره (`G`) با اعداد فارسی
 - بزرگ‌نمایی، کوچک‌نمایی و بازنشانی (۵۰٪ تا ۳۰۰٪)
 - انتخاب تم (انتخاب کاربر ذخیره می‌شود)
 - منوی خروجی:
@@ -144,6 +148,8 @@ Or from a CDN, no build step (works from `file://`) — یا مستقیم از C
 | `themeLink` | `'#theme'` | انتخابگر تگ `<link>` تم |
 | `digits` | مثل `rtl` | اعداد فارسی در تایمر و ساعت |
 | `idle` | `3000` | میلی‌ثانیه تا پنهان شدن نوار ابزار |
+| `duration` | `totalTime` یا خالی | مدت ارائه به دقیقه؛ تایمر معکوس می‌شمارد |
+| `warnAt` | ۵ (یا ۲۰٪ مدت کوتاه) | چند دقیقه مانده به پایان، تایمر زرد شود |
 
 عنوان هر اسلاید در فهرست از اولین `h1` تا `h3` خوانده می‌شود، یا از `data-menu-title`.
 
@@ -197,7 +203,7 @@ Plugin for right-to-left (Persian) presentations in reveal.js 6.
 - Jalali dates via `<time data-jalali>`
 - `pre`, `code` and `dir="ltr"` content stays left-to-right
 - RTL layout, Persian labels and digits in the notes plugin speaker view (`S`)
-- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, grid view, timer that survives page refresh, clock, zoom in/out/reset, theme switcher, export menu (PDF via print view, JSON, Markdown, standalone HTML, speaker notes), on-slide notes, fullscreen, and a hide/show toggle for the toolbar (`T`)
+- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, grid view, timer that survives page refresh (count-down with warnings via click or `uiOptions.duration`), laser pointer (`Z`), pen (`D`) and erase (`E`), slide preview on hover, Persian go-to-slide (`G`), clock, zoom in/out/reset, theme switcher, export menu (PDF via print view, JSON, Markdown, standalone HTML, speaker notes), on-slide notes, fullscreen, and a hide/show toggle for the toolbar (`T`)
 
 Options (`rtlOptions` in `Reveal.initialize`):
 

@@ -121,3 +121,70 @@ test( 'fullscreen button enters and leaves fullscreen', async ( { page } ) => {
 	await toolbarButton( page, 'تمام‌صفحه' ).click();
 	await expect.poll( () => page.evaluate( () => !!document.fullscreenElement ) ).toBe( false );
 } );
+
+test( 'timer counts down from a set duration, warns, goes negative and remembers the duration', async ( { page } ) => {
+	await openDemo( page );
+	page.once( 'dialog', dialog => dialog.accept( '۰.۰۵' ) ); // 3 seconds, typed with Persian digits
+	const timer = page.locator( '.rtlui-timer' );
+	await timer.click();
+	await expect( timer ).toHaveText( '۰:۰۳' );
+	await expect( timer ).toHaveAttribute( 'aria-label', /زمان باقی‌مانده/ );
+
+	await toolbarButton( page, 'شروع تایمر' ).click();
+	await expect( timer ).toHaveClass( /rtlui-timer-warn/, { timeout: 5000 } );
+	await expect( timer ).toHaveClass( /rtlui-timer-over/, { timeout: 5000 } );
+	await expect( timer ).toHaveText( /^-/ );
+
+	await reloadDemo( page );
+	await expect( timer ).toHaveClass( /rtlui-timer-over/ );
+
+	page.once( 'dialog', dialog => dialog.accept( '' ) ); // back to counting up
+	await timer.click();
+	await expect( timer ).not.toHaveClass( /rtlui-timer-(warn|over)/ );
+	await expect( timer ).not.toHaveText( /^-/ );
+} );
+
+test( 'pen draws on the slide, E erases, drawings are per slide; laser follows the mouse', async ( { page } ) => {
+	await openDemo( page );
+	const inked = () => page.evaluate( () => {
+		const canvas = document.querySelector( '.rtlui-canvas' );
+		const data = canvas.getContext( '2d' ).getImageData( 0, 0, canvas.width, canvas.height ).data;
+		for( let i = 3; i < data.length; i += 4 ) if( data[i] ) return true;
+		return false;
+	} );
+
+	await page.keyboard.press( 'd' );
+	await expect( toolbarButton( page, 'قلم (D)' ) ).toHaveAttribute( 'aria-pressed', 'true' );
+	await page.mouse.move( 200, 150 );
+	await page.mouse.down();
+	await page.mouse.move( 500, 180, { steps: 5 } );
+	await page.mouse.up();
+	expect( await inked() ).toBe( true );
+
+	await page.keyboard.press( 'ArrowLeft' ); // next slide: its own (empty) drawing
+	await expect.poll( inked ).toBe( false );
+	await page.keyboard.press( 'ArrowRight' );
+	await expect.poll( inked ).toBe( true );
+	await page.keyboard.press( 'e' );
+	await expect.poll( inked ).toBe( false );
+
+	await page.keyboard.press( 'z' );
+	await expect( page.locator( '.reveal' ) ).toHaveClass( /rtlui-laser-on/ );
+	await expect( toolbarButton( page, 'قلم (D)' ) ).toHaveAttribute( 'aria-pressed', 'false' );
+	await page.mouse.move( 300, 300 );
+	await expect( page.locator( '.rtlui-laser' ) ).toBeVisible();
+	await page.keyboard.press( 'z' );
+	await expect( page.locator( '.rtlui-laser' ) ).toBeHidden();
+} );
+
+test( 'hovering a slide in the list shows its preview', async ( { page } ) => {
+	await openDemo( page );
+	await page.keyboard.press( 'm' );
+	await page.locator( '.rtlui-item', { hasText: 'جدول' } ).hover();
+	const preview = page.locator( '.rtlui-preview' );
+	await expect( preview ).toBeVisible();
+	await expect( preview ).toContainText( 'ویژگی' );
+	await expect( preview.locator( 'aside.notes' ) ).toHaveCount( 0 );
+	await page.keyboard.press( 'Escape' );
+	await expect( preview ).toBeHidden();
+} );

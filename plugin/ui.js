@@ -1,4 +1,5 @@
-import { toPersianDigits, normalizeForSearch, formatDuration } from '../core/rtl.js';
+import { toPersianDigits, toLatinDigits, normalizeForSearch, timerDisplay } from '../core/rtl.js';
+import { createDrawingLayer } from '../core/draw.js';
 import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, standaloneHTML, offlineHTML, safeFileName, download } from '../core/export.js';
 
 /**
@@ -10,6 +11,8 @@ import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, stand
  *   themes:    [ { name, href } ] shown in the theme menu
  *   themeLink: selector of the theme <link> to swap (default '#theme')
  *   idle:      ms without mouse movement before the toolbar hides (default 3000)
+ *   duration:  presentation length in minutes; the timer counts down (default: config.totalTime, else counts up)
+ *   warnAt:    minutes left when the timer turns yellow (default: 5, or 20% of a short duration)
  */
 
 const THEME_STORAGE_KEY = 'reveal-rtl-ui:theme';
@@ -17,10 +20,15 @@ const TIMER_STORAGE_KEY = 'reveal-rtl-ui:timer';
 const TOOLBAR_STORAGE_KEY = 'reveal-rtl-ui:toolbar-hidden';
 const KEY_M = 77;
 const KEY_T = 84;
+const KEY_D = 68;
+const KEY_E = 69;
+const KEY_Z = 90;
 const ZOOM_STEP = 0.1;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 3;
 const PRINT_PARAM = 'rtlui-print';
+const PREVIEW_WIDTH = 260;
+const canHover = typeof matchMedia === 'function' && matchMedia( '(hover: hover)' ).matches;
 
 // Inline SVG: font glyphs for these symbols are missing on some systems.
 const svg = path => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="${ path }"/></svg>`;
@@ -37,6 +45,9 @@ const ICONS = {
 	zoomIn: svg( 'M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM9 7h2v2h2v2h-2v2H9v-2H7V9h2z' ),
 	zoomOut: svg( 'M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM7 9h6v2H7z' ),
 	export: svg( 'M11 3h2v9.2l3.3-3.3 1.4 1.4-5.7 5.7-5.7-5.7 1.4-1.4 3.3 3.3zM4 18h16v2H4z' ),
+	laser: svg( 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM11 1h2v4h-2zm0 18h2v4h-2zM1 11h4v2H1zm18 0h4v2h-4z' ),
+	pen: svg( 'M3 17.2V21h3.8l11-11-3.8-3.8zM20.7 7a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.8 3.8z' ),
+	erase: svg( 'M16.2 3.6 21 8.4a1.5 1.5 0 0 1 0 2.1L12.5 19H20v2H8l-4.6-4.6a1.5 1.5 0 0 1 0-2.1L14.1 3.6a1.5 1.5 0 0 1 2.1 0zM6.5 13.4 4.6 15.3 8.3 19h2.5l1.3-1.3z' ),
 	hide: svg( 'M7 10l5 5 5-5z' ),
 	show: svg( 'M7 14l5-5 5 5z' ),
 	fullscreen: svg( 'M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z' )
@@ -75,6 +86,12 @@ export default () => ( {
 
 		applyStoredTheme( themeLink, options.themes );
 
+		const drawing = createDrawingLayer( root, () => {
+			const { h, v } = deck.getIndices();
+			return `${ h }/${ v }`;
+		} );
+		deck.on( 'slidechanged', () => drawing.redraw() );
+
 		const panel = createPanel();
 		const toolbar = createToolbar();
 		root.append( panel.element, toolbar.element );
@@ -102,9 +119,42 @@ export default () => ( {
 			const empty = el( 'p', 'rtlui-empty', 'نتیجه‌ای پیدا نشد' );
 			empty.hidden = true;
 
-			element.append( search, list, empty );
+			// Hover preview: a scaled copy of the slide beside the panel (mouse only; touch has no hover).
+			const preview = el( 'div', 'rtlui-preview' );
+			preview.setAttribute( 'aria-hidden', 'true' );
+			preview.hidden = true;
+			const stage = el( 'div', 'rtlui-preview-stage' );
+			if( config.rtl ) stage.dir = 'rtl';
+			preview.append( stage );
+
+			element.append( search, list, empty, preview );
 
 			let items = [];
+
+			function showPreview( item ) {
+				const scale = PREVIEW_WIDTH / config.width;
+				const clone = item.slide.cloneNode( true );
+				clone.removeAttribute( 'style' );
+				clone.removeAttribute( 'id' );
+				clone.querySelectorAll( '[id]' ).forEach( node => node.removeAttribute( 'id' ) );
+				clone.querySelectorAll( 'aside.notes, script, iframe, video, audio' ).forEach( node => node.remove() );
+				clone.querySelectorAll( '.fragment' ).forEach( node => node.classList.add( 'visible' ) );
+				stage.style.width = `${ config.width }px`;
+				stage.style.height = `${ config.height }px`;
+				stage.style.scale = scale;
+				stage.replaceChildren( clone );
+				preview.style.width = `${ PREVIEW_WIDTH }px`;
+				preview.style.height = `${ Math.round( config.height * scale ) }px`;
+				const top = item.button.getBoundingClientRect().top - element.getBoundingClientRect().top;
+				preview.style.top = `${ Math.max( 8, Math.min( top, element.clientHeight - config.height * scale - 8 ) ) }px`;
+				preview.hidden = false;
+			}
+
+			const hidePreview = () => {
+				preview.hidden = true;
+				stage.replaceChildren();
+			};
+			list.addEventListener( 'mouseleave', hidePreview );
 
 			search.addEventListener( 'input', () => {
 				const query = normalizeForSearch( search.value.trim() );
@@ -140,7 +190,9 @@ export default () => ( {
 
 					li.append( button );
 					list.append( li );
-					return { slide, li, button, text: normalizeForSearch( `${ title } ${ slide.textContent }` ) };
+					const item = { slide, li, button, text: normalizeForSearch( `${ title } ${ slide.textContent }` ) };
+					if( canHover ) button.addEventListener( 'mouseenter', () => showPreview( item ) );
+					return item;
 				} );
 			}
 
@@ -156,6 +208,7 @@ export default () => ( {
 
 			function toggle( open = element.hidden ) {
 				element.hidden = !open;
+				if( !open ) hidePreview();
 				toolbar?.setMenuOpen( open );
 				if( open ) {
 					search.focus();
@@ -190,17 +243,33 @@ export default () => ( {
 			deck.on( 'overviewhidden', syncGrid );
 
 			// Timer: base seconds plus the running stretch since startedAt, kept in sessionStorage
-			// so a page refresh keeps counting.
-			const timer = readTimer();
+			// so a page refresh keeps counting. With a duration it counts down and warns near the end.
+			const timer = readTimer( options.duration ? options.duration * 60 : config.totalTime || null );
 			const isRunning = () => timer.startedAt !== null;
 			const elapsedSeconds = () => timer.base + ( isRunning() ? ( Date.now() - timer.startedAt ) / 1000 : 0 );
+			const warnAt = () => options.warnAt ? options.warnAt * 60 : Math.min( 300, Math.round( timer.duration * 0.2 ) );
 
-			const timerValue = el( 'span', 'rtlui-timer' );
-			timerValue.setAttribute( 'role', 'timer' );
-			timerValue.setAttribute( 'aria-label', 'زمان سپری‌شده' );
+			// A button: click to set the presentation length (count-down) or clear it (count-up).
+			const timerValue = el( 'button', 'rtlui-button rtlui-timer' );
+			timerValue.type = 'button';
 			const renderTimer = () => {
-				timerValue.textContent = digits( formatDuration( Math.floor( elapsedSeconds() ) ) );
+				const { text, state } = timerDisplay( elapsedSeconds(), timer.duration, warnAt() );
+				timerValue.textContent = digits( text );
+				timerValue.classList.toggle( 'rtlui-timer-warn', state === 'warn' );
+				timerValue.classList.toggle( 'rtlui-timer-over', state === 'over' );
+				setLabel( timerValue, timer.duration
+					? `زمان باقی‌مانده از ${ digits( timer.duration / 60 ) } دقیقه؛ برای تغییر مدت کلیک کنید`
+					: 'زمان سپری‌شده؛ برای تعیین مدت ارائه (شمارش معکوس) کلیک کنید' );
 			};
+			timerValue.addEventListener( 'click', () => {
+				const current = timer.duration ? digits( timer.duration / 60 ) : '';
+				const answer = window.prompt( 'مدت ارائه به دقیقه (خالی = شمارش رو به جلو):', current );
+				if( answer === null ) return;
+				const minutes = parseFloat( toLatinDigits( answer.trim() ) );
+				timer.duration = minutes > 0 ? Math.round( minutes * 60 ) : null;
+				saveTimer( timer );
+				renderTimer();
+			} );
 
 			const playButton = button( ICONS.play, 'شروع تایمر', () => {
 				if( isRunning() ) {
@@ -283,6 +352,22 @@ export default () => ( {
 			if( deck.hasPlugin( 'notes' ) ) {
 				noteControls.push( wideOnly( button( ICONS.speaker, 'پنجره‌ی سخنران (S)', () => deck.getPlugin( 'notes' ).open() ) ) );
 			}
+
+			// Laser pointer and pen (core/draw.js). Keys: Z laser, D pen, E erase this slide's drawing.
+			const laserButton = button( ICONS.laser, 'نشانگر لیزری (Z)', () => toggleTool( 'laser' ) );
+			const penButton = button( ICONS.pen, 'قلم (D)', () => toggleTool( 'pen' ) );
+			const eraseButton = button( ICONS.erase, 'پاک کردن نوشته‌های این اسلاید (E)', () => drawing.clear() );
+			const toggleTool = name => {
+				const active = drawing.setTool( name );
+				laserButton.setAttribute( 'aria-pressed', String( active === 'laser' ) );
+				penButton.setAttribute( 'aria-pressed', String( active === 'pen' ) );
+			};
+			laserButton.setAttribute( 'aria-pressed', 'false' );
+			penButton.setAttribute( 'aria-pressed', 'false' );
+			deck.addKeyBinding( { keyCode: KEY_Z, key: 'Z', description: 'نشانگر لیزری' }, () => toggleTool( 'laser' ) );
+			deck.addKeyBinding( { keyCode: KEY_D, key: 'D', description: 'قلم' }, () => toggleTool( 'pen' ) );
+			deck.addKeyBinding( { keyCode: KEY_E, key: 'E', description: 'پاک کردن نوشته‌های اسلاید' }, () => drawing.clear() );
+			groups.push( wideOnly( group( laserButton, penButton, eraseButton ) ) );
 
 			groups.push( group( ...noteControls, wideOnly( fullscreenButton ) ) );
 
@@ -447,13 +532,17 @@ export default () => ( {
 // One timer per deck URL, per browser tab.
 const timerStorageKey = () => `${ TIMER_STORAGE_KEY }:${ location.pathname }`;
 
-function readTimer() {
+function readTimer( defaultDuration ) {
+	const fresh = { base: 0, startedAt: null, duration: defaultDuration };
 	try {
 		const stored = JSON.parse( sessionStorage.getItem( timerStorageKey() ) );
 		const validStart = stored?.startedAt === null || ( Number.isFinite( stored?.startedAt ) && stored.startedAt <= Date.now() );
-		if( Number.isFinite( stored?.base ) && stored.base >= 0 && validStart ) return stored;
+		if( Number.isFinite( stored?.base ) && stored.base >= 0 && validStart ) {
+			const validDuration = stored.duration === null || ( Number.isFinite( stored.duration ) && stored.duration > 0 );
+			return { base: stored.base, startedAt: stored.startedAt, duration: 'duration' in stored && validDuration ? stored.duration : defaultDuration };
+		}
 	} catch( e ) { /* storage blocked or bad JSON */ }
-	return { base: 0, startedAt: null };
+	return fresh;
 }
 
 function saveTimer( timer ) {

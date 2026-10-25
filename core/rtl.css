@@ -87,6 +87,12 @@
 	unicode-bidi: isolate;
 }
 
+/* Jump to slide (G key). */
+.reveal.rtl .jump-to-slide-input {
+	font-family: var(--rtl-font);
+	text-align: start;
+}
+
 /* Notes shown on the slide (showNotes: true). */
 .reveal.rtl .speaker-notes {
 	direction: rtl;

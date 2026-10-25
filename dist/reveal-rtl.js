@@ -37,6 +37,9 @@ var RevealRTL = (() => {
       if (/[0-9]/.test(node.nodeValue)) node.nodeValue = toPersianDigits(node.nodeValue);
     }
   }
+  function toLatinDigits(text) {
+    return String(text).replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 1776).replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 1632);
+  }
   function formatSlideNumber(format, s) {
     if (typeof format !== "string") format = "h.v";
     if (!/c/.test(format) && s.horizontalCount === 1) format = "c";
@@ -217,6 +220,27 @@ body[data-speaker-layout="tall"] #speaker-controls { left: auto; right: 45%; }
       if (options.digits) {
         deck.on("pdf-ready", () => document.querySelectorAll(".slide-number-pdf").forEach(persianizeDigits));
       }
+      const patchJumpInput = (input) => {
+        if (input.dataset.rtl) return;
+        input.dataset.rtl = "1";
+        input.placeholder = "\u0631\u0641\u062A\u0646 \u0628\u0647 \u0627\u0633\u0644\u0627\u06CC\u062F (\u0634\u0645\u0627\u0631\u0647 \u06CC\u0627 \u0645\u062A\u0646)";
+        input.dir = "rtl";
+        const native = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+        Object.defineProperty(input, "value", {
+          get() {
+            return toLatinDigits(native.get.call(this));
+          },
+          set(value) {
+            native.set.call(this, value);
+          }
+        });
+      };
+      deck.on("ready", () => {
+        new MutationObserver(() => {
+          const input = deck.getRevealElement().querySelector(".jump-to-slide-input");
+          if (input) patchJumpInput(input);
+        }).observe(deck.getRevealElement(), { childList: true });
+      });
       deck.on("showhelp", () => localizeHelp(deck.getRevealElement().querySelector(".r-overlay-help")));
       if (!deck.isSpeakerNotes()) watchSpeakerView({ digits: options.digits });
       deck.on("ready", () => {

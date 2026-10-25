@@ -1,6 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toPersianDigits, formatJalali, normalizeForSearch, formatDuration, formatSlideNumber } from './rtl.js';
+import { toPersianDigits, toLatinDigits, formatJalali, normalizeForSearch, formatDuration, formatSlideNumber, timerDisplay } from './rtl.js';
+
+test( 'toLatinDigits converts Persian and Arabic digits', () => {
+	assert.equal( toLatinDigits( '۱۲ و ٣٤' ), '12 و 34' );
+} );
+
+test( 'timerDisplay counts up, counts down, warns and goes negative', () => {
+	assert.deepEqual( timerDisplay( 75.9, null, 300 ), { text: '1:15', state: 'normal' } );
+	assert.deepEqual( timerDisplay( 60, 1200, 300 ), { text: '19:00', state: 'normal' } );
+	assert.deepEqual( timerDisplay( 900, 1200, 300 ), { text: '5:00', state: 'warn' } );
+	assert.deepEqual( timerDisplay( 1200, 1200, 300 ), { text: '0:00', state: 'warn' } );
+	assert.deepEqual( timerDisplay( 1272, 1200, 300 ), { text: '-1:12', state: 'over' } );
+} );
 
 test( 'formatSlideNumber supports every reveal.js format', () => {
 	const vertical = { h: 6, v: 1, vertical: true, pastCount: 7, total: 8, uncounted: false, horizontalCount: 7 };

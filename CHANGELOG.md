@@ -8,6 +8,11 @@
 - Keyboard help overlay (`?`) is Persian and RTL.
 - Verified on all 14 reveal.js themes (automated test).
 - Fix: toolbar no longer swallows Esc/arrow keys after a button click.
+- Count-down timer: click the timer (or `uiOptions.duration` / `totalTime`) to set a length; yellow near the end, red and negative when over.
+- Laser pointer (`Z`), pen (`D`) and erase (`E`); drawings are kept per slide and redraw on resize.
+- Slide preview when hovering the slide list.
+- Jump to slide (`G`) accepts Persian digits, with a Persian placeholder.
+- Toolbar wraps to two rows when wider than the screen.
 
 ## 0.1.0 — 2026-10-25
 

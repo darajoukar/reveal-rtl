@@ -28,14 +28,117 @@ var RevealRTLUI = (() => {
   function toPersianDigits(value) {
     return String(value).replace(/[0-9]/g, (d) => PERSIAN_DIGITS[d]);
   }
+  function toLatinDigits(text) {
+    return String(text).replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 1776).replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 1632);
+  }
   function normalizeForSearch(text) {
-    return String(text).replace(/ي|ى/g, "\u06CC").replace(/ك/g, "\u06A9").replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 1776).replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 1632).replace(/‌/g, " ").toLowerCase();
+    return toLatinDigits(text).replace(/ي|ى/g, "\u06CC").replace(/ك/g, "\u06A9").replace(/‌/g, " ").toLowerCase();
+  }
+  function timerDisplay(elapsedSeconds, durationSeconds, warnAtSeconds) {
+    const elapsed = Math.floor(elapsedSeconds);
+    if (!durationSeconds) return { text: formatDuration(elapsed), state: "normal" };
+    const remaining = durationSeconds - elapsed;
+    if (remaining < 0) return { text: "-" + formatDuration(-remaining), state: "over" };
+    return { text: formatDuration(remaining), state: remaining <= warnAtSeconds ? "warn" : "normal" };
   }
   function formatDuration(totalSeconds) {
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor(totalSeconds % 3600 / 60);
     const s = String(totalSeconds % 60).padStart(2, "0");
     return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+  }
+
+  // core/draw.js
+  var PEN_COLOR = "#e53935";
+  var PEN_WIDTH = 4;
+  function createDrawingLayer(root, getSlideKey) {
+    const canvas = document.createElement("canvas");
+    canvas.className = "rtlui-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    const laser = document.createElement("div");
+    laser.className = "rtlui-laser";
+    laser.hidden = true;
+    root.append(canvas, laser);
+    const ctx = canvas.getContext("2d");
+    const strokes = /* @__PURE__ */ new Map();
+    let tool = null;
+    let current = null;
+    const point = (event) => {
+      const r = canvas.getBoundingClientRect();
+      return [(event.clientX - r.left) / r.width, (event.clientY - r.top) / r.height];
+    };
+    function resize() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.round(canvas.clientWidth * ratio);
+      canvas.height = Math.round(canvas.clientHeight * ratio);
+      redraw();
+    }
+    function drawStroke(points) {
+      if (!points.length) return;
+      const ratio = window.devicePixelRatio || 1;
+      ctx.strokeStyle = PEN_COLOR;
+      ctx.lineWidth = PEN_WIDTH * ratio;
+      ctx.lineCap = ctx.lineJoin = "round";
+      ctx.beginPath();
+      points.forEach(([x, y], i) => {
+        const px = x * canvas.width, py = y * canvas.height;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      });
+      if (points.length === 1) ctx.lineTo(points[0][0] * canvas.width + 0.1, points[0][1] * canvas.height);
+      ctx.stroke();
+    }
+    function redraw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      (strokes.get(getSlideKey()) || []).forEach(drawStroke);
+    }
+    canvas.addEventListener("pointerdown", (event) => {
+      if (tool !== "pen") return;
+      canvas.setPointerCapture(event.pointerId);
+      current = [point(event)];
+      const key = getSlideKey();
+      if (!strokes.has(key)) strokes.set(key, []);
+      strokes.get(key).push(current);
+      drawStroke(current);
+      event.preventDefault();
+    });
+    canvas.addEventListener("pointermove", (event) => {
+      if (!current) return;
+      current.push(point(event));
+      drawStroke(current.slice(-2));
+    });
+    const endStroke = () => {
+      current = null;
+    };
+    canvas.addEventListener("pointerup", endStroke);
+    canvas.addEventListener("pointercancel", endStroke);
+    root.addEventListener("pointermove", (event) => {
+      if (tool !== "laser") return;
+      laser.style.translate = `${event.clientX - root.getBoundingClientRect().left}px ${event.clientY - root.getBoundingClientRect().top}px`;
+      laser.hidden = false;
+    });
+    root.addEventListener("pointerleave", () => {
+      laser.hidden = true;
+    });
+    new ResizeObserver(resize).observe(canvas);
+    return {
+      get tool() {
+        return tool;
+      },
+      setTool(next) {
+        tool = tool === next ? null : next;
+        root.classList.toggle("rtlui-pen", tool === "pen");
+        root.classList.toggle("rtlui-laser-on", tool === "laser");
+        if (tool !== "laser") laser.hidden = true;
+        current = null;
+        return tool;
+      },
+      clear() {
+        strokes.delete(getSlideKey());
+        redraw();
+      },
+      hasStrokes: () => (strokes.get(getSlideKey()) || []).length > 0,
+      redraw
+    };
   }
 
   // core/export.js
@@ -311,10 +414,15 @@ ${parts.join("\n\n")}
   var TOOLBAR_STORAGE_KEY = "reveal-rtl-ui:toolbar-hidden";
   var KEY_M = 77;
   var KEY_T = 84;
+  var KEY_D = 68;
+  var KEY_E = 69;
+  var KEY_Z = 90;
   var ZOOM_STEP = 0.1;
   var ZOOM_MIN = 0.5;
   var ZOOM_MAX = 3;
   var PRINT_PARAM = "rtlui-print";
+  var PREVIEW_WIDTH = 260;
+  var canHover = typeof matchMedia === "function" && matchMedia("(hover: hover)").matches;
   var svg = (path) => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="${path}"/></svg>`;
   var ICONS = {
     menu: svg("M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"),
@@ -329,6 +437,9 @@ ${parts.join("\n\n")}
     zoomIn: svg("M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM9 7h2v2h2v2h-2v2H9v-2H7V9h2z"),
     zoomOut: svg("M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM7 9h6v2H7z"),
     export: svg("M11 3h2v9.2l3.3-3.3 1.4 1.4-5.7 5.7-5.7-5.7 1.4-1.4 3.3 3.3zM4 18h16v2H4z"),
+    laser: svg("M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM11 1h2v4h-2zm0 18h2v4h-2zM1 11h4v2H1zm18 0h4v2h-4z"),
+    pen: svg("M3 17.2V21h3.8l11-11-3.8-3.8zM20.7 7a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.8 3.8z"),
+    erase: svg("M16.2 3.6 21 8.4a1.5 1.5 0 0 1 0 2.1L12.5 19H20v2H8l-4.6-4.6a1.5 1.5 0 0 1 0-2.1L14.1 3.6a1.5 1.5 0 0 1 2.1 0zM6.5 13.4 4.6 15.3 8.3 19h2.5l1.3-1.3z"),
     hide: svg("M7 10l5 5 5-5z"),
     show: svg("M7 14l5-5 5 5z"),
     fullscreen: svg("M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z")
@@ -356,6 +467,11 @@ ${parts.join("\n\n")}
         return;
       }
       applyStoredTheme(themeLink, options.themes);
+      const drawing = createDrawingLayer(root, () => {
+        const { h, v } = deck.getIndices();
+        return `${h}/${v}`;
+      });
+      deck.on("slidechanged", () => drawing.redraw());
       const panel = createPanel();
       const toolbar = createToolbar();
       root.append(panel.element, toolbar.element);
@@ -376,8 +492,37 @@ ${parts.join("\n\n")}
         const list2 = el("ol", "rtlui-list");
         const empty = el("p", "rtlui-empty", "\u0646\u062A\u06CC\u062C\u0647\u200C\u0627\u06CC \u067E\u06CC\u062F\u0627 \u0646\u0634\u062F");
         empty.hidden = true;
-        element.append(search, list2, empty);
+        const preview = el("div", "rtlui-preview");
+        preview.setAttribute("aria-hidden", "true");
+        preview.hidden = true;
+        const stage = el("div", "rtlui-preview-stage");
+        if (config.rtl) stage.dir = "rtl";
+        preview.append(stage);
+        element.append(search, list2, empty, preview);
         let items = [];
+        function showPreview(item) {
+          const scale = PREVIEW_WIDTH / config.width;
+          const clone = item.slide.cloneNode(true);
+          clone.removeAttribute("style");
+          clone.removeAttribute("id");
+          clone.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
+          clone.querySelectorAll("aside.notes, script, iframe, video, audio").forEach((node) => node.remove());
+          clone.querySelectorAll(".fragment").forEach((node) => node.classList.add("visible"));
+          stage.style.width = `${config.width}px`;
+          stage.style.height = `${config.height}px`;
+          stage.style.scale = scale;
+          stage.replaceChildren(clone);
+          preview.style.width = `${PREVIEW_WIDTH}px`;
+          preview.style.height = `${Math.round(config.height * scale)}px`;
+          const top = item.button.getBoundingClientRect().top - element.getBoundingClientRect().top;
+          preview.style.top = `${Math.max(8, Math.min(top, element.clientHeight - config.height * scale - 8))}px`;
+          preview.hidden = false;
+        }
+        const hidePreview = () => {
+          preview.hidden = true;
+          stage.replaceChildren();
+        };
+        list2.addEventListener("mouseleave", hidePreview);
         search.addEventListener("input", () => {
           const query = normalizeForSearch(search.value.trim());
           let visible = 0;
@@ -408,7 +553,9 @@ ${parts.join("\n\n")}
             });
             li.append(button2);
             list2.append(li);
-            return { slide, li, button: button2, text: normalizeForSearch(`${title} ${slide.textContent}`) };
+            const item = { slide, li, button: button2, text: normalizeForSearch(`${title} ${slide.textContent}`) };
+            if (canHover) button2.addEventListener("mouseenter", () => showPreview(item));
+            return item;
           });
         }
         function markCurrent() {
@@ -422,6 +569,7 @@ ${parts.join("\n\n")}
         }
         function toggle(open = element.hidden) {
           element.hidden = !open;
+          if (!open) hidePreview();
           toolbar?.setMenuOpen(open);
           if (open) {
             search.focus();
@@ -447,15 +595,28 @@ ${parts.join("\n\n")}
         syncGrid();
         deck.on("overviewshown", syncGrid);
         deck.on("overviewhidden", syncGrid);
-        const timer = readTimer();
+        const timer = readTimer(options.duration ? options.duration * 60 : config.totalTime || null);
         const isRunning = () => timer.startedAt !== null;
         const elapsedSeconds = () => timer.base + (isRunning() ? (Date.now() - timer.startedAt) / 1e3 : 0);
-        const timerValue = el("span", "rtlui-timer");
-        timerValue.setAttribute("role", "timer");
-        timerValue.setAttribute("aria-label", "\u0632\u0645\u0627\u0646 \u0633\u067E\u0631\u06CC\u200C\u0634\u062F\u0647");
+        const warnAt = () => options.warnAt ? options.warnAt * 60 : Math.min(300, Math.round(timer.duration * 0.2));
+        const timerValue = el("button", "rtlui-button rtlui-timer");
+        timerValue.type = "button";
         const renderTimer = () => {
-          timerValue.textContent = digits(formatDuration(Math.floor(elapsedSeconds())));
+          const { text, state } = timerDisplay(elapsedSeconds(), timer.duration, warnAt());
+          timerValue.textContent = digits(text);
+          timerValue.classList.toggle("rtlui-timer-warn", state === "warn");
+          timerValue.classList.toggle("rtlui-timer-over", state === "over");
+          setLabel(timerValue, timer.duration ? `\u0632\u0645\u0627\u0646 \u0628\u0627\u0642\u06CC\u200C\u0645\u0627\u0646\u062F\u0647 \u0627\u0632 ${digits(timer.duration / 60)} \u062F\u0642\u06CC\u0642\u0647\u061B \u0628\u0631\u0627\u06CC \u062A\u063A\u06CC\u06CC\u0631 \u0645\u062F\u062A \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F` : "\u0632\u0645\u0627\u0646 \u0633\u067E\u0631\u06CC\u200C\u0634\u062F\u0647\u061B \u0628\u0631\u0627\u06CC \u062A\u0639\u06CC\u06CC\u0646 \u0645\u062F\u062A \u0627\u0631\u0627\u0626\u0647 (\u0634\u0645\u0627\u0631\u0634 \u0645\u0639\u06A9\u0648\u0633) \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F");
         };
+        timerValue.addEventListener("click", () => {
+          const current = timer.duration ? digits(timer.duration / 60) : "";
+          const answer = window.prompt("\u0645\u062F\u062A \u0627\u0631\u0627\u0626\u0647 \u0628\u0647 \u062F\u0642\u06CC\u0642\u0647 (\u062E\u0627\u0644\u06CC = \u0634\u0645\u0627\u0631\u0634 \u0631\u0648 \u0628\u0647 \u062C\u0644\u0648):", current);
+          if (answer === null) return;
+          const minutes = parseFloat(toLatinDigits(answer.trim()));
+          timer.duration = minutes > 0 ? Math.round(minutes * 60) : null;
+          saveTimer(timer);
+          renderTimer();
+        });
         const playButton = button(ICONS.play, "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631", () => {
           if (isRunning()) {
             timer.base = elapsedSeconds();
@@ -523,6 +684,20 @@ ${parts.join("\n\n")}
         if (deck.hasPlugin("notes")) {
           noteControls.push(wideOnly(button(ICONS.speaker, "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646 (S)", () => deck.getPlugin("notes").open())));
         }
+        const laserButton = button(ICONS.laser, "\u0646\u0634\u0627\u0646\u06AF\u0631 \u0644\u06CC\u0632\u0631\u06CC (Z)", () => toggleTool("laser"));
+        const penButton = button(ICONS.pen, "\u0642\u0644\u0645 (D)", () => toggleTool("pen"));
+        const eraseButton = button(ICONS.erase, "\u067E\u0627\u06A9 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0634\u062A\u0647\u200C\u0647\u0627\u06CC \u0627\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F (E)", () => drawing.clear());
+        const toggleTool = (name) => {
+          const active = drawing.setTool(name);
+          laserButton.setAttribute("aria-pressed", String(active === "laser"));
+          penButton.setAttribute("aria-pressed", String(active === "pen"));
+        };
+        laserButton.setAttribute("aria-pressed", "false");
+        penButton.setAttribute("aria-pressed", "false");
+        deck.addKeyBinding({ keyCode: KEY_Z, key: "Z", description: "\u0646\u0634\u0627\u0646\u06AF\u0631 \u0644\u06CC\u0632\u0631\u06CC" }, () => toggleTool("laser"));
+        deck.addKeyBinding({ keyCode: KEY_D, key: "D", description: "\u0642\u0644\u0645" }, () => toggleTool("pen"));
+        deck.addKeyBinding({ keyCode: KEY_E, key: "E", description: "\u067E\u0627\u06A9 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0634\u062A\u0647\u200C\u0647\u0627\u06CC \u0627\u0633\u0644\u0627\u06CC\u062F" }, () => drawing.clear());
+        groups.push(wideOnly(group(laserButton, penButton, eraseButton)));
         groups.push(group(...noteControls, wideOnly(fullscreenButton)));
         const hideButton = button(ICONS.hide, "\u067E\u0646\u0647\u0627\u0646 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631 (T)", () => setHidden(true));
         groups.push(group(hideButton));
@@ -670,14 +845,18 @@ ${failed.join("\n")}${hint}`);
     }
   });
   var timerStorageKey = () => `${TIMER_STORAGE_KEY}:${location.pathname}`;
-  function readTimer() {
+  function readTimer(defaultDuration) {
+    const fresh = { base: 0, startedAt: null, duration: defaultDuration };
     try {
       const stored = JSON.parse(sessionStorage.getItem(timerStorageKey()));
       const validStart = stored?.startedAt === null || Number.isFinite(stored?.startedAt) && stored.startedAt <= Date.now();
-      if (Number.isFinite(stored?.base) && stored.base >= 0 && validStart) return stored;
+      if (Number.isFinite(stored?.base) && stored.base >= 0 && validStart) {
+        const validDuration = stored.duration === null || Number.isFinite(stored.duration) && stored.duration > 0;
+        return { base: stored.base, startedAt: stored.startedAt, duration: "duration" in stored && validDuration ? stored.duration : defaultDuration };
+      }
     } catch (e) {
     }
-    return { base: 0, startedAt: null };
+    return fresh;
   }
   function saveTimer(timer) {
     try {

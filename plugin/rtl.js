@@ -1,4 +1,4 @@
-import { toPersianDigits, persianizeDigits, fillJalaliDates, formatSlideNumber } from '../core/rtl.js';
+import { toPersianDigits, toLatinDigits, persianizeDigits, fillJalaliDates, formatSlideNumber } from '../core/rtl.js';
 import { watchSpeakerView } from '../core/speaker.js';
 import { localizeHelp } from '../core/help.js';
 
@@ -39,6 +39,27 @@ export default () => ( {
 		if( options.digits ) {
 			deck.on( 'pdf-ready', () => document.querySelectorAll( '.slide-number-pdf' ).forEach( persianizeDigits ) );
 		}
+
+		// Jump to slide (G key): reveal.js creates the input on first use and parses it with
+		// parseInt, which rejects Persian digits. Persian placeholder, and the value reads as Latin
+		// digits for reveal.js while the user keeps seeing what they typed.
+		const patchJumpInput = input => {
+			if( input.dataset.rtl ) return;
+			input.dataset.rtl = '1';
+			input.placeholder = 'رفتن به اسلاید (شماره یا متن)';
+			input.dir = 'rtl';
+			const native = Object.getOwnPropertyDescriptor( HTMLInputElement.prototype, 'value' );
+			Object.defineProperty( input, 'value', {
+				get() { return toLatinDigits( native.get.call( this ) ); },
+				set( value ) { native.set.call( this, value ); }
+			} );
+		};
+		deck.on( 'ready', () => {
+			new MutationObserver( () => {
+				const input = deck.getRevealElement().querySelector( '.jump-to-slide-input' );
+				if( input ) patchJumpInput( input );
+			} ).observe( deck.getRevealElement(), { childList: true } );
+		} );
 
 		// Keyboard help overlay (? key) in Persian.
 		deck.on( 'showhelp', () => localizeHelp( deck.getRevealElement().querySelector( '.r-overlay-help' ) ) );

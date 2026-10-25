@@ -67,3 +67,14 @@ test( 'demo works when opened from disk (file://)', async ( { page } ) => {
 	await expect( page.locator( '.rtlui-toolbar' ) ).toBeAttached();
 	await expect( page.locator( '.rtlui-item' ) ).toHaveCount( 8 );
 } );
+
+test( 'jump to slide (G) accepts Persian digits and has a Persian placeholder', async ( { page } ) => {
+	await openDemo( page );
+	await page.keyboard.press( 'g' );
+	const input = page.locator( '.jump-to-slide-input' );
+	await expect( input ).toHaveAttribute( 'placeholder', 'رفتن به اسلاید (شماره یا متن)' );
+	await input.pressSequentially( '۶' );
+	await expect( input ).toHaveJSProperty( 'value', '6' );
+	await page.keyboard.press( 'Enter' );
+	await expect.poll( () => slideIndex( page ) ).toBe( 5 );
+} );

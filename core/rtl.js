@@ -22,15 +22,32 @@ export function persianizeDigits( root ) {
 	}
 }
 
+// Persian (۱) and Arabic (١) digits to Latin (1).
+export function toLatinDigits( text ) {
+	return String( text )
+		.replace( /[۰-۹]/g, d => d.charCodeAt( 0 ) - 0x06F0 )
+		.replace( /[٠-٩]/g, d => d.charCodeAt( 0 ) - 0x0660 );
+}
+
 // Lowercases and unifies Arabic/Persian letter and digit variants so "كتاب ۱" matches "کتاب 1".
 export function normalizeForSearch( text ) {
-	return String( text )
+	return toLatinDigits( text )
 		.replace( /ي|ى/g, 'ی' )
 		.replace( /ك/g, 'ک' )
-		.replace( /[۰-۹]/g, d => d.charCodeAt( 0 ) - 0x06F0 )
-		.replace( /[٠-٩]/g, d => d.charCodeAt( 0 ) - 0x0660 )
 		.replace( /‌/g, ' ' )
 		.toLowerCase();
+}
+
+/**
+ * Timer text and state. Without a duration it counts up; with one it counts down,
+ * turns 'warn' at warnAt seconds left and 'over' (negative, "-m:ss") past the end.
+ */
+export function timerDisplay( elapsedSeconds, durationSeconds, warnAtSeconds ) {
+	const elapsed = Math.floor( elapsedSeconds );
+	if( !durationSeconds ) return { text: formatDuration( elapsed ), state: 'normal' };
+	const remaining = durationSeconds - elapsed;
+	if( remaining < 0 ) return { text: '-' + formatDuration( -remaining ), state: 'over' };
+	return { text: formatDuration( remaining ), state: remaining <= warnAtSeconds ? 'warn' : 'normal' };
 }
 
 // Seconds to "m:ss", or "h:mm:ss" from one hour.
