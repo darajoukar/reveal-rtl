@@ -10,5 +10,13 @@
   "homepage": "https://darajoukar.github.io/reveal-rtl/",
   "repository": "https://github.com/darajoukar/reveal-rtl",
   "license": "MIT",
-  "keywords": ["presentation", "slides", "reveal.js", "rtl", "persian", "farsi", "arabic"]
+  "keywords": [
+    "presentation",
+    "slides",
+    "reveal.js",
+    "rtl",
+    "persian",
+    "farsi",
+    "arabic"
+  ]
 }

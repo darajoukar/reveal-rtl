@@ -10,7 +10,7 @@
 [![CI](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml/badge.svg)](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/reveal-rtl?color=1d3557)](LICENSE)
 
-[**Website**](https://darajoukar.github.io/reveal-rtl/) · [**Live demo**](https://darajoukar.github.io/reveal-rtl/demo/) · [Markdown demo](https://darajoukar.github.io/reveal-rtl/demo/markdown.html) · [npm](https://www.npmjs.com/package/reveal-rtl)
+[**Website**](https://darajoukar.github.io/reveal-rtl/) · [**Live demo**](https://darajoukar.github.io/reveal-rtl/demo/) · [Markdown demo](https://darajoukar.github.io/reveal-rtl/demo/markdown.html) · [Gallery](https://darajoukar.github.io/reveal-rtl/gallery/) · [npm](https://www.npmjs.com/package/reveal-rtl)
 
 [English](#english) · [فارسی](#فارسی) · <a href="#العربية" lang="ar">العربية</a>
 
@@ -28,6 +28,8 @@ Start a new presentation in one command (one `index.html`, slides in Markdown):
 
 ```bash
 npm create reveal-rtl my-talk                # Persian; add -- --lang ar or -- --lang en
+npm create reveal-rtl my-defense -- --template thesis   # thesis defense outline
+npm create reveal-rtl lesson-3 -- --template class      # lecture outline
 ```
 
 Add to an existing project:
@@ -301,9 +303,13 @@ npm install reveal.js reveal-rtl
 
 ```bash
 npm create reveal-rtl my-talk
+npm create reveal-rtl defa -- --template thesis
+npm create reveal-rtl jalase-3 -- --template class
 ```
 
 <div dir="rtl">
+
+قالب `thesis` اسلایدهای **دفاع پایان‌نامه** را آماده می‌کند (عنوان با استاد راهنما و مشاور، بیان مسئله، اهداف، پیشینه، روش، یافته‌ها، نتیجه‌گیری، منابع) و قالب `class` اسلایدهای **ارائه‌ی کلاسی** را (اهداف جلسه، مفهوم، مثال، تمرین کلاسی، جمع‌بندی، تکلیف). فقط جاهای «…» را پر کنید. نمونه‌های پرشده در [گالری](https://darajoukar.github.io/reveal-rtl/gallery/) هستند.
 
 ### استفاده با Claude
 

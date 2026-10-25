@@ -38,6 +38,24 @@ test( 'Arabic and English variants, title is escaped', () => {
 	assert.match( fs.readFileSync( path.join( en, 'index.html' ), 'utf8' ), /<title>&lt;b&gt;A &amp; B&lt;\/b&gt;<\/title>/ );
 } );
 
+test( 'thesis and class templates in every language: filled, and Persian text passes the checker', async () => {
+	const { lintPersian } = await import( '../core/lint.js' );
+	for( const template of [ 'thesis', 'class' ] ) {
+		for( const lang of [ 'fa', 'ar', 'en' ] ) {
+			const target = path.join( tmp(), `${ template }-${ lang }` );
+			createPresentation( target, { lang, template } );
+			const html = fs.readFileSync( path.join( target, 'index.html' ), 'utf8' );
+			assert.ok( !/\{\{\w+\}\}/.test( html ), `${ template }/${ lang } has unfilled placeholders` );
+			assert.match( html, new RegExp( `lang: '${ lang }'` ) );
+			if( lang === 'fa' ) assert.deepEqual( lintPersian( html ).map( i => `${ i.rule } «${ i.found }»` ), [], `${ template }/fa text issues` );
+		}
+	}
+	const thesis = fs.readFileSync( path.join( ( () => { const t = path.join( tmp(), 't' ); createPresentation( t, { template: 'thesis', title: 'بهینه‌سازی شبکه' } ); return t; } )(), 'index.html' ), 'utf8' );
+	assert.match( thesis, /^# بهینه‌سازی شبکه$/m );
+	assert.match( thesis, /استاد راهنما/ );
+	assert.throws( () => createPresentation( path.join( tmp(), 'x' ), { template: 'resume' } ), /Unknown template/ );
+} );
+
 test( 'refuses a non-empty folder and unknown languages', () => {
 	const dir = tmp();
 	fs.writeFileSync( path.join( dir, 'keep.txt' ), 'x' );

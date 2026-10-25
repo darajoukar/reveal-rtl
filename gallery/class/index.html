@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>مرتب‌سازی حبابی</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+	<link rel="stylesheet" id="theme" href="../../themes/parsi-light.css">
+	<link rel="stylesheet" href="../../core/rtl.css">
+	<link rel="stylesheet" href="../../core/ui.css">
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<!-- Write slides in Markdown: "---" new slide, "--" vertical slide, "Note:" speaker notes. -->
+			<section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Note:">
+				<textarea data-template>
+# مرتب‌سازی حبابی
+
+جلسه‌ی پنجم · مبانی الگوریتم
+
+<time data-jalali></time>
+
+Note: یادآوری کوتاه جلسه‌ی قبل درباره‌ی آرایه‌ها.
+
+---
+
+## اهداف این جلسه
+
+در پایان این جلسه می‌توانید:
+
+- ایده‌ی مرتب‌سازی حبابی را توضیح دهید
+- آن را روی یک آرایه‌ی کوچک دستی اجرا کنید
+- پیچیدگی زمانی آن را بگویید
+
+---
+
+## ایده‌ی اصلی
+
+- عنصرهای کنار هم را مقایسه کن
+- اگر ترتیبشان درست نیست، جابه‌جا کن
+- بزرگ‌ترین عنصر مثل حباب به آخر آرایه می‌رسد
+
+Note: با پنج دانش‌آموز داوطلب و کارت‌های عدد، الگوریتم را روی تخته اجرا کنید.
+
+---
+
+## مثال
+
+| دور | آرایه |
+|---|---|
+| شروع | 5، 2، 8، 1 |
+| دور اول | 2، 5، 1، 8 |
+| دور دوم | 2، 1، 5، 8 |
+| دور سوم | 1، 2، 5، 8 |
+
+---
+
+## کد
+
+```python
+def bubble_sort(items):
+    for end in range(len(items) - 1, 0, -1):
+        for i in range(end):
+            if items[i] > items[i + 1]:
+                items[i], items[i + 1] = items[i + 1], items[i]
+    return items
+```
+
+---
+
+## تمرین کلاسی
+
+1. آرایه‌ی 4، 3، 2، 1 را مرتب کنید <!-- .element: class="fragment" -->
+2. چند جابه‌جایی لازم شد؟ <!-- .element: class="fragment" -->
+3. بهترین حالت ورودی کدام است؟ <!-- .element: class="fragment" -->
+
+---
+
+## جمع‌بندی و تکلیف
+
+- پیچیدگی زمانی: در بدترین حالت از مرتبه‌ی n²
+- ساده، اما برای داده‌های بزرگ کند است
+- **تکلیف:** مرتب‌سازی انتخابی را مطالعه کنید
+				</textarea>
+			</section>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js" integrity="sha384-UilXW7W77EPIY5TmQGBrjhBPcfX40NqGwuIC8DGs6OeGTCxKy36B+DiOXtfqgk9S" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/markdown.js" integrity="sha384-J3U2K8/IFAwjPLyP5bTQZg3LzLbUxeqRxfiV4bpwjO6k5yv5br35eXGGKbMi+sQW" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js" integrity="sha384-XUVoTb/UbE06yoCUaqswCPKSUvPq3q4heijGsemnUSS/JEgW1lNnK0rKlNwjuz7O" crossorigin="anonymous"></script>
+	<!-- reveal-rtl uses a version range (latest 0.5.x), so no integrity hash here. -->
+	<script src="../../dist/reveal-rtl.js"></script>
+	<script src="../../dist/reveal-rtl-ui.js"></script>
+	<script>
+		const theme = name => `../../themes/${ name }.css`;
+
+		Reveal.initialize( {
+			hash: true,
+			slideNumber: 'c/t',
+			scrollActivationWidth: null,
+			rtlOptions: { lang: 'fa' },
+			uiOptions: {
+				themes: [
+					{ name: 'Parsi light', href: theme( 'parsi-light' ) },
+					{ name: 'Parsi dark', href: theme( 'parsi-dark' ) }
+				]
+			},
+			plugins: [ RevealMarkdown, RevealNotes, RevealRTL(), RevealRTLUI() ]
+		} );
+	</script>
+</body>
+</html>

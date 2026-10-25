@@ -38,3 +38,20 @@ test( 'npm create reveal-rtl output opens and runs (reveal-rtl CDN served from t
 	await expect( page.locator( '.slide-number' ) ).toHaveText( /۱ \/ ۳/ );
 	await expect( page.locator( '.rtlui-toolbar' ) ).toBeAttached();
 } );
+
+test( 'gallery page lists four decks and each one runs', async ( { page } ) => {
+	await page.goto( '/gallery/' );
+	const cards = page.locator( '.card' );
+	await expect( cards ).toHaveCount( 4 );
+	for( const img of await page.locator( '.card img' ).all() ) {
+		await img.scrollIntoViewIfNeeded();
+		await expect.poll( () => img.evaluate( el => el.complete && el.naturalWidth > 0 ) ).toBe( true );
+	}
+	const expected = { thesis: [ 'fa', /۱ \/ / ], class: [ 'fa', /۱ \/ / ], report: [ 'fa', /۱ \/ / ], arabic: [ 'ar', /١ \/ / ] };
+	for( const [ name, [ lang, number ] ] of Object.entries( expected ) ) {
+		await page.goto( `/gallery/${ name }/` );
+		await page.locator( '.reveal.ready' ).waitFor();
+		await expect( page.locator( '.reveal' ) ).toHaveAttribute( 'lang', lang );
+		await expect( page.locator( '.slide-number' ) ).toHaveText( number );
+	}
+} );

@@ -33,10 +33,10 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js && node scripts/build-themes.js && node scripts/sync-skill.js",
+    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js && node scripts/build-themes.js && node scripts/sync-skill.js && node scripts/build-gallery.js",
     "test": "node --test \"core/*.test.js\" \"create-reveal-rtl/*.test.js\"",
     "test:e2e": "playwright test",
-    "lint:text": "node bin/lint.js demo index.html README.md CONTRIBUTING.md docs create-reveal-rtl/template",
+    "lint:text": "node bin/lint.js demo index.html README.md CONTRIBUTING.md docs create-reveal-rtl/template gallery/src/thesis.md gallery/src/class.md gallery/src/report.md",
     "prepublishOnly": "npm run build && npm test",
     "demo": "serve ."
   },

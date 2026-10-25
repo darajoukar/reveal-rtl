@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>مقدمة في الذكاء الاصطناعي</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+	<link rel="stylesheet" id="theme" href="../../themes/parsi-light.css">
+	<link rel="stylesheet" href="../../core/rtl.css">
+	<link rel="stylesheet" href="../../core/ui.css">
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<!-- Write slides in Markdown: "---" new slide, "--" vertical slide, "Note:" speaker notes. -->
+			<section data-markdown data-separator="^---$" data-separator-vertical="^--$" data-separator-notes="^Note:">
+				<textarea data-template>
+# مقدمة في الذكاء الاصطناعي
+
+محاضرة تمهيدية
+
+<time data-hijri></time>
+
+Note: نموذج توضيحي لعرض باللغة العربية مع أرقام عربية.
+
+---
+
+## ما هو الذكاء الاصطناعي؟
+
+- أنظمة تتعلم من البيانات
+- تتخذ قرارات أو تقدّم توقعات
+- تُستخدم في الترجمة والطب والنقل
+
+---
+
+## أنواع التعلم
+
+| النوع | الفكرة | مثال |
+|---|---|---|
+| تعلم موجَّه | بيانات مع إجابات | تصنيف الصور |
+| تعلم غير موجَّه | بيانات دون إجابات | تجميع العملاء |
+| تعلم معزَّز | تجربة ومكافأة | الألعاب |
+
+---
+
+## أرقام سريعة
+
+- أكثر من 50 لغة تدعمها أدوات الترجمة الآلية
+- دقة تصل إلى 95 في المئة في بعض مهام الرؤية
+
+---
+
+## الخلاصة
+
+- الذكاء الاصطناعي أداة وليس بديلًا عن الإنسان
+- البيانات الجيدة أساس النتائج الجيدة
+
+أسئلة؟
+				</textarea>
+			</section>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js" integrity="sha384-UilXW7W77EPIY5TmQGBrjhBPcfX40NqGwuIC8DGs6OeGTCxKy36B+DiOXtfqgk9S" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/markdown.js" integrity="sha384-J3U2K8/IFAwjPLyP5bTQZg3LzLbUxeqRxfiV4bpwjO6k5yv5br35eXGGKbMi+sQW" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js" integrity="sha384-XUVoTb/UbE06yoCUaqswCPKSUvPq3q4heijGsemnUSS/JEgW1lNnK0rKlNwjuz7O" crossorigin="anonymous"></script>
+	<!-- reveal-rtl uses a version range (latest 0.5.x), so no integrity hash here. -->
+	<script src="../../dist/reveal-rtl.js"></script>
+	<script src="../../dist/reveal-rtl-ui.js"></script>
+	<script>
+		const theme = name => `../../themes/${ name }.css`;
+
+		Reveal.initialize( {
+			hash: true,
+			slideNumber: 'c/t',
+			scrollActivationWidth: null,
+			rtlOptions: { lang: 'ar' },
+			uiOptions: {
+				themes: [
+					{ name: 'Parsi light', href: theme( 'parsi-light' ) },
+					{ name: 'Parsi dark', href: theme( 'parsi-dark' ) }
+				]
+			},
+			plugins: [ RevealMarkdown, RevealNotes, RevealRTL(), RevealRTLUI() ]
+		} );
+	</script>
+</body>
+</html>

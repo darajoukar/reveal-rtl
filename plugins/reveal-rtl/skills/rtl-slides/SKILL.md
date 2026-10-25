@@ -20,8 +20,10 @@ From the request (ask only if it is unclear): **language** — `fa` (default), `
 Preferred, when Node.js is available:
 
 ```bash
-npx --yes create-reveal-rtl <folder> --lang fa --title "<title>"
+npx --yes create-reveal-rtl@0.3.0 <folder> --lang fa --title "<title>"
 ```
+
+Add `--template thesis` for a thesis defense (title page with supervisor, problem, aims, related work, method, results, conclusion, references) or `--template class` for a lecture (goals, concept, example, in-class exercise with fragments, summary, homework). Then replace the outline's placeholders (…) with the user's content.
 
 Without Node: copy [template.html](template.html) to `<folder>/index.html` and replace the placeholders: `{{lang}}` → `fa`/`ar`/`en`, `{{title}}` → the title (HTML-escaped), `{{version}}` → `0.5`, `{{slides}}` → the Markdown slides from step 3.
 
@@ -51,7 +53,7 @@ Both give the same file. Never edit anything outside the `<textarea data-templat
 Run the Persian text checker and fix everything it reports (it only reports, never edits):
 
 ```bash
-npx --yes -p reveal-rtl reveal-rtl-lint <folder>
+npx --yes -p reveal-rtl@0.5.0 reveal-rtl-lint <folder>
 ```
 
 Skip this step for Arabic or English decks (it checks Persian rules). If you can open a browser, open `<folder>/index.html` and look at a few slides.
