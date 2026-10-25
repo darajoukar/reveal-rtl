@@ -42,9 +42,9 @@ Or straight from a CDN — no build step, works from `file://`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.3/themes/parsi-light.css" id="theme">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.3/core/rtl.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.3/core/ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/themes/parsi-light.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/core/rtl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/core/ui.css">
 
 <div class="reveal"><div class="slides">
   <section><h1>سلام دنیا</h1></section>
@@ -52,8 +52,8 @@ Or straight from a CDN — no build step, works from `file://`:
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.3/dist/reveal-rtl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.3/dist/reveal-rtl-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/dist/reveal-rtl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.5.4/dist/reveal-rtl-ui.js"></script>
 <script>
   Reveal.initialize({
     slideNumber: 'c/t',
@@ -341,13 +341,13 @@ npx reveal-rtl-lint slides/
 
 ## العربية
 
-<div dir="rtl">
+
 
 <span  dir="rtl">مشروع **reveal-rtl** يضمّ إضافتين لإنشاء عروض تقديمية من اليمين إلى اليسار باستخدام reveal.js 6، مع دعم كامل للعربية والفارسية.</span>
 
 ### التثبيت
 
-</div>
+
 
 ```bash
 npm install reveal.js reveal-rtl
@@ -389,9 +389,13 @@ Reveal.initialize({
 - **التصدير**: PDF وJSON وMarkdown وHTML و**HTML دون اتصال في ملف واحد** وملاحظات المتحدث
 - إخفاء شريط الأدوات وإظهاره (`T`)؛ تخطيط مضغوط على الهاتف
 
+</div>
+
 ### الخيارات
 
 <span  dir="rtl">الخيار `rtlOptions.lang` يحدد لغة الواجهة (`'fa'` أو `'ar'` أو `'en'`) و`rtlOptions.digits` نوع الأرقام (`'persian'` أو `'arabic'` أو `'latin'`). الجداول الكاملة للخيارات والمفاتيح في [القسم الإنجليزي](#english).</span>
+
+<div dir="rtl">
 
 ### الاستخدام مع Claude
 

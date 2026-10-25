@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.4 — 2026-10-25
+
+- README: right-to-left blocks in the Arabic section rearranged.
+
 ## 0.5.3 — 2026-10-25
 
 - README: Persian and Arabic paragraphs start with a Persian/Arabic word instead of code or a Latin name, so they keep right-to-left direction; clearer Arabic intro sentence.
