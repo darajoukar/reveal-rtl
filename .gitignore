@@ -5,3 +5,4 @@ playwright-report/
 *.tgz
 .DS_Store
 Thumbs.db
+private/
