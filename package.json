@@ -36,7 +36,7 @@
     "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js && node scripts/build-themes.js",
     "test": "node --test \"core/*.test.js\" \"create-reveal-rtl/*.test.js\"",
     "test:e2e": "playwright test",
-    "lint:text": "node bin/lint.js demo index.html README.md create-reveal-rtl/template",
+    "lint:text": "node bin/lint.js demo index.html README.md CONTRIBUTING.md docs create-reveal-rtl/template",
     "prepublishOnly": "npm run build && npm test",
     "demo": "serve ."
   },
@@ -63,6 +63,7 @@
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "esbuild": "^0.28.2",
+    "gifenc": "^1.0.3",
     "reveal.js": "6.0.2",
     "serve": "^14.2.6"
   }

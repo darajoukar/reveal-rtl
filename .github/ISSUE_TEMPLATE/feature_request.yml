@@ -1,0 +1,23 @@
+name: Feature request / پیشنهاد امکان
+description: An idea for reveal-rtl / ایده‌ای برای reveal-rtl
+labels: [ enhancement ]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would it solve? / چه مشکلی را حل می‌کند؟
+      description: Describe the situation in your presentations. / موقعیت را در ارائه‌هایتان توضیح دهید.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea / ایده‌ی شما
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution / مشارکت
+      options:
+        - label: I'd like to work on this myself / مایلم خودم روی این کار کنم

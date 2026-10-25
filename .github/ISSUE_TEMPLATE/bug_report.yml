@@ -1,0 +1,43 @@
+name: Bug report / گزارش باگ
+description: Something doesn't work as expected / چیزی درست کار نمی‌کند
+labels: [ bug ]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / چه اتفاقی افتاد؟
+      description: What you did, what you expected, and what you saw instead. / چه کردید، چه انتظاری داشتید و چه دیدید.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / مراحل تکرار
+      placeholder: |
+        1. Open the demo / دمو را باز کنید
+        2. Press M / کلید M را بزنید
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions / نسخه‌ها
+      description: reveal-rtl, reveal.js, browser and OS / reveal-rtl، reveal.js، مرورگر و سیستم‌عامل
+      placeholder: reveal-rtl 0.4.0, reveal.js 6.0.2, Chrome 140, Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: lang
+    attributes:
+      label: Language setting / تنظیم زبان
+      options: [ fa, ar, en ]
+  - type: textarea
+    id: config
+    attributes:
+      label: Reveal.initialize options / تنظیمات Reveal.initialize
+      render: js
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or console errors / اسکرین‌شات یا خطاهای کنسول

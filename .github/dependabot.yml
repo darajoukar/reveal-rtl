@@ -1,0 +1,16 @@
+# Weekly pull requests for new versions. reveal.js matters most: parts of reveal-rtl patch its
+# speaker view, help overlay, print view and jump-to-slide input, so a new version must pass CI first.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-tools:
+        patterns: [ "@playwright/test", "esbuild", "serve" ]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

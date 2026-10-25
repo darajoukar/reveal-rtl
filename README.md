@@ -14,6 +14,8 @@
 
 [English](#english) · [فارسی](#فارسی) · <a href="#العربية" lang="ar">العربية</a>
 
+<img src="https://raw.githubusercontent.com/darajoukar/reveal-rtl/main/docs/demo.gif" alt="reveal-rtl in action: slide list search, pen, laser pointer and theme switch" width="720">
+
 <img src="https://raw.githubusercontent.com/darajoukar/reveal-rtl/main/docs/screenshot-light.png" alt="reveal-rtl demo: Persian slide, Parsi light theme" width="49%"> <img src="https://raw.githubusercontent.com/darajoukar/reveal-rtl/main/docs/screenshot-dark.png" alt="reveal-rtl demo: slide list and toolbar, Parsi dark theme" width="49%">
 
 </div>
