@@ -11,8 +11,21 @@
 	font-display: swap;
 }
 
+/* Same font limited to Arabic-script ranges: listed before the monospace code font, Persian/Arabic
+   letters in code use Vazirmatn (properly joined) while Latin keeps the monospace font. */
+@font-face {
+	font-family: 'reveal-rtl-code-script';
+	src: local('Vazirmatn'), url('../fonts/Vazirmatn-Variable.woff2') format('woff2');
+	font-weight: 100 900;
+	unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F;
+}
+
 .reveal.rtl {
 	--rtl-font: 'Vazirmatn', 'Sahel', Tahoma, sans-serif;
+}
+
+.reveal.rtl code {
+	font-family: 'reveal-rtl-code-script', var(--r-code-font, monospace);
 }
 
 .reveal.rtl .slides,
@@ -44,8 +57,17 @@
 	margin-inline-start: 40px;
 }
 
+/* Ordered list numbers follow rtlOptions.digits (data-rtl-digits set by plugin/rtl.js). */
 .reveal.rtl ol {
 	list-style-type: persian;
+}
+
+.reveal.rtl[data-rtl-digits="arabic"] ol {
+	list-style-type: arabic-indic;
+}
+
+.reveal.rtl[data-rtl-digits="latin"] ol {
+	list-style-type: decimal;
 }
 
 .reveal.rtl table th,
@@ -59,7 +81,15 @@
 .reveal.rtl [dir="ltr"] {
 	direction: ltr;
 	text-align: left;
+}
+
+.reveal.rtl [dir="ltr"]:not(code) {
 	font-family: revert;
+}
+
+.reveal.rtl pre,
+.reveal.rtl pre code {
+	font-family: 'reveal-rtl-code-script', var(--r-code-font, monospace);
 }
 
 /* Inline code inside Persian text: isolate so surrounding punctuation stays in place. */
@@ -101,5 +131,6 @@
 }
 
 .reveal.rtl .speaker-notes::before {
-	content: 'یادداشت‌ها';
+	/* Set by plugin/rtl.js from the chosen language. */
+	content: var(--rtl-notes-label, 'یادداشت‌ها');
 }

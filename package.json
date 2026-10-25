@@ -9,7 +9,8 @@
     "./ui": "./plugin/ui.js",
     "./core": "./core/rtl.js",
     "./rtl.css": "./core/rtl.css",
-    "./ui.css": "./core/ui.css"
+    "./ui.css": "./core/ui.css",
+    "./themes/*": "./themes/*"
   },
   "files": [
     "core/rtl.js",
@@ -17,15 +18,17 @@
     "core/export.js",
     "core/help.js",
     "core/draw.js",
+    "core/i18n.js",
     "core/rtl.css",
     "core/ui.css",
     "plugin",
     "dist",
     "fonts",
+    "themes",
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js",
+    "build": "esbuild plugin/rtl.js --bundle --format=iife --global-name=RevealRTL --footer:js=\"RevealRTL=RevealRTL.default;\" --outfile=dist/reveal-rtl.js && esbuild plugin/ui.js --bundle --format=iife --global-name=RevealRTLUI --footer:js=\"RevealRTLUI=RevealRTLUI.default;\" --outfile=dist/reveal-rtl-ui.js && node scripts/build-themes.js",
     "test": "node --test \"core/*.test.js\"",
     "test:e2e": "playwright test",
     "prepublishOnly": "npm run build && npm test",

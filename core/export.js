@@ -17,11 +17,13 @@ export function textOf( node ) {
 
 const collapse = text => text.replace( /\s+/g, ' ' ).trim();
 
-export function getSlideTitle( slide, index ) {
+// t: optional resolveLocale().t for the "Slide N" fallback (default Persian).
+export function getSlideTitle( slide, index, t ) {
 	const explicit = slide.getAttribute( 'data-menu-title' );
 	if( explicit ) return explicit;
 	const heading = findFirst( slide, node => /^H[1-3]$/.test( node.nodeName ) );
-	return heading ? collapse( textOf( heading ) ) : `اسلاید ${ index + 1 }`;
+	if( heading ) return collapse( textOf( heading ) );
+	return t ? t( 'slideN', { n: index + 1 } ) : `اسلاید ${ index + 1 }`;
 }
 
 function findFirst( node, test ) {
@@ -137,7 +139,7 @@ export function slidesToMarkdown( slides ) {
 	} ).join( '\n\n---\n\n' ) + '\n';
 }
 
-export function slidesToJSON( slides, title ) {
+export function slidesToJSON( slides, title, t ) {
 	return JSON.stringify( {
 		title,
 		exportedAt: new Date().toISOString(),
@@ -145,7 +147,7 @@ export function slidesToJSON( slides, title ) {
 		slides: slides.map( ( { element, h, v }, i ) => ( {
 			number: i + 1,
 			indices: { h, v },
-			title: getSlideTitle( element, i ),
+			title: getSlideTitle( element, i, t ),
 			text: collapse( textOf( element ) ),
 			notes: getSlideNotes( element ),
 			markdown: htmlToMarkdown( element )
@@ -153,12 +155,13 @@ export function slidesToJSON( slides, title ) {
 	}, null, 2 );
 }
 
-export function slidesToNotesText( slides, title ) {
+export function slidesToNotesText( slides, title, t ) {
 	const parts = slides.map( ( { element }, i ) => {
 		const notes = getSlideNotes( element );
-		return `${ i + 1 }. ${ getSlideTitle( element, i ) }\n${ notes || '—' }`;
+		return `${ i + 1 }. ${ getSlideTitle( element, i, t ) }\n${ notes || '—' }`;
 	} );
-	return `یادداشت‌های سخنران: ${ title }\n\n${ parts.join( '\n\n' ) }\n`;
+	const heading = t ? t( 'notesFileTitle' ) : 'یادداشت‌های سخنران';
+	return `${ heading }: ${ title }\n\n${ parts.join( '\n\n' ) }\n`;
 }
 
 // --- HTML ---

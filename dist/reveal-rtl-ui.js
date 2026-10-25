@@ -24,9 +24,10 @@ var RevealRTLUI = (() => {
   });
 
   // core/rtl.js
-  var PERSIAN_DIGITS = "\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9";
-  function toPersianDigits(value) {
-    return String(value).replace(/[0-9]/g, (d) => PERSIAN_DIGITS[d]);
+  var DIGITS = { persian: "\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9", arabic: "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669" };
+  function localizeDigits(value, style = "persian") {
+    const set = DIGITS[style];
+    return set ? String(value).replace(/[0-9]/g, (d) => set[d]) : String(value);
   }
   function toLatinDigits(text) {
     return String(text).replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 1776).replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 1632);
@@ -46,6 +47,213 @@ var RevealRTLUI = (() => {
     const m = Math.floor(totalSeconds % 3600 / 60);
     const s = String(totalSeconds % 60).padStart(2, "0");
     return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+  }
+
+  // core/i18n.js
+  var fa = {
+    slideN: "\u0627\u0633\u0644\u0627\u06CC\u062F {n}",
+    slideList: "\u0641\u0647\u0631\u0633\u062A \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627",
+    search: "\u062C\u0633\u062A\u062C\u0648 \u062F\u0631 \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627\u2026",
+    searchLabel: "\u062C\u0633\u062A\u062C\u0648 \u062F\u0631 \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627",
+    noResults: "\u0646\u062A\u06CC\u062C\u0647\u200C\u0627\u06CC \u067E\u06CC\u062F\u0627 \u0646\u0634\u062F",
+    toolbar: "\u0627\u0628\u0632\u0627\u0631\u0647\u0627\u06CC \u0627\u0631\u0627\u0626\u0647",
+    first: "\u0627\u0648\u0644\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F",
+    last: "\u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F",
+    grid: "\u0646\u0645\u0627\u06CC \u0634\u0628\u06A9\u0647\u200C\u0627\u06CC",
+    play: "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631",
+    pause: "\u062A\u0648\u0642\u0641 \u062A\u0627\u06CC\u0645\u0631",
+    resetTimer: "\u0635\u0641\u0631 \u06A9\u0631\u062F\u0646 \u062A\u0627\u06CC\u0645\u0631",
+    timerElapsed: "\u0632\u0645\u0627\u0646 \u0633\u067E\u0631\u06CC\u200C\u0634\u062F\u0647\u061B \u0628\u0631\u0627\u06CC \u062A\u0639\u06CC\u06CC\u0646 \u0645\u062F\u062A \u0627\u0631\u0627\u0626\u0647 (\u0634\u0645\u0627\u0631\u0634 \u0645\u0639\u06A9\u0648\u0633) \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F",
+    timerRemaining: "\u0632\u0645\u0627\u0646 \u0628\u0627\u0642\u06CC\u200C\u0645\u0627\u0646\u062F\u0647 \u0627\u0632 {m} \u062F\u0642\u06CC\u0642\u0647\u061B \u0628\u0631\u0627\u06CC \u062A\u063A\u06CC\u06CC\u0631 \u0645\u062F\u062A \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F",
+    timerPrompt: "\u0645\u062F\u062A \u0627\u0631\u0627\u0626\u0647 \u0628\u0647 \u062F\u0642\u06CC\u0642\u0647 (\u062E\u0627\u0644\u06CC = \u0634\u0645\u0627\u0631\u0634 \u0631\u0648 \u0628\u0647 \u062C\u0644\u0648):",
+    zoomIn: "\u0628\u0632\u0631\u06AF\u200C\u0646\u0645\u0627\u06CC\u06CC",
+    zoomOut: "\u06A9\u0648\u0686\u06A9\u200C\u0646\u0645\u0627\u06CC\u06CC",
+    zoomReset: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0628\u0632\u0631\u06AF\u200C\u0646\u0645\u0627\u06CC\u06CC",
+    theme: "\u0627\u0646\u062A\u062E\u0627\u0628 \u062A\u0645",
+    export: "\u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646",
+    exportPDF: "PDF (\u0686\u0627\u067E)",
+    exportJSON: "JSON",
+    exportMarkdown: "\u0645\u062A\u0646 Markdown",
+    exportHTML: "HTML",
+    exportOffline: "HTML \u0622\u0641\u0644\u0627\u06CC\u0646 (\u06CC\u06A9 \u0641\u0627\u06CC\u0644)",
+    exportNotes: "\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646",
+    notesFileTitle: "\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646",
+    offlineFailed: "{n} \u0641\u0627\u06CC\u0644 \u062F\u0627\u062E\u0644 \u062E\u0631\u0648\u062C\u06CC \u0642\u0631\u0627\u0631 \u0646\u06AF\u0631\u0641\u062A \u0648 \u0647\u0646\u0648\u0632 \u0628\u0647 \u0627\u06CC\u0646\u062A\u0631\u0646\u062A \u06CC\u0627 \u0645\u0633\u06CC\u0631 \u0627\u0635\u0644\u06CC \u0646\u06CC\u0627\u0632 \u062F\u0627\u0631\u062F:",
+    offlineFileHint: "\u0628\u0631\u0627\u06CC \u062E\u0631\u0648\u062C\u06CC \u0622\u0641\u0644\u0627\u06CC\u0646 \u06A9\u0627\u0645\u0644\u060C \u0627\u0631\u0627\u0626\u0647 \u0631\u0627 \u0627\u0632 \u06CC\u06A9 \u0633\u0631\u0648\u0631 (\u0645\u062B\u0644\u0627\u064B npm run demo) \u06CC\u0627 \u0646\u0633\u062E\u0647\u200C\u06CC \u0622\u0646\u0644\u0627\u06CC\u0646 \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
+    showNotes: "\u0646\u0645\u0627\u06CC\u0634 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627",
+    speakerView: "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646",
+    fullscreen: "\u062A\u0645\u0627\u0645\u200C\u0635\u0641\u062D\u0647",
+    laser: "\u0646\u0634\u0627\u0646\u06AF\u0631 \u0644\u06CC\u0632\u0631\u06CC",
+    pen: "\u0642\u0644\u0645",
+    erase: "\u067E\u0627\u06A9 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0634\u062A\u0647\u200C\u0647\u0627\u06CC \u0627\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F",
+    hideToolbar: "\u067E\u0646\u0647\u0627\u0646 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631",
+    showToolbar: "\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631",
+    toggleToolbar: "\u067E\u0646\u0647\u0627\u0646/\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631",
+    notes: "\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627",
+    jump: "\u0631\u0641\u062A\u0646 \u0628\u0647 \u0627\u0633\u0644\u0627\u06CC\u062F (\u0634\u0645\u0627\u0631\u0647 \u06CC\u0627 \u0645\u062A\u0646)",
+    upcoming: "\u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0639\u062F\u06CC",
+    time: "\u0632\u0645\u0627\u0646",
+    clickToReset: "\u0628\u0631\u0627\u06CC \u0635\u0641\u0631 \u06A9\u0631\u062F\u0646 \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F",
+    pacing: "\u0632\u0645\u0627\u0646 \u0628\u0627\u0642\u06CC\u200C\u0645\u0627\u0646\u062F\u0647\u200C\u06CC \u0627\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F",
+    layout: "\u0686\u06CC\u062F\u0645\u0627\u0646",
+    layoutDefault: "\u067E\u06CC\u0634\u200C\u0641\u0631\u0636",
+    layoutWide: "\u0639\u0631\u06CC\u0636",
+    layoutTall: "\u0628\u0644\u0646\u062F",
+    layoutNotesOnly: "\u0641\u0642\u0637 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A",
+    am: "\u0642.\u0638",
+    pm: "\u0628.\u0638",
+    // Keyboard help overlay (reveal.js English strings → translation)
+    "Keyboard Shortcuts": "\u0645\u06CC\u0627\u0646\u200C\u0628\u0631\u0647\u0627\u06CC \u0635\u0641\u062D\u0647\u200C\u06A9\u0644\u06CC\u062F",
+    "KEY": "\u06A9\u0644\u06CC\u062F",
+    "ACTION": "\u06A9\u0627\u0631",
+    "Next slide": "\u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0639\u062F\u06CC",
+    "Previous slide": "\u0627\u0633\u0644\u0627\u06CC\u062F \u0642\u0628\u0644\u06CC",
+    "Navigate left": "\u0686\u067E: \u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0639\u062F\u06CC",
+    "Navigate right": "\u0631\u0627\u0633\u062A: \u0627\u0633\u0644\u0627\u06CC\u062F \u0642\u0628\u0644\u06CC",
+    "Navigate up": "\u0628\u0627\u0644\u0627",
+    "Navigate down": "\u067E\u0627\u06CC\u06CC\u0646",
+    "Navigate without fragments": "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u062F\u0648\u0646 \u0645\u0631\u0627\u062D\u0644 (fragment)",
+    "Jump to first/last slide": "\u0631\u0641\u062A\u0646 \u0628\u0647 \u0627\u0648\u0644\u06CC\u0646/\u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F",
+    "Pause": "\u0645\u06A9\u062B (\u0635\u0641\u062D\u0647\u200C\u06CC \u0633\u06CC\u0627\u0647)",
+    "Fullscreen": "\u062A\u0645\u0627\u0645\u200C\u0635\u0641\u062D\u0647",
+    "Jump to slide": "\u0631\u0641\u062A\u0646 \u0628\u0647 \u0627\u0633\u0644\u0627\u06CC\u062F \u0628\u0627 \u0634\u0645\u0627\u0631\u0647",
+    "Slide overview": "\u0646\u0645\u0627\u06CC \u06A9\u0644\u06CC \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627",
+    "Speaker notes view": "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646"
+  };
+  var ar = {
+    slideN: "\u0627\u0644\u0634\u0631\u064A\u062D\u0629 {n}",
+    slideList: "\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0634\u0631\u0627\u0626\u062D",
+    search: "\u0627\u0628\u062D\u062B \u0641\u064A \u0627\u0644\u0634\u0631\u0627\u0626\u062D\u2026",
+    searchLabel: "\u0627\u0628\u062D\u062B \u0641\u064A \u0627\u0644\u0634\u0631\u0627\u0626\u062D",
+    noResults: "\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u062A\u0627\u0626\u062C",
+    toolbar: "\u0623\u062F\u0648\u0627\u062A \u0627\u0644\u0639\u0631\u0636",
+    first: "\u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u0623\u0648\u0644\u0649",
+    last: "\u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u0623\u062E\u064A\u0631\u0629",
+    grid: "\u0639\u0631\u0636 \u0634\u0628\u0643\u064A",
+    play: "\u062A\u0634\u063A\u064A\u0644 \u0627\u0644\u0645\u0624\u0642\u062A",
+    pause: "\u0625\u064A\u0642\u0627\u0641 \u0627\u0644\u0645\u0624\u0642\u062A",
+    resetTimer: "\u062A\u0635\u0641\u064A\u0631 \u0627\u0644\u0645\u0624\u0642\u062A",
+    timerElapsed: "\u0627\u0644\u0648\u0642\u062A \u0627\u0644\u0645\u0646\u0642\u0636\u064A\u061B \u0627\u0646\u0642\u0631 \u0644\u062A\u062D\u062F\u064A\u062F \u0645\u062F\u0629 \u0627\u0644\u0639\u0631\u0636 (\u0639\u062F\u0651 \u062A\u0646\u0627\u0632\u0644\u064A)",
+    timerRemaining: "\u0627\u0644\u0648\u0642\u062A \u0627\u0644\u0645\u062A\u0628\u0642\u064A \u0645\u0646 {m} \u062F\u0642\u064A\u0642\u0629\u061B \u0627\u0646\u0642\u0631 \u0644\u062A\u063A\u064A\u064A\u0631 \u0627\u0644\u0645\u062F\u0629",
+    timerPrompt: "\u0645\u062F\u0629 \u0627\u0644\u0639\u0631\u0636 \u0628\u0627\u0644\u062F\u0642\u0627\u0626\u0642 (\u0641\u0627\u0631\u063A = \u0639\u062F\u0651 \u062A\u0635\u0627\u0639\u062F\u064A):",
+    zoomIn: "\u062A\u0643\u0628\u064A\u0631",
+    zoomOut: "\u062A\u0635\u063A\u064A\u0631",
+    zoomReset: "\u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u0643\u0628\u064A\u0631",
+    theme: "\u0627\u062E\u062A\u064A\u0627\u0631 \u0627\u0644\u0633\u0645\u0629",
+    export: "\u062A\u0635\u062F\u064A\u0631",
+    exportPDF: "PDF (\u0637\u0628\u0627\u0639\u0629)",
+    exportJSON: "JSON",
+    exportMarkdown: "\u0646\u0635 Markdown",
+    exportHTML: "HTML",
+    exportOffline: "HTML \u062F\u0648\u0646 \u0627\u062A\u0635\u0627\u0644 (\u0645\u0644\u0641 \u0648\u0627\u062D\u062F)",
+    exportNotes: "\u0645\u0644\u0627\u062D\u0638\u0627\u062A \u0627\u0644\u0645\u062A\u062D\u062F\u062B",
+    notesFileTitle: "\u0645\u0644\u0627\u062D\u0638\u0627\u062A \u0627\u0644\u0645\u062A\u062D\u062F\u062B",
+    offlineFailed: "\u0644\u0645 \u064A\u064F\u0636\u0645\u064E\u0651\u0646 {n} \u0645\u0644\u0641 \u0641\u064A \u0627\u0644\u062A\u0635\u062F\u064A\u0631 \u0648\u0645\u0627 \u0632\u0627\u0644 \u064A\u062D\u062A\u0627\u062C \u0625\u0644\u0649 \u0627\u0644\u0625\u0646\u062A\u0631\u0646\u062A \u0623\u0648 \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0623\u0635\u0644\u064A:",
+    offlineFileHint: "\u0644\u0644\u062D\u0635\u0648\u0644 \u0639\u0644\u0649 \u062A\u0635\u062F\u064A\u0631 \u0643\u0627\u0645\u0644 \u062F\u0648\u0646 \u0627\u062A\u0635\u0627\u0644\u060C \u0627\u0641\u062A\u062D \u0627\u0644\u0639\u0631\u0636 \u0645\u0646 \u062E\u0627\u062F\u0645 (\u0645\u062B\u0644 npm run demo) \u0623\u0648 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0645\u0646\u0634\u0648\u0631\u0629.",
+    showNotes: "\u0639\u0631\u0636 \u0627\u0644\u0645\u0644\u0627\u062D\u0638\u0627\u062A",
+    speakerView: "\u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u0645\u062A\u062D\u062F\u062B",
+    fullscreen: "\u0645\u0644\u0621 \u0627\u0644\u0634\u0627\u0634\u0629",
+    laser: "\u0645\u0624\u0634\u0631 \u0644\u064A\u0632\u0631",
+    pen: "\u0642\u0644\u0645",
+    erase: "\u0645\u0633\u062D \u0643\u062A\u0627\u0628\u0629 \u0647\u0630\u0647 \u0627\u0644\u0634\u0631\u064A\u062D\u0629",
+    hideToolbar: "\u0625\u062E\u0641\u0627\u0621 \u0634\u0631\u064A\u0637 \u0627\u0644\u0623\u062F\u0648\u0627\u062A",
+    showToolbar: "\u0625\u0638\u0647\u0627\u0631 \u0634\u0631\u064A\u0637 \u0627\u0644\u0623\u062F\u0648\u0627\u062A",
+    toggleToolbar: "\u0625\u062E\u0641\u0627\u0621/\u0625\u0638\u0647\u0627\u0631 \u0634\u0631\u064A\u0637 \u0627\u0644\u0623\u062F\u0648\u0627\u062A",
+    notes: "\u0645\u0644\u0627\u062D\u0638\u0627\u062A",
+    jump: "\u0627\u0644\u0627\u0646\u062A\u0642\u0627\u0644 \u0625\u0644\u0649 \u0634\u0631\u064A\u062D\u0629 (\u0631\u0642\u0645 \u0623\u0648 \u0646\u0635)",
+    upcoming: "\u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629",
+    time: "\u0627\u0644\u0648\u0642\u062A",
+    clickToReset: "\u0627\u0646\u0642\u0631 \u0644\u0644\u062A\u0635\u0641\u064A\u0631",
+    pacing: "\u0627\u0644\u0648\u0642\u062A \u0627\u0644\u0645\u062A\u0628\u0642\u064A \u0644\u0647\u0630\u0647 \u0627\u0644\u0634\u0631\u064A\u062D\u0629",
+    layout: "\u0627\u0644\u062A\u062E\u0637\u064A\u0637",
+    layoutDefault: "\u0627\u0641\u062A\u0631\u0627\u0636\u064A",
+    layoutWide: "\u0639\u0631\u064A\u0636",
+    layoutTall: "\u0637\u0648\u064A\u0644",
+    layoutNotesOnly: "\u0627\u0644\u0645\u0644\u0627\u062D\u0638\u0627\u062A \u0641\u0642\u0637",
+    am: "\u0635",
+    pm: "\u0645",
+    "Keyboard Shortcuts": "\u0627\u062E\u062A\u0635\u0627\u0631\u0627\u062A \u0644\u0648\u062D\u0629 \u0627\u0644\u0645\u0641\u0627\u062A\u064A\u062D",
+    "KEY": "\u0627\u0644\u0645\u0641\u062A\u0627\u062D",
+    "ACTION": "\u0627\u0644\u0625\u062C\u0631\u0627\u0621",
+    "Next slide": "\u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629",
+    "Previous slide": "\u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
+    "Navigate left": "\u064A\u0633\u0627\u0631: \u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629",
+    "Navigate right": "\u064A\u0645\u064A\u0646: \u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
+    "Navigate up": "\u0623\u0639\u0644\u0649",
+    "Navigate down": "\u0623\u0633\u0641\u0644",
+    "Navigate without fragments": "\u0627\u0644\u062A\u0646\u0642\u0644 \u062F\u0648\u0646 \u0627\u0644\u0645\u0631\u0627\u062D\u0644 (fragment)",
+    "Jump to first/last slide": "\u0627\u0644\u0627\u0646\u062A\u0642\u0627\u0644 \u0625\u0644\u0649 \u0627\u0644\u0634\u0631\u064A\u062D\u0629 \u0627\u0644\u0623\u0648\u0644\u0649/\u0627\u0644\u0623\u062E\u064A\u0631\u0629",
+    "Pause": "\u0625\u064A\u0642\u0627\u0641 \u0645\u0624\u0642\u062A (\u0634\u0627\u0634\u0629 \u0633\u0648\u062F\u0627\u0621)",
+    "Fullscreen": "\u0645\u0644\u0621 \u0627\u0644\u0634\u0627\u0634\u0629",
+    "Jump to slide": "\u0627\u0644\u0627\u0646\u062A\u0642\u0627\u0644 \u0625\u0644\u0649 \u0634\u0631\u064A\u062D\u0629 \u0628\u0631\u0642\u0645\u0647\u0627",
+    "Slide overview": "\u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629 \u0639\u0644\u0649 \u0627\u0644\u0634\u0631\u0627\u0626\u062D",
+    "Speaker notes view": "\u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u0645\u062A\u062D\u062F\u062B"
+  };
+  var en = {
+    slideN: "Slide {n}",
+    slideList: "Slide list",
+    search: "Search slides\u2026",
+    searchLabel: "Search slides",
+    noResults: "No results",
+    toolbar: "Presentation tools",
+    first: "First slide",
+    last: "Last slide",
+    grid: "Grid view",
+    play: "Start timer",
+    pause: "Pause timer",
+    resetTimer: "Reset timer",
+    timerElapsed: "Elapsed time; click to set a presentation length (count-down)",
+    timerRemaining: "Time left of {m} minutes; click to change",
+    timerPrompt: "Presentation length in minutes (empty = count up):",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    zoomReset: "Reset zoom",
+    theme: "Theme",
+    export: "Export",
+    exportPDF: "PDF (print)",
+    exportJSON: "JSON",
+    exportMarkdown: "Markdown text",
+    exportHTML: "HTML",
+    exportOffline: "Offline HTML (single file)",
+    exportNotes: "Speaker notes",
+    notesFileTitle: "Speaker notes",
+    offlineFailed: "{n} file(s) could not be embedded and still need the internet or the original location:",
+    offlineFileHint: "For a complete offline export, open the deck from a server (e.g. npm run demo) or the published site.",
+    showNotes: "Show notes",
+    speakerView: "Speaker view",
+    fullscreen: "Fullscreen",
+    laser: "Laser pointer",
+    pen: "Pen",
+    erase: "Erase drawing on this slide",
+    hideToolbar: "Hide toolbar",
+    showToolbar: "Show toolbar",
+    toggleToolbar: "Hide/show toolbar",
+    notes: "Notes",
+    jump: "Jump to slide (number or text)",
+    upcoming: "Upcoming",
+    time: "Time",
+    clickToReset: "Click to reset",
+    pacing: "Time left for this slide",
+    layout: "Layout",
+    layoutDefault: "Default",
+    layoutWide: "Wide",
+    layoutTall: "Tall",
+    layoutNotesOnly: "Notes only",
+    am: "AM",
+    pm: "PM",
+    // reveal.js help is already English; only the RTL-specific arrow meaning changes.
+    "Navigate left": "Left: next slide",
+    "Navigate right": "Right: previous slide"
+  };
+  var LOCALES = { fa, ar, en };
+  var DEFAULT_DIGITS = { fa: "persian", ar: "arabic", en: "latin" };
+  var DIGIT_LOCALES = { persian: "fa-IR", arabic: "ar-EG", latin: "en-GB" };
+  function resolveLocale({ lang, digits, labels } = {}) {
+    const code = LOCALES[lang] ? lang : "fa";
+    const style = digits === false ? "latin" : ["persian", "arabic", "latin"].includes(digits) ? digits : DEFAULT_DIGITS[code];
+    const table2 = { ...LOCALES[code], ...labels };
+    const t = (key, vars = {}) => (table2[key] ?? key).replace(/\{(\w+)\}/g, (m, name) => vars[name] ?? m);
+    return { lang: code, digits: style, t };
   }
 
   // core/draw.js
@@ -152,11 +360,12 @@ var RevealRTLUI = (() => {
     return children(node).map(textOf).join("");
   }
   var collapse = (text) => text.replace(/\s+/g, " ").trim();
-  function getSlideTitle(slide, index) {
+  function getSlideTitle(slide, index, t) {
     const explicit = slide.getAttribute("data-menu-title");
     if (explicit) return explicit;
     const heading = findFirst(slide, (node) => /^H[1-3]$/.test(node.nodeName));
-    return heading ? collapse(textOf(heading)) : `\u0627\u0633\u0644\u0627\u06CC\u062F ${index + 1}`;
+    if (heading) return collapse(textOf(heading));
+    return t ? t("slideN", { n: index + 1 }) : `\u0627\u0633\u0644\u0627\u06CC\u062F ${index + 1}`;
   }
   function findFirst(node, test) {
     for (const child of children(node)) {
@@ -279,7 +488,7 @@ ${nested}`;
 Note: ${notes}` : "");
     }).join("\n\n---\n\n") + "\n";
   }
-  function slidesToJSON(slides, title) {
+  function slidesToJSON(slides, title, t) {
     return JSON.stringify({
       title,
       exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -287,20 +496,21 @@ Note: ${notes}` : "");
       slides: slides.map(({ element, h, v }, i) => ({
         number: i + 1,
         indices: { h, v },
-        title: getSlideTitle(element, i),
+        title: getSlideTitle(element, i, t),
         text: collapse(textOf(element)),
         notes: getSlideNotes(element),
         markdown: htmlToMarkdown(element)
       }))
     }, null, 2);
   }
-  function slidesToNotesText(slides, title) {
+  function slidesToNotesText(slides, title, t) {
     const parts = slides.map(({ element }, i) => {
       const notes = getSlideNotes(element);
-      return `${i + 1}. ${getSlideTitle(element, i)}
+      return `${i + 1}. ${getSlideTitle(element, i, t)}
 ${notes || "\u2014"}`;
     });
-    return `\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646: ${title}
+    const heading = t ? t("notesFileTitle") : "\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646";
+    return `${heading}: ${title}
 
 ${parts.join("\n\n")}
 `;
@@ -450,13 +660,14 @@ ${parts.join("\n\n")}
       if (deck.isSpeakerNotes()) return;
       const config = deck.getConfig();
       const options = {
-        digits: !!config.rtl,
         themes: [],
         themeLink: "#theme",
         idle: 3e3,
         ...config.uiOptions
       };
-      const digits = (text) => options.digits ? toPersianDigits(text) : String(text);
+      const locale = resolveLocale({ ...config.rtlOptions, ..."digits" in options ? { digits: options.digits } : {} });
+      const { t } = locale;
+      const digits = (text) => localizeDigits(text, locale.digits);
       const root = deck.getRevealElement();
       const themeLink = document.querySelector(options.themeLink);
       const pageSnapshot = document.documentElement.cloneNode(true);
@@ -475,7 +686,7 @@ ${parts.join("\n\n")}
       const panel = createPanel();
       const toolbar = createToolbar();
       root.append(panel.element, toolbar.element);
-      deck.addKeyBinding({ keyCode: KEY_M, key: "M", description: "\u0641\u0647\u0631\u0633\u062A \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627" }, () => panel.toggle());
+      deck.addKeyBinding({ keyCode: KEY_M, key: "M", description: t("slideList") }, () => panel.toggle());
       deck.on("ready", () => {
         panel.build();
         panel.markCurrent();
@@ -483,14 +694,14 @@ ${parts.join("\n\n")}
       deck.on("slidechanged", () => panel.markCurrent());
       function createPanel() {
         const element = el("nav", "rtlui-panel");
-        element.setAttribute("aria-label", "\u0641\u0647\u0631\u0633\u062A \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627");
+        element.setAttribute("aria-label", t("slideList"));
         element.hidden = true;
         const search = el("input", "rtlui-search");
         search.type = "search";
-        search.placeholder = "\u062C\u0633\u062A\u062C\u0648 \u062F\u0631 \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627\u2026";
-        search.setAttribute("aria-label", "\u062C\u0633\u062A\u062C\u0648 \u062F\u0631 \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627");
+        search.placeholder = t("search");
+        search.setAttribute("aria-label", t("searchLabel"));
         const list2 = el("ol", "rtlui-list");
-        const empty = el("p", "rtlui-empty", "\u0646\u062A\u06CC\u062C\u0647\u200C\u0627\u06CC \u067E\u06CC\u062F\u0627 \u0646\u0634\u062F");
+        const empty = el("p", "rtlui-empty", t("noResults"));
         empty.hidden = true;
         const preview = el("div", "rtlui-preview");
         preview.setAttribute("aria-hidden", "true");
@@ -541,7 +752,7 @@ ${parts.join("\n\n")}
           list2.replaceChildren();
           items = deck.getSlides().map((slide, i) => {
             const { h, v } = deck.getIndices(slide);
-            const title = getSlideTitle(slide, i);
+            const title = getSlideTitle(slide, i, t);
             const li = el("li");
             const button2 = el("button", "rtlui-item");
             button2.type = "button";
@@ -583,14 +794,14 @@ ${parts.join("\n\n")}
       function createToolbar() {
         const element = el("div", "rtlui-toolbar");
         element.setAttribute("role", "toolbar");
-        element.setAttribute("aria-label", "\u0627\u0628\u0632\u0627\u0631\u0647\u0627\u06CC \u0627\u0631\u0627\u0626\u0647");
-        const menuButton = button(ICONS.menu, "\u0641\u0647\u0631\u0633\u062A \u0627\u0633\u0644\u0627\u06CC\u062F\u0647\u0627 (M)", () => panel.toggle());
+        element.setAttribute("aria-label", t("toolbar"));
+        const menuButton = button(ICONS.menu, `${t("slideList")} (M)`, () => panel.toggle());
         menuButton.setAttribute("aria-expanded", "false");
-        const firstButton = button(ICONS.first, "\u0627\u0648\u0644\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F", () => deck.slide(0));
-        const lastButton = button(ICONS.last, "\u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F", () => deck.slide(Number.MAX_VALUE));
+        const firstButton = button(ICONS.first, t("first"), () => deck.slide(0));
+        const lastButton = button(ICONS.last, t("last"), () => deck.slide(Number.MAX_VALUE));
         firstButton.classList.add("rtlui-mirror");
         lastButton.classList.add("rtlui-mirror");
-        const gridButton = button(ICONS.grid, "\u0646\u0645\u0627\u06CC \u0634\u0628\u06A9\u0647\u200C\u0627\u06CC (Esc)", () => deck.toggleOverview());
+        const gridButton = button(ICONS.grid, `${t("grid")} (Esc)`, () => deck.toggleOverview());
         const syncGrid = () => gridButton.setAttribute("aria-pressed", String(deck.isOverview()));
         syncGrid();
         deck.on("overviewshown", syncGrid);
@@ -606,18 +817,18 @@ ${parts.join("\n\n")}
           timerValue.textContent = digits(text);
           timerValue.classList.toggle("rtlui-timer-warn", state === "warn");
           timerValue.classList.toggle("rtlui-timer-over", state === "over");
-          setLabel(timerValue, timer.duration ? `\u0632\u0645\u0627\u0646 \u0628\u0627\u0642\u06CC\u200C\u0645\u0627\u0646\u062F\u0647 \u0627\u0632 ${digits(timer.duration / 60)} \u062F\u0642\u06CC\u0642\u0647\u061B \u0628\u0631\u0627\u06CC \u062A\u063A\u06CC\u06CC\u0631 \u0645\u062F\u062A \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F` : "\u0632\u0645\u0627\u0646 \u0633\u067E\u0631\u06CC\u200C\u0634\u062F\u0647\u061B \u0628\u0631\u0627\u06CC \u062A\u0639\u06CC\u06CC\u0646 \u0645\u062F\u062A \u0627\u0631\u0627\u0626\u0647 (\u0634\u0645\u0627\u0631\u0634 \u0645\u0639\u06A9\u0648\u0633) \u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F");
+          setLabel(timerValue, timer.duration ? t("timerRemaining", { m: digits(timer.duration / 60) }) : t("timerElapsed"));
         };
         timerValue.addEventListener("click", () => {
           const current = timer.duration ? digits(timer.duration / 60) : "";
-          const answer = window.prompt("\u0645\u062F\u062A \u0627\u0631\u0627\u0626\u0647 \u0628\u0647 \u062F\u0642\u06CC\u0642\u0647 (\u062E\u0627\u0644\u06CC = \u0634\u0645\u0627\u0631\u0634 \u0631\u0648 \u0628\u0647 \u062C\u0644\u0648):", current);
+          const answer = window.prompt(t("timerPrompt"), current);
           if (answer === null) return;
           const minutes = parseFloat(toLatinDigits(answer.trim()));
           timer.duration = minutes > 0 ? Math.round(minutes * 60) : null;
           saveTimer(timer);
           renderTimer();
         });
-        const playButton = button(ICONS.play, "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631", () => {
+        const playButton = button(ICONS.play, t("play"), () => {
           if (isRunning()) {
             timer.base = elapsedSeconds();
             timer.startedAt = null;
@@ -629,17 +840,17 @@ ${parts.join("\n\n")}
         });
         const renderPlayButton = () => {
           playButton.innerHTML = isRunning() ? ICONS.pause : ICONS.play;
-          setLabel(playButton, isRunning() ? "\u062A\u0648\u0642\u0641 \u062A\u0627\u06CC\u0645\u0631" : "\u0634\u0631\u0648\u0639 \u062A\u0627\u06CC\u0645\u0631");
+          setLabel(playButton, isRunning() ? t("pause") : t("play"));
         };
         renderPlayButton();
-        const resetButton = button(ICONS.reset, "\u0635\u0641\u0631 \u06A9\u0631\u062F\u0646 \u062A\u0627\u06CC\u0645\u0631", () => {
+        const resetButton = button(ICONS.reset, t("resetTimer"), () => {
           timer.base = 0;
           if (isRunning()) timer.startedAt = Date.now();
           saveTimer(timer);
           renderTimer();
         });
         const clock = el("time", "rtlui-clock");
-        const clockFormat = new Intl.DateTimeFormat(options.digits ? "fa-IR" : void 0, { hour: "2-digit", minute: "2-digit" });
+        const clockFormat = new Intl.DateTimeFormat(DIGIT_LOCALES[locale.digits], { hour: "2-digit", minute: "2-digit" });
         const tick = () => {
           clock.textContent = clockFormat.format(/* @__PURE__ */ new Date());
           renderTimer();
@@ -655,7 +866,7 @@ ${parts.join("\n\n")}
         let zoom = 1;
         const zoomReset = el("button", "rtlui-button rtlui-zoom-value");
         zoomReset.type = "button";
-        setLabel(zoomReset, "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0628\u0632\u0631\u06AF\u200C\u0646\u0645\u0627\u06CC\u06CC");
+        setLabel(zoomReset, t("zoomReset"));
         const setZoom = (value) => {
           zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value * 10) / 10));
           root.style.setProperty("--rtlui-zoom", zoom);
@@ -664,29 +875,29 @@ ${parts.join("\n\n")}
         zoomReset.addEventListener("click", () => setZoom(1));
         setZoom(1);
         groups.push(wideOnly(group(
-          button(ICONS.zoomIn, "\u0628\u0632\u0631\u06AF\u200C\u0646\u0645\u0627\u06CC\u06CC", () => setZoom(zoom + ZOOM_STEP)),
+          button(ICONS.zoomIn, t("zoomIn"), () => setZoom(zoom + ZOOM_STEP)),
           zoomReset,
-          button(ICONS.zoomOut, "\u06A9\u0648\u0686\u06A9\u200C\u0646\u0645\u0627\u06CC\u06CC", () => setZoom(zoom - ZOOM_STEP))
+          button(ICONS.zoomOut, t("zoomOut"), () => setZoom(zoom - ZOOM_STEP))
         )));
         if (options.themes.length && themeLink) groups.push(wideOnly(group(themeSelect())));
         groups.push(group(exportMenu()));
-        const notesButton = button(ICONS.notes, "\u0646\u0645\u0627\u06CC\u0634 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627", () => {
+        const notesButton = button(ICONS.notes, t("showNotes"), () => {
           const show = !deck.getConfig().showNotes;
           deck.configure({ showNotes: show });
           notesButton.setAttribute("aria-pressed", String(show));
         });
         notesButton.setAttribute("aria-pressed", String(!!config.showNotes));
-        const fullscreenButton = button(ICONS.fullscreen, "\u062A\u0645\u0627\u0645\u200C\u0635\u0641\u062D\u0647", () => {
+        const fullscreenButton = button(ICONS.fullscreen, t("fullscreen"), () => {
           if (document.fullscreenElement) document.exitFullscreen();
           else document.documentElement.requestFullscreen?.();
         });
         const noteControls = [notesButton];
         if (deck.hasPlugin("notes")) {
-          noteControls.push(wideOnly(button(ICONS.speaker, "\u067E\u0646\u062C\u0631\u0647\u200C\u06CC \u0633\u062E\u0646\u0631\u0627\u0646 (S)", () => deck.getPlugin("notes").open())));
+          noteControls.push(wideOnly(button(ICONS.speaker, `${t("speakerView")} (S)`, () => deck.getPlugin("notes").open())));
         }
-        const laserButton = button(ICONS.laser, "\u0646\u0634\u0627\u0646\u06AF\u0631 \u0644\u06CC\u0632\u0631\u06CC (Z)", () => toggleTool("laser"));
-        const penButton = button(ICONS.pen, "\u0642\u0644\u0645 (D)", () => toggleTool("pen"));
-        const eraseButton = button(ICONS.erase, "\u067E\u0627\u06A9 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0634\u062A\u0647\u200C\u0647\u0627\u06CC \u0627\u06CC\u0646 \u0627\u0633\u0644\u0627\u06CC\u062F (E)", () => drawing.clear());
+        const laserButton = button(ICONS.laser, `${t("laser")} (Z)`, () => toggleTool("laser"));
+        const penButton = button(ICONS.pen, `${t("pen")} (D)`, () => toggleTool("pen"));
+        const eraseButton = button(ICONS.erase, `${t("erase")} (E)`, () => drawing.clear());
         const toggleTool = (name) => {
           const active = drawing.setTool(name);
           laserButton.setAttribute("aria-pressed", String(active === "laser"));
@@ -694,15 +905,15 @@ ${parts.join("\n\n")}
         };
         laserButton.setAttribute("aria-pressed", "false");
         penButton.setAttribute("aria-pressed", "false");
-        deck.addKeyBinding({ keyCode: KEY_Z, key: "Z", description: "\u0646\u0634\u0627\u0646\u06AF\u0631 \u0644\u06CC\u0632\u0631\u06CC" }, () => toggleTool("laser"));
-        deck.addKeyBinding({ keyCode: KEY_D, key: "D", description: "\u0642\u0644\u0645" }, () => toggleTool("pen"));
-        deck.addKeyBinding({ keyCode: KEY_E, key: "E", description: "\u067E\u0627\u06A9 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0634\u062A\u0647\u200C\u0647\u0627\u06CC \u0627\u0633\u0644\u0627\u06CC\u062F" }, () => drawing.clear());
+        deck.addKeyBinding({ keyCode: KEY_Z, key: "Z", description: t("laser") }, () => toggleTool("laser"));
+        deck.addKeyBinding({ keyCode: KEY_D, key: "D", description: t("pen") }, () => toggleTool("pen"));
+        deck.addKeyBinding({ keyCode: KEY_E, key: "E", description: t("erase") }, () => drawing.clear());
         groups.push(wideOnly(group(laserButton, penButton, eraseButton)));
         groups.push(group(...noteControls, wideOnly(fullscreenButton)));
-        const hideButton = button(ICONS.hide, "\u067E\u0646\u0647\u0627\u0646 \u06A9\u0631\u062F\u0646 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631 (T)", () => setHidden(true));
+        const hideButton = button(ICONS.hide, `${t("hideToolbar")} (T)`, () => setHidden(true));
         groups.push(group(hideButton));
         element.append(...groups);
-        const showButton = button(ICONS.show, "\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631 (T)", () => setHidden(false));
+        const showButton = button(ICONS.show, `${t("showToolbar")} (T)`, () => setHidden(false));
         showButton.classList.add("rtlui-show");
         root.append(showButton);
         const setHidden = (hidden) => {
@@ -721,7 +932,7 @@ ${parts.join("\n\n")}
         } catch (e) {
         }
         setHidden(storedHidden);
-        deck.addKeyBinding({ keyCode: KEY_T, key: "T", description: "\u067E\u0646\u0647\u0627\u0646/\u0646\u0645\u0627\u06CC\u0634 \u0646\u0648\u0627\u0631 \u0627\u0628\u0632\u0627\u0631" }, () => setHidden(!root.classList.contains("rtlui-hidden")));
+        deck.addKeyBinding({ keyCode: KEY_T, key: "T", description: t("toggleToolbar") }, () => setHidden(!root.classList.contains("rtlui-hidden")));
         element.addEventListener("keydown", (event) => {
           const target = event.target;
           if (target.matches("select") || target.closest(".rtlui-menu") || target.matches("button") && (event.key === "Enter" || event.key === " ")) {
@@ -736,23 +947,23 @@ ${parts.join("\n\n")}
       }
       function exportMenu() {
         const wrapper = el("div", "rtlui-menu-wrapper");
-        const trigger = button(ICONS.export, "\u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646", () => setOpen(menu.hidden));
+        const trigger = button(ICONS.export, t("export"), () => setOpen(menu.hidden));
         trigger.setAttribute("aria-haspopup", "menu");
         trigger.setAttribute("aria-expanded", "false");
         const menu = el("div", "rtlui-menu");
         menu.setAttribute("role", "menu");
-        menu.setAttribute("aria-label", "\u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646");
+        menu.setAttribute("aria-label", t("export"));
         menu.hidden = true;
         const title = document.title || "presentation";
         const fileName = (ext) => `${safeFileName(title)}.${ext}`;
         const slides = () => deck.getSlides().map((element) => ({ element, ...deck.getIndices(element) }));
         const items = [
-          ["PDF (\u0686\u0627\u067E)", exportPDF],
-          ["JSON", () => download(fileName("json"), slidesToJSON(slides(), title), "application/json")],
-          ["\u0645\u062A\u0646 Markdown", () => download(fileName("md"), slidesToMarkdown(slides()), "text/markdown")],
-          ["HTML", () => download(fileName("html"), standaloneHTML(pageSnapshot.cloneNode(true), document.baseURI), "text/html")],
-          ["HTML \u0622\u0641\u0644\u0627\u06CC\u0646 (\u06CC\u06A9 \u0641\u0627\u06CC\u0644)", exportOfflineHTML],
-          ["\u06CC\u0627\u062F\u062F\u0627\u0634\u062A\u200C\u0647\u0627\u06CC \u0633\u062E\u0646\u0631\u0627\u0646", () => download(`${safeFileName(title)}-notes.txt`, slidesToNotesText(slides(), title), "text/plain")]
+          [t("exportPDF"), exportPDF],
+          [t("exportJSON"), () => download(fileName("json"), slidesToJSON(slides(), title, t), "application/json")],
+          [t("exportMarkdown"), () => download(fileName("md"), slidesToMarkdown(slides()), "text/markdown")],
+          [t("exportHTML"), () => download(fileName("html"), standaloneHTML(pageSnapshot.cloneNode(true), document.baseURI), "text/html")],
+          [t("exportOffline"), exportOfflineHTML],
+          [t("exportNotes"), () => download(`${safeFileName(title)}-notes.txt`, slidesToNotesText(slides(), title, t), "text/plain")]
         ].map(([label, action]) => {
           const item = el("button", "rtlui-menu-item", label);
           item.type = "button";
@@ -794,8 +1005,8 @@ ${parts.join("\n\n")}
           const { html, failed } = await offlineHTML(pageSnapshot.cloneNode(true), document.baseURI);
           download(`${safeFileName(title)}-offline.html`, html, "text/html");
           if (failed.length) {
-            const hint = location.protocol === "file:" ? "\n\u0628\u0631\u0627\u06CC \u062E\u0631\u0648\u062C\u06CC \u0622\u0641\u0644\u0627\u06CC\u0646 \u06A9\u0627\u0645\u0644\u060C \u0627\u0631\u0627\u0626\u0647 \u0631\u0627 \u0627\u0632 \u06CC\u06A9 \u0633\u0631\u0648\u0631 (\u0645\u062B\u0644\u0627\u064B npm run demo) \u06CC\u0627 \u0646\u0633\u062E\u0647\u200C\u06CC \u0622\u0646\u0644\u0627\u06CC\u0646 \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F." : "";
-            window.alert(`${toPersianDigits(failed.length)} \u0641\u0627\u06CC\u0644 \u062F\u0627\u062E\u0644 \u062E\u0631\u0648\u062C\u06CC \u0642\u0631\u0627\u0631 \u0646\u06AF\u0631\u0641\u062A \u0648 \u0647\u0646\u0648\u0632 \u0628\u0647 \u0627\u06CC\u0646\u062A\u0631\u0646\u062A \u06CC\u0627 \u0645\u0633\u06CC\u0631 \u0627\u0635\u0644\u06CC \u0646\u06CC\u0627\u0632 \u062F\u0627\u0631\u062F:
+            const hint = location.protocol === "file:" ? "\n" + t("offlineFileHint") : "";
+            window.alert(`${t("offlineFailed", { n: digits(failed.length) })}
 ${failed.join("\n")}${hint}`);
           }
         } finally {
@@ -811,8 +1022,8 @@ ${failed.join("\n")}${hint}`);
       }
       function themeSelect() {
         const select = el("select", "rtlui-theme");
-        select.setAttribute("aria-label", "\u0627\u0646\u062A\u062E\u0627\u0628 \u062A\u0645");
-        select.title = "\u0627\u0646\u062A\u062E\u0627\u0628 \u062A\u0645";
+        select.setAttribute("aria-label", t("theme"));
+        select.title = t("theme");
         const current = themeLink.getAttribute("href");
         options.themes.forEach((theme) => {
           const option = el("option", "", theme.name);

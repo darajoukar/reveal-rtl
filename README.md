@@ -1,228 +1,303 @@
+<div align="center">
+
 # reveal-rtl
 
-[فارسی](#فارسی) | [English](#english)
+**Right-to-left presentations with [reveal.js](https://revealjs.com) 6 — Persian, Arabic and more**
 
-Right-to-left support plugin for [reveal.js](https://revealjs.com) 6, built for Persian presentations.
+**ارائه‌های راست‌به‌چپ با reveal.js** · **عروض تقديمية من اليمين إلى اليسار مع reveal.js**
 
-[![npm](https://img.shields.io/npm/v/reveal-rtl)](https://www.npmjs.com/package/reveal-rtl) [![CI](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml/badge.svg)](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml) · [Demo](https://darajoukar.github.io/reveal-rtl/demo/)
+[![npm](https://img.shields.io/npm/v/reveal-rtl?color=c2410c)](https://www.npmjs.com/package/reveal-rtl)
+[![CI](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml/badge.svg)](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/reveal-rtl?color=1d3557)](LICENSE)
 
-## Install / نصب
+[**Website**](https://darajoukar.github.io/reveal-rtl/) · [**Live demo**](https://darajoukar.github.io/reveal-rtl/demo/) · [Markdown demo](https://darajoukar.github.io/reveal-rtl/demo/markdown.html) · [npm](https://www.npmjs.com/package/reveal-rtl)
+
+[English](#english) · [فارسی](#فارسی) · [العربية](#العربية)
+
+<img src="https://raw.githubusercontent.com/darajoukar/reveal-rtl/main/docs/screenshot-light.png" alt="reveal-rtl demo: Persian slide, Parsi light theme" width="49%"> <img src="https://raw.githubusercontent.com/darajoukar/reveal-rtl/main/docs/screenshot-dark.png" alt="reveal-rtl demo: slide list and toolbar, Parsi dark theme" width="49%">
+
+</div>
+
+---
+
+## Quick start
 
 ```bash
 npm install reveal.js reveal-rtl
 ```
 
-Or from a CDN, no build step (works from `file://`) — یا مستقیم از CDN، بدون نصب:
+Or straight from a CDN — no build step, works from `file://`:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/reveal.js@6.0.2/dist/reveal.css">
-<link rel="stylesheet" href="https://unpkg.com/reveal.js@6.0.2/dist/theme/white.css" id="theme">
-<link rel="stylesheet" href="https://unpkg.com/reveal-rtl@0.2.0/core/rtl.css">
-<link rel="stylesheet" href="https://unpkg.com/reveal-rtl@0.2.0/core/ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/themes/parsi-light.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/core/rtl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/core/ui.css">
 
-<script src="https://unpkg.com/reveal.js@6.0.2/dist/reveal.js"></script>
-<script src="https://unpkg.com/reveal.js@6.0.2/dist/plugin/notes.js"></script>
-<script src="https://unpkg.com/reveal-rtl@0.2.0/dist/reveal-rtl.js"></script>
-<script src="https://unpkg.com/reveal-rtl@0.2.0/dist/reveal-rtl-ui.js"></script>
+<div class="reveal"><div class="slides">
+  <section><h1>سلام دنیا</h1></section>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/dist/reveal-rtl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal-rtl@0.3.0/dist/reveal-rtl-ui.js"></script>
 <script>
   Reveal.initialize({
-    slideNumber: true,
-    scrollActivationWidth: null,
+    slideNumber: 'c/t',
+    scrollActivationWidth: null,          // keep swiping slide by slide on phones
+    rtlOptions: { lang: 'fa' },           // 'fa' | 'ar' | 'en'
     plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ]
   });
 </script>
+```
+
+With a bundler / ES modules:
+
+```js
+import Reveal from 'reveal.js';
+import RevealNotes from 'reveal.js/plugin/notes';
+import RevealRTL from 'reveal-rtl';
+import RevealRTLUI from 'reveal-rtl/ui';
+import 'reveal.js/reveal.css';
+import 'reveal-rtl/rtl.css';
+import 'reveal-rtl/ui.css';
+
+Reveal.initialize({ plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ] });
 ```
 
 `RevealRTLUI` (toolbar, slide list, exports) and `ui.css` are optional.
 
 ---
 
+<a id="english"></a>
+
+## English
+
+### Two plugins
+
+| Plugin | File | What it does |
+|---|---|---|
+| **RevealRTL** | `plugin/rtl.js` + `core/rtl.css` | Right-to-left layout and typography, localized digits, Jalali dates, localized help, notes and speaker view |
+| **RevealRTLUI** | `plugin/ui.js` + `core/ui.css` | Toolbar, searchable slide list, timer, drawing tools, zoom, themes, exports |
+
+### RevealRTL features
+
+- Turns on reveal.js `rtl` mode before the first render (direction, arrow keys, swipe, progress bar)
+- Fixes what reveal.js themes leave left-to-right: list indentation, table alignment, the forced `sans-serif` font, letter spacing
+- **Vazirmatn bundled** (variable font, OFL) — works offline, no Google Fonts; change with `--rtl-font`
+- **Localized digits** in slide text, slide number (every format: `h.v`, `h/v`, `c`, `c/t`), PDF page numbers and ordered lists — Persian `۱۲۳`, Arabic `١٢٣` or Latin
+- Code, `pre`, `dir="ltr"` and `.latin-digits` content stays left-to-right with Latin digits; Persian/Arabic text inside code still joins correctly
+- **Jalali dates**: `<time data-jalali></time>` (today) or `<time data-jalali datetime="2025-03-21"></time>`
+- Localized, RTL **keyboard help** (`?`), **on-slide notes** and **speaker view** (`S`, mirrored layout)
+- **Jump to slide** (`G`) accepts Persian/Arabic digits
+- Tested on all 14 reveal.js themes plus the two bundled ones
+
+### RevealRTLUI features
+
+- **Slide list** with search (`M`) — matches Arabic/Persian letter variants and digits; hover shows a slide preview
+- First / last slide, **grid view** (overview)
+- **Timer** that survives a page refresh; click it to set a length and it **counts down**, turning yellow near the end and red (negative) when over
+- **Laser pointer** (`Z`), **pen** (`D`) and **erase** (`E`), kept per slide
+- Zoom in / out / reset, **theme switcher** (remembered), clock
+- Notes on the slide, speaker view button, fullscreen
+- **Export**: PDF (print view), JSON, Markdown (reveal.js format, `Note:` for notes), HTML, **offline single-file HTML** (CSS, scripts, fonts and images inlined) and speaker notes as text
+- Hide / show the toolbar (`T`); compact one-row layout on phones
+
+### Options
+
+`rtlOptions` (shared by both plugins):
+
+| Option | Default | Description |
+|---|---|---|
+| `lang` | `'fa'` | Language of all built-in labels: `'fa'`, `'ar'`, `'en'` |
+| `digits` | by language | `'persian'`, `'arabic'`, `'latin'`; `true` = language default, `false` = Latin |
+| `labels` | — | Override single labels, e.g. `{ first: 'آغاز' }` (keys in [`core/i18n.js`](core/i18n.js)) |
+
+`uiOptions`:
+
+| Option | Default | Description |
+|---|---|---|
+| `themes` | `[]` | Theme menu entries: `{ name, href }` |
+| `themeLink` | `'#theme'` | Selector of the theme `<link>` to swap |
+| `duration` | `totalTime` / none | Presentation length in minutes; the timer counts down |
+| `warnAt` | 5 (or 20% of a short talk) | Minutes left when the timer turns yellow |
+| `idle` | `3000` | Milliseconds without mouse movement before the toolbar fades |
+| `digits` | `rtlOptions.digits` | Digit style for the toolbar only |
+
+### Keyboard
+
+| Key | Action | Key | Action |
+|---|---|---|---|
+| `←` / `→` | Next / previous slide (RTL) | `M` | Slide list |
+| `Esc` / `O` | Grid view | `T` | Hide / show toolbar |
+| `G` | Jump to slide | `Z` | Laser pointer |
+| `S` | Speaker view | `D` | Pen |
+| `F` | Fullscreen | `E` | Erase this slide's drawing |
+| `B` / `.` | Pause (black screen) | `?` | Keyboard help |
+
+### Themes
+
+Two themes built from the reveal.js theme template, tuned for Persian/Arabic: `themes/parsi-light.css` and `themes/parsi-dark.css`. Use them in place of a reveal.js theme. All 14 reveal.js themes work too.
+
+### Writing slides in Markdown
+
+Use reveal.js's markdown plugin and list it before `RevealRTL()`; see [`demo/markdown.html`](demo/markdown.html):
+
+```html
+<section data-markdown data-separator="^---$" data-separator-notes="^Note:">
+  <textarea data-template>
+## فهرست
+- مورد اول
+Note: یادداشت سخنران
+  </textarea>
+</section>
+```
+
+### Phones
+
+Below 435px reveal.js 6 switches to a vertical scroll view; set `scrollActivationWidth: null` to keep swiping slide by slide.
+
+### Development
+
+```bash
+npm install
+npm run build       # dist/ bundles and themes/ (commit both)
+npm test            # unit tests
+npm run test:e2e    # Playwright browser tests (desktop + mobile)
+npm run demo        # serve the repo at http://localhost:3000/demo/
+```
+
+If Playwright's Chromium download is unavailable, use an installed browser: `PW_CHANNEL=msedge npm run test:e2e`. CI fails if `dist/` or `themes/` is out of date.
+
+---
+
+<a id="فارسی"></a>
+
 ## فارسی
 
 <div dir="rtl">
 
-پلاگینی برای ساخت ارائه‌های راست‌به‌چپ (فارسی) با reveal.js.
+**reveal-rtl** دو پلاگین برای ساخت ارائه‌های راست‌به‌چپ با reveal.js 6 است؛ برای فارسی ساخته شده و عربی را هم پشتیبانی می‌کند.
 
-### ویژگی‌ها
-
-- فعال‌سازی خودکار حالت `rtl` در reveal.js (جهت، کلیدها، نوار پیشرفت)
-- اصلاح تورفتگی فهرست‌ها، جدول‌ها و تراز متن در تم‌های reveal.js
-- فونت وزیرمتن داخل پکیج، بدون نیاز به اینترنت یا Google Fonts (قابل تغییر با متغیر `--rtl-font`؛ مجوز OFL در `fonts/OFL.txt`)
-- تبدیل اعداد به فارسی در متن اسلایدها و شماره‌ی اسلاید (به‌جز کد)
-- فهرست شماره‌دار با اعداد فارسی
-- تاریخ شمسی با `<time data-jalali>`
-- کد و متن‌های `dir="ltr"` همیشه چپ‌به‌راست می‌مانند
-- همه‌ی قالب‌های شماره‌ی اسلاید reveal.js (`h.v`، `h/v`، `c`، `c/t`) با اعداد فارسی، از جمله شماره‌ی صفحه‌های PDF
-- راهنمای کلیدها (`?`) فارسی و راست‌به‌چپ
-- با هر ۱۴ تم reveal.js تست شده
-
-### استفاده
+### نصب
 
 </div>
 
-```html
-<link rel="stylesheet" href="reveal.js/dist/reveal.css">
-<link rel="stylesheet" href="reveal.js/dist/theme/white.css">
-<link rel="stylesheet" href="reveal-rtl/core/rtl.css">
-
-<script type="module">
-  import Reveal from 'reveal.js';
-  import RevealRTL from 'reveal-rtl';
-
-  Reveal.initialize({
-    slideNumber: true,
-    rtlOptions: { digits: true },
-    plugins: [ RevealRTL() ]
-  });
-</script>
+```bash
+npm install reveal.js reveal-rtl
 ```
 
 <div dir="rtl">
 
-بدون ES module (مثلاً باز کردن مستقیم فایل HTML از روی دیسک) از نسخه‌ی `dist` استفاده کنید:
+یا بدون نصب، مستقیم از CDN — نمونه‌ی کامل در بخش [Quick start](#quick-start) بالا. فایل HTML را می‌شود مستقیم با دابل‌کلیک باز کرد.
 
-</div>
+### پلاگین RevealRTL
 
-```html
-<script src="reveal.js/dist/reveal.js"></script>
-<script src="reveal-rtl/dist/reveal-rtl.js"></script>
-<script>
-  Reveal.initialize({ plugins: [ RevealRTL() ] });
-</script>
-```
+- فعال شدن حالت `rtl` در reveal.js پیش از اولین نمایش (جهت، کلیدها، کشیدن انگشت، نوار پیشرفت)
+- اصلاح تورفتگی فهرست‌ها، تراز جدول‌ها و فونت در تم‌های reveal.js
+- **فونت وزیرمتن داخل پکیج**؛ بدون اینترنت و بدون Google Fonts (قابل تغییر با `--rtl-font`)
+- **اعداد فارسی** در متن اسلاید، شماره‌ی اسلاید (همه‌ی قالب‌ها)، شماره‌ی صفحه‌های PDF و فهرست شماره‌دار؛ یا اعداد عربی یا لاتین
+- کد و متن‌های `dir="ltr"` چپ‌به‌راست و با اعداد لاتین می‌مانند؛ متن فارسی داخل کد هم درست و پیوسته نمایش داده می‌شود
+- **تاریخ شمسی** با `<time data-jalali></time>`
+- **راهنمای کلیدها** (`?`)، **یادداشت‌ها** و **پنجره‌ی سخنران** (`S`) فارسی و راست‌به‌چپ
+- **رفتن به اسلاید** (`G`) با اعداد فارسی
 
-<div dir="rtl">
+### پلاگین RevealRTLUI (نوار ابزار)
 
-### نوار ابزار و فهرست اسلایدها (اختیاری)
+- **فهرست اسلایدها** با جستجو (`M`) و پیش‌نمایش با بردن موس
+- اولین و آخرین اسلاید، **نمای شبکه‌ای**
+- **تایمر** که با رفرش متوقف نمی‌شود؛ با کلیک روی آن مدت ارائه را بدهید تا **معکوس** بشمارد (زرد در دقایق آخر، قرمز و منفی بعد از پایان وقت)
+- **نشانگر لیزری** (`Z`)، **قلم** (`D`) و **پاک کردن** (`E`)، جدا برای هر اسلاید
+- بزرگ‌نمایی و کوچک‌نمایی، **انتخاب تم**، ساعت، یادداشت‌ها، پنجره‌ی سخنران، تمام‌صفحه
+- **خروجی**: PDF، JSON، Markdown، HTML، **HTML آفلاین تک‌فایلی** و یادداشت‌های سخنران
+- پنهان و نمایش نوار ابزار (`T`)؛ نمای فشرده روی گوشی
 
-پلاگین جداگانه‌ی `RevealRTLUI` این امکانات را اضافه می‌کند:
+### تنظیمات
 
-- فهرست اسلایدها با جستجو در بالای آن (کلید `M` یا دکمه‌ی ☰). جستجو «ي/ك» عربی و اعداد فارسی را هم پیدا می‌کند.
-- دکمه‌های اولین و آخرین اسلاید
-- نمای شبکه‌ای اسلایدها (همان overview خود reveal.js، کلید `Esc`)
-- تایمر ارائه (شروع، توقف، صفر کردن) و ساعت. تایمر با رفرش صفحه متوقف نمی‌شود.
-- شمارش معکوس: با کلیک روی عدد تایمر مدت ارائه را به دقیقه وارد کنید (یا `uiOptions.duration`). در دقایق آخر زرد و بعد از پایان وقت قرمز و منفی می‌شود.
-- نشانگر لیزری (`Z`)، قلم برای نوشتن روی اسلاید (`D`) و پاک کردن نوشته‌های اسلاید (`E`). نوشته‌ها برای هر اسلاید جدا نگه داشته می‌شوند.
-- پیش‌نمایش اسلاید با بردن موس روی فهرست
-- رفتن به اسلاید با شماره (`G`) با اعداد فارسی
-- بزرگ‌نمایی، کوچک‌نمایی و بازنشانی (۵۰٪ تا ۳۰۰٪)
-- انتخاب تم (انتخاب کاربر ذخیره می‌شود)
-- منوی خروجی:
-  - **PDF**: نمای چاپ reveal.js را در تب جدید باز می‌کند و پنجره‌ی چاپ را نشان می‌دهد؛ «Save as PDF» را انتخاب کنید.
-  - **JSON**: عنوان، متن، یادداشت و Markdown هر اسلاید
-  - **Markdown**: اسلایدها با جداکننده‌ی `---` و یادداشت‌ها با `Note:` (قابل استفاده با پلاگین markdown خود reveal.js)
-  - **HTML**: نسخه‌ی کامل ارائه با آدرس‌های مطلق برای CSS و اسکریپت‌ها (به اینترنت/مسیر اصلی نیاز دارد)
-  - **HTML آفلاین**: یک فایل تنها که CSS، اسکریپت‌ها، فونت و تصاویر داخلش است و بدون اینترنت اجرا می‌شود. باید ارائه را از سرور یا نسخه‌ی آنلاین باز کرده باشید؛ مرورگر در حالت `file://` اجازه‌ی خواندن فایل‌ها را نمی‌دهد.
-  - **یادداشت‌های سخنران**: فایل متنی، به ترتیب اسلایدها
-- نمایش یادداشت‌ها روی صفحه (`<aside class="notes">`)
-- دکمه‌ی پنجره‌ی سخنران (اگر پلاگین `RevealNotes` بارگذاری شده باشد)
-- دکمه‌ی تمام‌صفحه
+`rtlOptions.lang` زبان برچسب‌ها را تعیین می‌کند (`'fa'` پیش‌فرض، `'ar'`، `'en'`) و `rtlOptions.digits` نوع رقم را (`'persian'`، `'arabic'`، `'latin'`). جدول کامل تنظیمات و کلیدها در [بخش انگلیسی](#english) است.
 
-نوار ابزار بعد از چند ثانیه بی‌حرکتی موس کم‌رنگ و پنهان می‌شود. با دکمه‌ی ▾ یا کلید `T` کاملاً پنهان می‌شود و فقط یک دکمه‌ی کوچک ▴ برای برگرداندنش می‌ماند؛ این انتخاب ذخیره می‌شود. نوار پیشرفت همان `progress: true` خود reveal.js است.
+### تم‌ها
 
-</div>
+دو تم مخصوص فارسی و عربی: **پارسی روشن** (`themes/parsi-light.css`) و **پارسی تیره** (`themes/parsi-dark.css`). همه‌ی ۱۴ تم reveal.js هم کار می‌کنند.
 
-```html
-<link rel="stylesheet" id="theme" href="reveal.js/dist/theme/white.css">
-<link rel="stylesheet" href="reveal-rtl/core/ui.css">
-<script src="reveal-rtl/dist/reveal-rtl-ui.js"></script>
-<script>
-  Reveal.initialize({
-    progress: true,
-    uiOptions: {
-      themes: [
-        { name: 'سفید', href: 'reveal.js/dist/theme/white.css' },
-        { name: 'مشکی', href: 'reveal.js/dist/theme/black.css' }
-      ]
-    },
-    plugins: [ RevealRTL(), RevealRTLUI() ]
-  });
-</script>
-```
+### نوشتن با Markdown
 
-<div dir="rtl">
-
-| گزینه‌ی `uiOptions` | پیش‌فرض | توضیح |
-|---|---|---|
-| `themes` | `[]` | تم‌های منوی انتخاب تم: `{ name, href }` |
-| `themeLink` | `'#theme'` | انتخابگر تگ `<link>` تم |
-| `digits` | مثل `rtl` | اعداد فارسی در تایمر و ساعت |
-| `idle` | `3000` | میلی‌ثانیه تا پنهان شدن نوار ابزار |
-| `duration` | `totalTime` یا خالی | مدت ارائه به دقیقه؛ تایمر معکوس می‌شمارد |
-| `warnAt` | ۵ (یا ۲۰٪ مدت کوتاه) | چند دقیقه مانده به پایان، تایمر زرد شود |
-
-عنوان هر اسلاید در فهرست از اولین `h1` تا `h3` خوانده می‌شود، یا از `data-menu-title`.
-
-در صفحه‌های کوچک‌تر از ۶۴۰ پیکسل، ساعت، زوم، انتخاب تم، پنجره‌ی سخنران و تمام‌صفحه از نوار ابزار حذف می‌شوند تا نوار در یک خط جا شود.
+پلاگین markdown خود reveal.js را قبل از `RevealRTL()` بگذارید؛ نمونه در [`demo/markdown.html`](demo/markdown.html).
 
 ### موبایل
 
-reveal.js 6 در عرض کمتر از ۴۳۵ پیکسل خودکار به «نمای اسکرولی» می‌رود: اسلایدها زیر هم می‌آیند و کشیدن انگشت به چپ و راست کار نمی‌کند. برای ارائه‌ی اسلاید به اسلاید روی گوشی، این را خاموش کنید:
-
-</div>
-
-```js
-Reveal.initialize({ scrollActivationWidth: null, /* ... */ });
-```
-
-<div dir="rtl">
-
-### پنجره‌ی سخنران
-
-پنجره‌ی سخنران reveal.js (کلید `S`) اسلاید فعلی، اسلاید بعدی، یادداشت‌ها و زمان را برای ارائه‌دهنده نشان می‌دهد. با بارگذاری پلاگین `notes` خود reveal.js، پلاگین `RevealRTL` این پنجره را خودکار راست‌به‌چپ می‌کند: چیدمان قرینه، برچسب‌های فارسی و اعداد فارسی.
-
-</div>
-
-```html
-<script src="reveal.js/dist/plugin/notes.js"></script>
-<script>
-  Reveal.initialize({ plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ] });
-</script>
-```
-
-<div dir="rtl">
-
-پنجره‌ی سخنران یک pop-up است؛ اگر مرورگر آن را مسدود کرد، اجازه‌ی pop-up را برای صفحه بدهید.
-
-برای اینکه عددی لاتین بماند، کلاس `no-fa-digits` یا `dir="ltr"` بدهید.
-
-دمو: [demo/index.html](demo/index.html) را مستقیم در مرورگر باز کنید. بعد از تغییر کد پلاگین، `npm run build` را اجرا کنید.
+برای اینکه روی گوشی اسلاید به اسلاید (با کشیدن انگشت) کار کند، `scrollActivationWidth: null` را تنظیم کنید.
 
 </div>
 
 ---
 
-## English
+<a id="العربية"></a>
 
-Plugin for right-to-left (Persian) presentations in reveal.js 6.
+## العربية
 
-- Turns on reveal.js `rtl` mode (direction, keyboard, progress bar)
-- Fixes theme list indentation, table alignment and the forced `sans-serif` font
-- Vazirmatn bundled (variable font, works offline; override with `--rtl-font`; OFL license in `fonts/OFL.txt`)
-- Persian digits in slide text and slide number (code is left alone)
-- Jalali dates via `<time data-jalali>`
-- `pre`, `code` and `dir="ltr"` content stays left-to-right
-- RTL layout, Persian labels and digits in the notes plugin speaker view (`S`)
-- Optional `RevealRTLUI` plugin (`plugin/ui.js` + `core/ui.css`): slide list with search (`M`), first/last buttons, grid view, timer that survives page refresh (count-down with warnings via click or `uiOptions.duration`), laser pointer (`Z`), pen (`D`) and erase (`E`), slide preview on hover, Persian go-to-slide (`G`), clock, zoom in/out/reset, theme switcher, export menu (PDF via print view, JSON, Markdown, standalone HTML, speaker notes), on-slide notes, fullscreen, and a hide/show toggle for the toolbar (`T`)
+<div dir="rtl">
 
-Options (`rtlOptions` in `Reveal.initialize`):
+**reveal-rtl** إضافتان لإنشاء عروض تقديمية من اليمين إلى اليسار باستخدام reveal.js 6، مع دعم كامل للعربية والفارسية.
 
-| Option | Default | Description |
-|---|---|---|
-| `digits` | `true` | Convert digits to Persian in slides and slide number |
+### التثبيت
 
-Tests:
+</div>
 
 ```bash
-npm test                 # unit tests (node:test)
-npx playwright install chromium
-npm run test:e2e         # browser tests (Playwright), desktop + mobile
+npm install reveal.js reveal-rtl
 ```
 
-Browser tests serve reveal.js from `node_modules` and stub Google Fonts, so they run offline. If the Playwright Chromium download is unavailable, use an installed browser: `PW_CHANNEL=msedge npm run test:e2e` (or `chrome`).
+<div dir="rtl">
 
-CI (GitHub Actions) runs both suites and fails if `dist/` is out of date with the sources — run `npm run build` before committing.
+أو مباشرةً من CDN دون تثبيت — المثال الكامل في قسم [Quick start](#quick-start) أعلاه. اضبط اللغة العربية هكذا:
 
-## License
+</div>
 
-MIT
+```js
+Reveal.initialize({
+  rtlOptions: { lang: 'ar' },   // واجهة عربية وأرقام عربية ١٢٣
+  plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ]
+});
+```
+
+<div dir="rtl">
+
+### إضافة RevealRTL
+
+- تفعيل وضع `rtl` في reveal.js قبل العرض الأول (الاتجاه، الأسهم، السحب، شريط التقدم)
+- إصلاح المسافات البادئة للقوائم ومحاذاة الجداول والخط في سمات reveal.js
+- **خط Vazirmatn مضمّن** يعمل دون اتصال بالإنترنت
+- **أرقام عربية** (أو فارسية أو لاتينية) في نص الشرائح ورقم الشريحة وصفحات PDF والقوائم المرقمة
+- الشيفرة والنصوص `dir="ltr"` تبقى من اليسار إلى اليمين بأرقام لاتينية
+- **مساعدة لوحة المفاتيح** (`?`) و**الملاحظات** و**نافذة المتحدث** (`S`) بالعربية ومن اليمين إلى اليسار
+- **الانتقال إلى شريحة** (`G`) بالأرقام العربية
+
+### إضافة RevealRTLUI (شريط الأدوات)
+
+- **قائمة الشرائح** مع البحث (`M`) ومعاينة عند تمرير الفأرة
+- الشريحة الأولى والأخيرة، **العرض الشبكي**
+- **مؤقت** لا يتوقف عند إعادة التحميل؛ انقر عليه لتحديد المدة فيعدّ **تنازليًا** (أصفر قرب النهاية، أحمر وسالب بعد انتهاء الوقت)
+- **مؤشر ليزر** (`Z`) و**قلم** (`D`) و**مسح** (`E`) لكل شريحة على حدة
+- التكبير والتصغير، **اختيار السمة**، الساعة، الملاحظات، نافذة المتحدث، ملء الشاشة
+- **التصدير**: PDF وJSON وMarkdown وHTML و**HTML دون اتصال في ملف واحد** وملاحظات المتحدث
+- إخفاء شريط الأدوات وإظهاره (`T`)؛ تخطيط مضغوط على الهاتف
+
+### الخيارات
+
+`rtlOptions.lang` يحدد لغة الواجهة (`'fa'` أو `'ar'` أو `'en'`) و`rtlOptions.digits` نوع الأرقام (`'persian'` أو `'arabic'` أو `'latin'`). الجداول الكاملة للخيارات والمفاتيح في [القسم الإنجليزي](#english).
+
+### الهاتف
+
+لكي يعمل العرض شريحةً بشريحة بالسحب على الهاتف، اضبط `scrollActivationWidth: null`.
+
+</div>
+
+---
+
+<div align="center">
+
+MIT © Dara Joukar · Vazirmatn font: [SIL OFL 1.1](fonts/OFL.txt) · Built on [reveal.js](https://revealjs.com)
+
+</div>

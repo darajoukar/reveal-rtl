@@ -2,6 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { toPersianDigits, toLatinDigits, formatJalali, normalizeForSearch, formatDuration, formatSlideNumber, timerDisplay } from './rtl.js';
 
+test( 'localizeDigits supports Persian, Arabic and Latin', async () => {
+	const { localizeDigits } = await import( './rtl.js' );
+	assert.equal( localizeDigits( 'v2.10', 'persian' ), 'v۲.۱۰' );
+	assert.equal( localizeDigits( 'v2.10', 'arabic' ), 'v٢.١٠' );
+	assert.equal( localizeDigits( 'v2.10', 'latin' ), 'v2.10' );
+} );
+
 test( 'toLatinDigits converts Persian and Arabic digits', () => {
 	assert.equal( toLatinDigits( '۱۲ و ٣٤' ), '12 و 34' );
 } );

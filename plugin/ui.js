@@ -1,4 +1,5 @@
-import { toPersianDigits, toLatinDigits, normalizeForSearch, timerDisplay } from '../core/rtl.js';
+import { localizeDigits, toLatinDigits, normalizeForSearch, timerDisplay } from '../core/rtl.js';
+import { resolveLocale, DIGIT_LOCALES } from '../core/i18n.js';
 import { createDrawingLayer } from '../core/draw.js';
 import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, standaloneHTML, offlineHTML, safeFileName, download } from '../core/export.js';
 
@@ -7,7 +8,8 @@ import { getSlideTitle, slidesToJSON, slidesToMarkdown, slidesToNotesText, stand
  * and a slide list panel with search. Pair with core/ui.css.
  *
  * Options go in `uiOptions` in Reveal.initialize():
- *   digits:    Persian digits in timer and clock (default: same as config.rtl)
+ *   digits:    digit style for timer, clock and list numbers (default: rtlOptions.digits / the language default)
+ * Labels follow rtlOptions.lang ('fa' | 'ar' | 'en') and rtlOptions.labels (see core/i18n.js).
  *   themes:    [ { name, href } ] shown in the theme menu
  *   themeLink: selector of the theme <link> to swap (default '#theme')
  *   idle:      ms without mouse movement before the toolbar hides (default 3000)
@@ -62,13 +64,15 @@ export default () => ( {
 
 		const config = deck.getConfig();
 		const options = {
-			digits: !!config.rtl,
 			themes: [],
 			themeLink: '#theme',
 			idle: 3000,
 			...config.uiOptions
 		};
-		const digits = text => options.digits ? toPersianDigits( text ) : String( text );
+		// Language and digits come from rtlOptions (shared with RevealRTL); uiOptions.digits overrides.
+		const locale = resolveLocale( { ...config.rtlOptions, ...( 'digits' in options ? { digits: options.digits } : {} ) } );
+		const { t } = locale;
+		const digits = text => localizeDigits( text, locale.digits );
 
 		const root = deck.getRevealElement();
 		const themeLink = document.querySelector( options.themeLink );
@@ -96,7 +100,7 @@ export default () => ( {
 		const toolbar = createToolbar();
 		root.append( panel.element, toolbar.element );
 
-		deck.addKeyBinding( { keyCode: KEY_M, key: 'M', description: 'فهرست اسلایدها' }, () => panel.toggle() );
+		deck.addKeyBinding( { keyCode: KEY_M, key: 'M', description: t( 'slideList' ) }, () => panel.toggle() );
 
 		// Build the list after all plugins (markdown, rtl digits) have changed the slides.
 		deck.on( 'ready', () => {
@@ -107,16 +111,16 @@ export default () => ( {
 
 		function createPanel() {
 			const element = el( 'nav', 'rtlui-panel' );
-			element.setAttribute( 'aria-label', 'فهرست اسلایدها' );
+			element.setAttribute( 'aria-label', t( 'slideList' ) );
 			element.hidden = true;
 
 			const search = el( 'input', 'rtlui-search' );
 			search.type = 'search';
-			search.placeholder = 'جستجو در اسلایدها…';
-			search.setAttribute( 'aria-label', 'جستجو در اسلایدها' );
+			search.placeholder = t( 'search' );
+			search.setAttribute( 'aria-label', t( 'searchLabel' ) );
 
 			const list = el( 'ol', 'rtlui-list' );
-			const empty = el( 'p', 'rtlui-empty', 'نتیجه‌ای پیدا نشد' );
+			const empty = el( 'p', 'rtlui-empty', t( 'noResults' ) );
 			empty.hidden = true;
 
 			// Hover preview: a scaled copy of the slide beside the panel (mouse only; touch has no hover).
@@ -176,7 +180,7 @@ export default () => ( {
 				list.replaceChildren();
 				items = deck.getSlides().map( ( slide, i ) => {
 					const { h, v } = deck.getIndices( slide );
-					const title = getSlideTitle( slide, i );
+					const title = getSlideTitle( slide, i, t );
 
 					const li = el( 'li' );
 					const button = el( 'button', 'rtlui-item' );
@@ -225,18 +229,18 @@ export default () => ( {
 		function createToolbar() {
 			const element = el( 'div', 'rtlui-toolbar' );
 			element.setAttribute( 'role', 'toolbar' );
-			element.setAttribute( 'aria-label', 'ابزارهای ارائه' );
+			element.setAttribute( 'aria-label', t( 'toolbar' ) );
 
-			const menuButton = button( ICONS.menu, 'فهرست اسلایدها (M)', () => panel.toggle() );
+			const menuButton = button( ICONS.menu, `${ t( 'slideList' ) } (M)`, () => panel.toggle() );
 			menuButton.setAttribute( 'aria-expanded', 'false' );
 
-			const firstButton = button( ICONS.first, 'اولین اسلاید', () => deck.slide( 0 ) );
-			const lastButton = button( ICONS.last, 'آخرین اسلاید', () => deck.slide( Number.MAX_VALUE ) );
+			const firstButton = button( ICONS.first, t( 'first' ), () => deck.slide( 0 ) );
+			const lastButton = button( ICONS.last, t( 'last' ), () => deck.slide( Number.MAX_VALUE ) );
 			firstButton.classList.add( 'rtlui-mirror' );
 			lastButton.classList.add( 'rtlui-mirror' );
 
 			// Grid view = reveal.js overview mode (also Esc / O).
-			const gridButton = button( ICONS.grid, 'نمای شبکه‌ای (Esc)', () => deck.toggleOverview() );
+			const gridButton = button( ICONS.grid, `${ t( 'grid' ) } (Esc)`, () => deck.toggleOverview() );
 			const syncGrid = () => gridButton.setAttribute( 'aria-pressed', String( deck.isOverview() ) );
 			syncGrid();
 			deck.on( 'overviewshown', syncGrid );
@@ -258,12 +262,12 @@ export default () => ( {
 				timerValue.classList.toggle( 'rtlui-timer-warn', state === 'warn' );
 				timerValue.classList.toggle( 'rtlui-timer-over', state === 'over' );
 				setLabel( timerValue, timer.duration
-					? `زمان باقی‌مانده از ${ digits( timer.duration / 60 ) } دقیقه؛ برای تغییر مدت کلیک کنید`
-					: 'زمان سپری‌شده؛ برای تعیین مدت ارائه (شمارش معکوس) کلیک کنید' );
+					? t( 'timerRemaining', { m: digits( timer.duration / 60 ) } )
+					: t( 'timerElapsed' ) );
 			};
 			timerValue.addEventListener( 'click', () => {
 				const current = timer.duration ? digits( timer.duration / 60 ) : '';
-				const answer = window.prompt( 'مدت ارائه به دقیقه (خالی = شمارش رو به جلو):', current );
+				const answer = window.prompt( t( 'timerPrompt' ), current );
 				if( answer === null ) return;
 				const minutes = parseFloat( toLatinDigits( answer.trim() ) );
 				timer.duration = minutes > 0 ? Math.round( minutes * 60 ) : null;
@@ -271,7 +275,7 @@ export default () => ( {
 				renderTimer();
 			} );
 
-			const playButton = button( ICONS.play, 'شروع تایمر', () => {
+			const playButton = button( ICONS.play, t( 'play' ), () => {
 				if( isRunning() ) {
 					timer.base = elapsedSeconds();
 					timer.startedAt = null;
@@ -284,11 +288,11 @@ export default () => ( {
 			} );
 			const renderPlayButton = () => {
 				playButton.innerHTML = isRunning() ? ICONS.pause : ICONS.play;
-				setLabel( playButton, isRunning() ? 'توقف تایمر' : 'شروع تایمر' );
+				setLabel( playButton, isRunning() ? t( 'pause' ) : t( 'play' ) );
 			};
 			renderPlayButton();
 
-			const resetButton = button( ICONS.reset, 'صفر کردن تایمر', () => {
+			const resetButton = button( ICONS.reset, t( 'resetTimer' ), () => {
 				timer.base = 0;
 				if( isRunning() ) timer.startedAt = Date.now();
 				saveTimer( timer );
@@ -297,7 +301,7 @@ export default () => ( {
 
 			// Clock
 			const clock = el( 'time', 'rtlui-clock' );
-			const clockFormat = new Intl.DateTimeFormat( options.digits ? 'fa-IR' : undefined, { hour: '2-digit', minute: '2-digit' } );
+			const clockFormat = new Intl.DateTimeFormat( DIGIT_LOCALES[ locale.digits ], { hour: '2-digit', minute: '2-digit' } );
 
 			const tick = () => {
 				clock.textContent = clockFormat.format( new Date() );
@@ -317,7 +321,7 @@ export default () => ( {
 			let zoom = 1;
 			const zoomReset = el( 'button', 'rtlui-button rtlui-zoom-value' );
 			zoomReset.type = 'button';
-			setLabel( zoomReset, 'بازنشانی بزرگ‌نمایی' );
+			setLabel( zoomReset, t( 'zoomReset' ) );
 			const setZoom = value => {
 				zoom = Math.min( ZOOM_MAX, Math.max( ZOOM_MIN, Math.round( value * 10 ) / 10 ) );
 				root.style.setProperty( '--rtlui-zoom', zoom );
@@ -326,23 +330,23 @@ export default () => ( {
 			zoomReset.addEventListener( 'click', () => setZoom( 1 ) );
 			setZoom( 1 );
 			groups.push( wideOnly( group(
-				button( ICONS.zoomIn, 'بزرگ‌نمایی', () => setZoom( zoom + ZOOM_STEP ) ),
+				button( ICONS.zoomIn, t( 'zoomIn' ), () => setZoom( zoom + ZOOM_STEP ) ),
 				zoomReset,
-				button( ICONS.zoomOut, 'کوچک‌نمایی', () => setZoom( zoom - ZOOM_STEP ) )
+				button( ICONS.zoomOut, t( 'zoomOut' ), () => setZoom( zoom - ZOOM_STEP ) )
 			) ) );
 
 			if( options.themes.length && themeLink ) groups.push( wideOnly( group( themeSelect() ) ) );
 
 			groups.push( group( exportMenu() ) );
 
-			const notesButton = button( ICONS.notes, 'نمایش یادداشت‌ها', () => {
+			const notesButton = button( ICONS.notes, t( 'showNotes' ), () => {
 				const show = !deck.getConfig().showNotes;
 				deck.configure( { showNotes: show } );
 				notesButton.setAttribute( 'aria-pressed', String( show ) );
 			} );
 			notesButton.setAttribute( 'aria-pressed', String( !!config.showNotes ) );
 
-			const fullscreenButton = button( ICONS.fullscreen, 'تمام‌صفحه', () => {
+			const fullscreenButton = button( ICONS.fullscreen, t( 'fullscreen' ), () => {
 				if( document.fullscreenElement ) document.exitFullscreen();
 				else document.documentElement.requestFullscreen?.();
 			} );
@@ -350,13 +354,13 @@ export default () => ( {
 			const noteControls = [ notesButton ];
 			// Speaker view needs the notes plugin (RevealNotes).
 			if( deck.hasPlugin( 'notes' ) ) {
-				noteControls.push( wideOnly( button( ICONS.speaker, 'پنجره‌ی سخنران (S)', () => deck.getPlugin( 'notes' ).open() ) ) );
+				noteControls.push( wideOnly( button( ICONS.speaker, `${ t( 'speakerView' ) } (S)`, () => deck.getPlugin( 'notes' ).open() ) ) );
 			}
 
 			// Laser pointer and pen (core/draw.js). Keys: Z laser, D pen, E erase this slide's drawing.
-			const laserButton = button( ICONS.laser, 'نشانگر لیزری (Z)', () => toggleTool( 'laser' ) );
-			const penButton = button( ICONS.pen, 'قلم (D)', () => toggleTool( 'pen' ) );
-			const eraseButton = button( ICONS.erase, 'پاک کردن نوشته‌های این اسلاید (E)', () => drawing.clear() );
+			const laserButton = button( ICONS.laser, `${ t( 'laser' ) } (Z)`, () => toggleTool( 'laser' ) );
+			const penButton = button( ICONS.pen, `${ t( 'pen' ) } (D)`, () => toggleTool( 'pen' ) );
+			const eraseButton = button( ICONS.erase, `${ t( 'erase' ) } (E)`, () => drawing.clear() );
 			const toggleTool = name => {
 				const active = drawing.setTool( name );
 				laserButton.setAttribute( 'aria-pressed', String( active === 'laser' ) );
@@ -364,19 +368,19 @@ export default () => ( {
 			};
 			laserButton.setAttribute( 'aria-pressed', 'false' );
 			penButton.setAttribute( 'aria-pressed', 'false' );
-			deck.addKeyBinding( { keyCode: KEY_Z, key: 'Z', description: 'نشانگر لیزری' }, () => toggleTool( 'laser' ) );
-			deck.addKeyBinding( { keyCode: KEY_D, key: 'D', description: 'قلم' }, () => toggleTool( 'pen' ) );
-			deck.addKeyBinding( { keyCode: KEY_E, key: 'E', description: 'پاک کردن نوشته‌های اسلاید' }, () => drawing.clear() );
+			deck.addKeyBinding( { keyCode: KEY_Z, key: 'Z', description: t( 'laser' ) }, () => toggleTool( 'laser' ) );
+			deck.addKeyBinding( { keyCode: KEY_D, key: 'D', description: t( 'pen' ) }, () => toggleTool( 'pen' ) );
+			deck.addKeyBinding( { keyCode: KEY_E, key: 'E', description: t( 'erase' ) }, () => drawing.clear() );
 			groups.push( wideOnly( group( laserButton, penButton, eraseButton ) ) );
 
 			groups.push( group( ...noteControls, wideOnly( fullscreenButton ) ) );
 
 			// Hide/show: the toolbar collapses to a small handle; choice is remembered.
-			const hideButton = button( ICONS.hide, 'پنهان کردن نوار ابزار (T)', () => setHidden( true ) );
+			const hideButton = button( ICONS.hide, `${ t( 'hideToolbar' ) } (T)`, () => setHidden( true ) );
 			groups.push( group( hideButton ) );
 			element.append( ...groups );
 
-			const showButton = button( ICONS.show, 'نمایش نوار ابزار (T)', () => setHidden( false ) );
+			const showButton = button( ICONS.show, `${ t( 'showToolbar' ) } (T)`, () => setHidden( false ) );
 			showButton.classList.add( 'rtlui-show' );
 			root.append( showButton );
 
@@ -391,7 +395,7 @@ export default () => ( {
 			try { storedHidden = localStorage.getItem( TOOLBAR_STORAGE_KEY ) === '1'; } catch( e ) { /* storage blocked */ }
 			setHidden( storedHidden );
 
-			deck.addKeyBinding( { keyCode: KEY_T, key: 'T', description: 'پنهان/نمایش نوار ابزار' }, () => setHidden( !root.classList.contains( 'rtlui-hidden' ) ) );
+			deck.addKeyBinding( { keyCode: KEY_T, key: 'T', description: t( 'toggleToolbar' ) }, () => setHidden( !root.classList.contains( 'rtlui-hidden' ) ) );
 
 			// Keep reveal.js shortcuts (arrows, Esc) working after a toolbar click, except where the key
 			// belongs to the control: arrows in the theme select and export menu, Enter/Space on buttons.
@@ -412,13 +416,13 @@ export default () => ( {
 
 		function exportMenu() {
 			const wrapper = el( 'div', 'rtlui-menu-wrapper' );
-			const trigger = button( ICONS.export, 'خروجی گرفتن', () => setOpen( menu.hidden ) );
+			const trigger = button( ICONS.export, t( 'export' ), () => setOpen( menu.hidden ) );
 			trigger.setAttribute( 'aria-haspopup', 'menu' );
 			trigger.setAttribute( 'aria-expanded', 'false' );
 
 			const menu = el( 'div', 'rtlui-menu' );
 			menu.setAttribute( 'role', 'menu' );
-			menu.setAttribute( 'aria-label', 'خروجی گرفتن' );
+			menu.setAttribute( 'aria-label', t( 'export' ) );
 			menu.hidden = true;
 
 			const title = document.title || 'presentation';
@@ -426,12 +430,12 @@ export default () => ( {
 			const slides = () => deck.getSlides().map( element => ( { element, ...deck.getIndices( element ) } ) );
 
 			const items = [
-				[ 'PDF (چاپ)', exportPDF ],
-				[ 'JSON', () => download( fileName( 'json' ), slidesToJSON( slides(), title ), 'application/json' ) ],
-				[ 'متن Markdown', () => download( fileName( 'md' ), slidesToMarkdown( slides() ), 'text/markdown' ) ],
-				[ 'HTML', () => download( fileName( 'html' ), standaloneHTML( pageSnapshot.cloneNode( true ), document.baseURI ), 'text/html' ) ],
-				[ 'HTML آفلاین (یک فایل)', exportOfflineHTML ],
-				[ 'یادداشت‌های سخنران', () => download( `${ safeFileName( title ) }-notes.txt`, slidesToNotesText( slides(), title ), 'text/plain' ) ]
+				[ t( 'exportPDF' ), exportPDF ],
+				[ t( 'exportJSON' ), () => download( fileName( 'json' ), slidesToJSON( slides(), title, t ), 'application/json' ) ],
+				[ t( 'exportMarkdown' ), () => download( fileName( 'md' ), slidesToMarkdown( slides() ), 'text/markdown' ) ],
+				[ t( 'exportHTML' ), () => download( fileName( 'html' ), standaloneHTML( pageSnapshot.cloneNode( true ), document.baseURI ), 'text/html' ) ],
+				[ t( 'exportOffline' ), exportOfflineHTML ],
+				[ t( 'exportNotes' ), () => download( `${ safeFileName( title ) }-notes.txt`, slidesToNotesText( slides(), title, t ), 'text/plain' ) ]
 			].map( ( [ label, action ] ) => {
 				const item = el( 'button', 'rtlui-menu-item', label );
 				item.type = 'button';
@@ -477,8 +481,8 @@ export default () => ( {
 				download( `${ safeFileName( title ) }-offline.html`, html, 'text/html' );
 				if( failed.length ) {
 					// Browsers block fetch() for file:// pages, so nothing local can be inlined there.
-					const hint = location.protocol === 'file:' ? '\nبرای خروجی آفلاین کامل، ارائه را از یک سرور (مثلاً npm run demo) یا نسخه‌ی آنلاین باز کنید.' : '';
-					window.alert( `${ toPersianDigits( failed.length ) } فایل داخل خروجی قرار نگرفت و هنوز به اینترنت یا مسیر اصلی نیاز دارد:\n${ failed.join( '\n' ) }${ hint }` );
+					const hint = location.protocol === 'file:' ? '\n' + t( 'offlineFileHint' ) : '';
+					window.alert( `${ t( 'offlineFailed', { n: digits( failed.length ) } ) }\n${ failed.join( '\n' ) }${ hint }` );
 				}
 			}
 			finally {
@@ -497,8 +501,8 @@ export default () => ( {
 
 		function themeSelect() {
 			const select = el( 'select', 'rtlui-theme' );
-			select.setAttribute( 'aria-label', 'انتخاب تم' );
-			select.title = 'انتخاب تم';
+			select.setAttribute( 'aria-label', t( 'theme' ) );
+			select.title = t( 'theme' );
 			const current = themeLink.getAttribute( 'href' );
 			options.themes.forEach( theme => {
 				const option = el( 'option', '', theme.name );

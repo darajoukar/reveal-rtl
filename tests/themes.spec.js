@@ -1,13 +1,14 @@
 import { test, expect, openDemo } from './helpers.js';
 
-const THEMES = [ 'beige', 'black-contrast', 'black', 'blood', 'dracula', 'league', 'moon', 'night', 'serif', 'simple', 'sky', 'solarized', 'white-contrast', 'white' ];
+const OWN_THEMES = [ 'parsi-light', 'parsi-dark' ];
+const THEMES = [ ...OWN_THEMES, 'beige', 'black-contrast', 'black', 'blood', 'dracula', 'league', 'moon', 'night', 'serif', 'simple', 'sky', 'solarized', 'white-contrast', 'white' ];
 
 for( const theme of THEMES ) {
 	test( `RTL layout holds in the ${ theme } theme`, async ( { page } ) => {
 		await openDemo( page, '#/2' );
 		await page.evaluate( async name => {
 			const link = document.getElementById( 'theme' );
-			const href = `https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/${ name }.css`;
+			const href = name.startsWith( 'parsi-' ) ? new URL( `../themes/${ name }.css`, location.href ).href : `https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/${ name }.css`;
 			// Same URL (the demo's default theme) fires no load event.
 			if( link.href !== href ) {
 				const loaded = new Promise( resolve => link.addEventListener( 'load', resolve, { once: true } ) );

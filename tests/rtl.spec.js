@@ -78,3 +78,46 @@ test( 'jump to slide (G) accepts Persian digits and has a Persian placeholder', 
 	await page.keyboard.press( 'Enter' );
 	await expect.poll( () => slideIndex( page ) ).toBe( 5 );
 } );
+
+test( 'Arabic UI: labels, Arabic-Indic digits, help and jump placeholder', async ( { page } ) => {
+	await openDemo( page, '?lang=ar' );
+	await expect( page.locator( '.reveal' ) ).toHaveAttribute( 'lang', 'ar' );
+	await expect( page.locator( '.rtlui-toolbar' ).getByRole( 'button', { name: 'الشريحة الأولى', exact: true } ) ).toBeAttached();
+	await expect( page.locator( '.slide-number' ) ).toHaveText( /^\s*١ \/ ٨\s*$/ );
+	await page.evaluate( () => Reveal.slide( 3 ) );
+	await expect( page.locator( '.slides > section.present ol' ) ).toHaveCSS( 'list-style-type', 'arabic-indic' );
+	await page.keyboard.press( 'Shift+Slash' );
+	await expect( page.locator( '.r-overlay-help-content .title' ) ).toHaveText( 'اختصارات لوحة المفاتيح' );
+	await page.keyboard.press( 'Escape' );
+	await page.keyboard.press( 'g' );
+	await expect( page.locator( '.jump-to-slide-input' ) ).toHaveAttribute( 'placeholder', 'الانتقال إلى شريحة (رقم أو نص)' );
+} );
+
+test( 'English UI keeps Latin digits and reveal.js help, with RTL arrow hints', async ( { page } ) => {
+	await openDemo( page, '?lang=en' );
+	await expect( page.locator( '.rtlui-toolbar' ).getByRole( 'button', { name: 'First slide', exact: true } ) ).toBeAttached();
+	// Latin digits: reveal.js renders the number itself, in separate spans (whitespace-normalized match).
+	await expect( page.locator( '.slide-number' ) ).toHaveText( '1 / 8' );
+	await expect( page.locator( 'time[data-jalali]' ) ).toHaveText( /\d{4}/ );
+	await page.keyboard.press( 'Shift+Slash' );
+	await expect( page.locator( '.r-overlay-help-content' ) ).toContainText( 'Next slide' );
+	await expect( page.locator( '.r-overlay-help-content' ) ).toContainText( 'Left: next slide' );
+} );
+
+test( 'digits option overrides the language default', async ( { page } ) => {
+	await openDemo( page, '?lang=fa&digits=latin' );
+	await expect( page.locator( '.rtlui-toolbar' ).getByRole( 'button', { name: 'اولین اسلاید', exact: true } ) ).toBeAttached();
+	await expect( page.locator( '.slide-number' ) ).toHaveText( '1 / 8' );
+	await expect( page.locator( 'li', { hasText: 'اعداد فارسی' } ) ).toContainText( '1404' );
+} );
+
+test( 'Markdown demo: slides, notes and RTL from Markdown', async ( { page } ) => {
+	await page.goto( '/demo/markdown.html' );
+	await page.locator( '.reveal.ready' ).waitFor();
+	expect( await page.evaluate( () => Reveal.getTotalSlides() ) ).toBe( 7 );
+	await expect( page.locator( '.slide-number' ) ).toHaveText( /۱ \/ ۷/ );
+	await expect( page.locator( '.rtlui-item' ) ).toHaveCount( 7 );
+	await expect( page.locator( 'li', { hasText: 'اعداد' } ) ).toContainText( '۲۰۲۶' );
+	await expect( page.locator( 'pre code' ) ).toContainText( '42' );
+	await expect( page.locator( 'aside.notes' ).first() ).toContainText( 'یادداشت سخنران' );
+} );

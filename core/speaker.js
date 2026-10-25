@@ -1,6 +1,7 @@
-import { toPersianDigits } from './rtl.js';
+import { localizeDigits } from './rtl.js';
+import { resolveLocale } from './i18n.js';
 
-// RTL + Persian labels for the reveal.js notes plugin speaker view (reveal.js 6).
+// RTL + localized labels for the reveal.js notes plugin speaker view (reveal.js 6).
 // The speaker view is a same-origin popup whose markup comes from the notes plugin,
 // so we patch its document after it opens instead of shipping our own copy.
 
@@ -32,26 +33,29 @@ body[data-speaker-layout="tall"] #speaker-controls { left: auto; right: 45%; }
 .speaker-controls-time .timer { text-align: right; }
 `;
 
+// selector -> i18n key
 const LABELS = [
-	[ '#upcoming-slide .label', 'اسلاید بعدی' ],
-	[ '.speaker-controls-time .reset-button', 'برای صفر کردن کلیک کنید' ],
-	[ '.pacing-title', 'زمان باقی‌مانده‌ی این اسلاید' ],
-	[ '.speaker-controls-notes .label', 'یادداشت‌ها' ]
+	[ '#upcoming-slide .label', 'upcoming' ],
+	[ '.speaker-controls-time .reset-button', 'clickToReset' ],
+	[ '.pacing-title', 'pacing' ],
+	[ '.speaker-controls-notes .label', 'notes' ]
 ];
 
-const LAYOUT_NAMES = { 'default': 'پیش‌فرض', 'wide': 'عریض', 'tall': 'بلند', 'notes-only': 'فقط یادداشت' };
+const LAYOUT_KEYS = { 'default': 'layoutDefault', 'wide': 'layoutWide', 'tall': 'layoutTall', 'notes-only': 'layoutNotesOnly' };
 
 // Elements whose text the speaker view script rewrites every second.
 const LIVE_TEXT_SELECTOR = '.clock-value, .timer, .pacing';
 
-export function applySpeakerRTL( doc, { digits = true } = {} ) {
+// locale: resolveLocale() result ({ lang, digits, t }).
+export function applySpeakerRTL( doc, locale = resolveLocale() ) {
+	const { t, lang, digits } = locale;
 	if( !doc?.head || doc.getElementById( STYLE_ID ) ) return;
 
 	const style = doc.createElement( 'style' );
 	style.id = STYLE_ID;
 	style.textContent = SPEAKER_CSS;
 	doc.head.append( style );
-	doc.documentElement.lang = 'fa';
+	doc.documentElement.lang = lang;
 
 	// Load the Persian font: rtl.css carries the bundled @font-face; also any Vazirmatn stylesheet
 	// the deck links itself. Absolute href, since the popup document is about:blank.
@@ -62,23 +66,23 @@ export function applySpeakerRTL( doc, { digits = true } = {} ) {
 		doc.head.append( copy );
 	} );
 
-	LABELS.forEach( ( [ selector, text ] ) => {
+	LABELS.forEach( ( [ selector, key ] ) => {
 		const el = doc.querySelector( selector );
-		if( el ) el.textContent = text;
+		if( el ) el.textContent = t( key );
 	} );
 
 	// "Time" is a bare text node before the reset button.
 	const timeLabel = doc.querySelector( '.speaker-controls-time > .label' );
-	if( timeLabel?.firstChild?.nodeType === Node.TEXT_NODE ) timeLabel.firstChild.nodeValue = 'زمان ';
+	if( timeLabel?.firstChild?.nodeType === Node.TEXT_NODE ) timeLabel.firstChild.nodeValue = `${ t( 'time' ) } `;
 
 	const layoutSelect = doc.querySelector( '.speaker-layout-dropdown' );
 	const layoutLabel = doc.querySelector( '.speaker-layout-label' );
 	if( layoutSelect && layoutLabel ) {
 		layoutSelect.querySelectorAll( 'option' ).forEach( option => {
-			option.textContent = LAYOUT_NAMES[ option.value ] || option.textContent;
+			if( LAYOUT_KEYS[ option.value ] ) option.textContent = t( LAYOUT_KEYS[ option.value ] );
 		} );
 		const syncLayoutLabel = () => {
-			const text = `چیدمان: ${ layoutSelect.selectedOptions[0]?.textContent || '' }`;
+			const text = `${ t( 'layout' ) }: ${ layoutSelect.selectedOptions[0]?.textContent || '' }`;
 			if( layoutLabel.textContent !== text ) layoutLabel.textContent = text;
 		};
 		syncLayoutLabel();
@@ -86,12 +90,12 @@ export function applySpeakerRTL( doc, { digits = true } = {} ) {
 		new doc.defaultView.MutationObserver( syncLayoutLabel ).observe( layoutLabel, { childList: true, characterData: true, subtree: true } );
 	}
 
-	if( digits ) {
+	if( digits !== 'latin' || lang !== 'en' ) {
 		// Edit text nodes only: the speaker script keeps references to the inner spans.
 		const localize = el => {
 			const walker = doc.createTreeWalker( el, NodeFilter.SHOW_TEXT );
 			for( let node = walker.nextNode(); node; node = walker.nextNode() ) {
-				const text = toPersianDigits( node.nodeValue ).replace( 'AM', 'ق.ظ' ).replace( 'PM', 'ب.ظ' );
+				const text = localizeDigits( node.nodeValue, digits ).replace( 'AM', t( 'am' ) ).replace( 'PM', t( 'pm' ) );
 				if( node.nodeValue !== text ) node.nodeValue = text;
 			}
 		};

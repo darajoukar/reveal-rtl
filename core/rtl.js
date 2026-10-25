@@ -1,16 +1,21 @@
 // Framework-independent RTL helpers. No reveal.js imports here.
 
-const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const DIGITS = { persian: '۰۱۲۳۴۵۶۷۸۹', arabic: '٠١٢٣٤٥٦٧٨٩' };
 
 // Elements whose text must keep Latin digits.
-const SKIP_SELECTOR = 'pre, code, kbd, samp, script, style, math, svg, [dir="ltr"], .no-fa-digits';
+const SKIP_SELECTOR = 'pre, code, kbd, samp, script, style, math, svg, [dir="ltr"], .no-fa-digits, .latin-digits';
 
-export function toPersianDigits( value ) {
-	return String( value ).replace( /[0-9]/g, d => PERSIAN_DIGITS[d] );
+// style: 'persian' | 'arabic' | 'latin' (unchanged)
+export function localizeDigits( value, style = 'persian' ) {
+	const set = DIGITS[ style ];
+	return set ? String( value ).replace( /[0-9]/g, d => set[d] ) : String( value );
 }
 
+export const toPersianDigits = value => localizeDigits( value, 'persian' );
+
 // Converts digits in every text node under root, except inside SKIP_SELECTOR.
-export function persianizeDigits( root ) {
+export function localizeDigitsIn( root, style = 'persian' ) {
+	if( !DIGITS[ style ] ) return;
 	const walker = root.ownerDocument.createTreeWalker( root, NodeFilter.SHOW_TEXT, {
 		acceptNode: node => node.parentElement?.closest( SKIP_SELECTOR )
 			? NodeFilter.FILTER_REJECT
@@ -18,9 +23,11 @@ export function persianizeDigits( root ) {
 	} );
 
 	for( let node = walker.nextNode(); node; node = walker.nextNode() ) {
-		if( /[0-9]/.test( node.nodeValue ) ) node.nodeValue = toPersianDigits( node.nodeValue );
+		if( /[0-9]/.test( node.nodeValue ) ) node.nodeValue = localizeDigits( node.nodeValue, style );
 	}
 }
+
+export const persianizeDigits = root => localizeDigitsIn( root, 'persian' );
 
 // Persian (۱) and Arabic (١) digits to Latin (1).
 export function toLatinDigits( text ) {
@@ -78,14 +85,17 @@ export function formatSlideNumber( format, s ) {
 	}
 }
 
-export function formatJalali( date = new Date(), options = { dateStyle: 'long' } ) {
-	return new Intl.DateTimeFormat( 'fa-IR-u-ca-persian', options ).format( date );
+// Unicode numbering systems for the digit styles.
+const NUMBERING = { persian: 'arabext', arabic: 'arab', latin: 'latn' };
+
+export function formatJalali( date = new Date(), options = { dateStyle: 'long' }, digits = 'persian' ) {
+	return new Intl.DateTimeFormat( `fa-IR-u-ca-persian-nu-${ NUMBERING[ digits ] || 'arabext' }`, options ).format( date );
 }
 
 // Fills <time data-jalali> elements. Uses the datetime attribute when present, otherwise today.
-export function fillJalaliDates( root ) {
+export function fillJalaliDates( root, digits = 'persian' ) {
 	root.querySelectorAll( 'time[data-jalali]' ).forEach( el => {
 		const date = el.dateTime ? new Date( el.dateTime ) : new Date();
-		if( !isNaN( date ) ) el.textContent = formatJalali( date );
+		if( !isNaN( date ) ) el.textContent = formatJalali( date, undefined, digits );
 	} );
 }

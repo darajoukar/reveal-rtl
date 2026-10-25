@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Languages**: `rtlOptions.lang` = `'fa'` (default), `'ar'` or `'en'` for every built-in label — toolbar, slide list, exports, timer, keyboard help, speaker view, notes, jump-to-slide. `rtlOptions.labels` overrides single strings (`core/i18n.js`).
+- **Digit styles**: `rtlOptions.digits` = `'persian'`, `'arabic'` or `'latin'` (default by language) — slide text, slide number, PDF pages, ordered lists, Jalali dates, clock and timer.
+- **Themes**: `themes/parsi-light.css` and `themes/parsi-dark.css`, built from the reveal.js theme template.
+- Persian/Arabic text inside code now joins correctly (script-only Vazirmatn fallback before the monospace font).
+- Markdown demo (`demo/markdown.html`) and a language switcher in the demo.
+- Trilingual README (English, فارسی, العربية) with screenshots; GitHub Pages landing page (`index.html`).
+- `reveal-rtl/themes/*` export.
+
 ## 0.2.0 — 2026-10-25
 
 - Slide number keeps every reveal.js format (`h.v`, `h/v`, `c`, `c/t`) with Persian digits; PDF page numbers are Persian too.

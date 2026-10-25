@@ -16,6 +16,9 @@
 				<h1>ارائه‌ی راست‌به‌چپ</h1>
 				<p>پلاگین RTL برای reveal.js</p>
 				<p><time data-jalali></time></p>
+				<p class="lang-switch" style="font-size: 0.5em">
+					<a href="?lang=fa">فارسی</a> · <a href="?lang=ar">العربية</a> · <a href="?lang=en">English</a> · <a href="markdown.html">نسخه‌ی Markdown</a>
+				</p>
 				<aside class="notes">این یادداشت سخنران است. با دکمه‌ی یادداشت در نوار ابزار یا کلید S دیده می‌شود.</aside>
 			</section>
 
@@ -87,6 +90,8 @@
 	<script src="../dist/reveal-rtl-ui.js"></script>
 	<script>
 		const themeUrl = name => `https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/${ name }.css`;
+		// Demo only: ?lang=fa|ar|en and ?digits=persian|arabic|latin pick the UI language and digits.
+		const params = new URLSearchParams( location.search );
 
 		Reveal.initialize( {
 			hash: true,
@@ -94,8 +99,14 @@
 			progress: true,
 			// reveal.js 6 switches to a vertical scroll view below 435px wide; keep slide-by-slide swiping on phones.
 			scrollActivationWidth: null,
+			rtlOptions: {
+				lang: params.get( 'lang' ) || 'fa',
+				...( params.has( 'digits' ) ? { digits: params.get( 'digits' ) } : {} )
+			},
 			uiOptions: {
 				themes: [
+					{ name: 'پارسی روشن', href: '../themes/parsi-light.css' },
+					{ name: 'پارسی تیره', href: '../themes/parsi-dark.css' },
 					{ name: 'سفید', href: themeUrl( 'white' ) },
 					{ name: 'مشکی', href: themeUrl( 'black' ) },
 					{ name: 'ساده', href: themeUrl( 'simple' ) },
