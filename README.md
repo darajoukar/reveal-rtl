@@ -4,6 +4,37 @@
 
 Right-to-left support plugin for [reveal.js](https://revealjs.com) 6, built for Persian presentations.
 
+[![npm](https://img.shields.io/npm/v/reveal-rtl)](https://www.npmjs.com/package/reveal-rtl) [![CI](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml/badge.svg)](https://github.com/darajoukar/reveal-rtl/actions/workflows/ci.yml) · [Demo](https://darajoukar.github.io/reveal-rtl/demo/)
+
+## Install / نصب
+
+```bash
+npm install reveal.js reveal-rtl
+```
+
+Or from a CDN, no build step (works from `file://`) — یا مستقیم از CDN، بدون نصب:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@6.0.2/dist/reveal.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@6.0.2/dist/theme/white.css" id="theme">
+<link rel="stylesheet" href="https://unpkg.com/reveal-rtl@0.1.0/core/rtl.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal-rtl@0.1.0/core/ui.css">
+
+<script src="https://unpkg.com/reveal.js@6.0.2/dist/reveal.js"></script>
+<script src="https://unpkg.com/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+<script src="https://unpkg.com/reveal-rtl@0.1.0/dist/reveal-rtl.js"></script>
+<script src="https://unpkg.com/reveal-rtl@0.1.0/dist/reveal-rtl-ui.js"></script>
+<script>
+  Reveal.initialize({
+    slideNumber: true,
+    scrollActivationWidth: null,
+    plugins: [ RevealNotes, RevealRTL(), RevealRTLUI() ]
+  });
+</script>
+```
+
+`RevealRTLUI` (toolbar, slide list, exports) and `ui.css` are optional.
+
 ---
 
 ## فارسی
